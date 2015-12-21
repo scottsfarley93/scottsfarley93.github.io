@@ -31,6 +31,32 @@ $(".portfolio-content").mouseleave(function(){
 	});
 	
 	
+	$("#yose_thumb1").click(function(){
+		changeSource = $(this).attr('src');
+		$("#yosemite_mainImage").attr('src', changeSource);
+	});
+	$("#yose_thumb2").click(function(){
+		changeSource = $(this).attr('src');
+		$("#yosemite_mainImage").attr('src', changeSource);
+	});
+	$("#yose_thumb3").click(function(){
+		changeSource = $(this).attr('src');
+		$("#yosemite_mainImage").attr('src', changeSource);
+	});
+	
+		$("#syria_thumb1").click(function(){
+		changeSource = $(this).attr('src');
+		$("#syria_mainImage").attr('src', changeSource);
+	});
+	$("#syria_thumb2").click(function(){
+		changeSource = $(this).attr('src');
+		$("#syria_mainImage").attr('src', changeSource);
+	});
+	$("#syria_thumb3").click(function(){
+		changeSource = $(this).attr('src');
+		$("#syria_mainImage").attr('src', changeSource);
+	});
+	
 	
 	
 	$("#scandi_thumb1").click(function(){

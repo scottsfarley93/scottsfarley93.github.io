@@ -1,0 +1,624 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Scott&#39;s Blog</title>
+    <description>I am a graduate student at UW Madison studying computing applications to physical geography and paleoecological change.
+</description>
+    <link>http://scottsfarley.com/blog/</link>
+    <atom:link href="http://scottsfarley.com/blog/feed.xml" rel="self" type="application/rss+xml"/>
+    <pubDate>Fri, 03 Jun 2016 09:15:49 -0500</pubDate>
+    <lastBuildDate>Fri, 03 Jun 2016 09:15:49 -0500</lastBuildDate>
+    <generator>Jekyll v3.1.6</generator>
+    
+      <item>
+        <title>Connecting to Google Cloud SQL</title>
+        <description>&lt;p&gt;Part of the reason that I am keeping this blog is to keep a record of the things I’ve done
+and my thought process in doing them so that when it comes time to write up my thesis,
+I will have a better recollection of what was going through my head. The other reason
+is to perhaps help someone out there struggling similar problems that I went through.
+I think that my adventures in the Google Cloud Platform are a good example of this –
+Google’s Cloud Platform is acknowledged to be slightly less mature than some of its competitors, like AWS.
+Because of this, there are fewer stackexchange questions, blogs posts, etc that can help guide
+basic setup.  I do think that Google’s documentation and tutorials are better than Amazon’s –
+more accessible, better written – but it can be hard to figure out what you need to
+be doing if you’re not a cloud professional.  So I’ll document some of the hard steps
+I encountered in this ongoing set of posts.&lt;/p&gt;
+
+&lt;h3 id=&quot;setting-up-cloud-sql-with-mysql-workbench&quot;&gt;Setting up Cloud SQL with MySQL Workbench&lt;/h3&gt;
+&lt;p&gt;In this post, I discuss the process of setting up Google’s Cloud SQL and getting it
+to work with MySQL Workbench (the challenging part).  The tutorials on most of these
+steps are pretty good, so I won’t try to completely recreate those.&lt;/p&gt;
+
+&lt;h4 id=&quot;set-up-cloudsql&quot;&gt;Set up CloudSQL&lt;/h4&gt;
+&lt;ol&gt;
+  &lt;li&gt;Go to your Cloud Console&lt;/li&gt;
+  &lt;li&gt;Click on SQL –&amp;gt; Go To SQL Dashboard&lt;/li&gt;
+  &lt;li&gt;Click the Blue Plus button to start a new SQL Instance&lt;/li&gt;
+  &lt;li&gt;Click the option to choose the second generation of SQL Servers.&lt;br /&gt;
+These virtual machines are still in beta and Google hasn’t updated all of its documentation
+about them yet, so some of the screenshots and instructions in the tutorials do not apply to the second generation
+instances.&lt;/li&gt;
+  &lt;li&gt;Walk through the wizard to create a new virtual machine instance for your database.&lt;/li&gt;
+  &lt;li&gt;When you’re done with the wizard, click to create the VM and then wait for it to spin up.&lt;/li&gt;
+  &lt;li&gt;Open the VM preferences, go to the Access Control tab, and then go to Users.
+Change the root password to the password you want to use for logging into the server from a MySQL client.&lt;/li&gt;
+  &lt;li&gt;Your database server should be set up and ready to go now.  You can access a SQL console and check its installation by clicking the button that looks like a terminal prompt in the upper righthand corner of the page.  Clicking that should open a command prompt.  Start the built-in MySQL client with:&lt;/li&gt;
+&lt;/ol&gt;
+&lt;pre&gt;gcloud beta sql connect myinstance --user=root&lt;/pre&gt;
+&lt;p&gt;If your server is up and running, you should see the terminal change to a &lt;code&gt;mysql&amp;gt;&lt;/code&gt; prompt.  If not, refer to &lt;a href=&quot;https://cloud.google.com/sql/docs/quickstart&quot;&gt;this walkthrough&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h4 id=&quot;set-up-the-mysql-workbench&quot;&gt;Set up the MySQL Workbench&lt;/h4&gt;
+&lt;p&gt;If you’re doing any time of analysis on the data stored within your database, you might be interested in working with an external tool like &lt;a href=&quot;https://www.mysql.com/products/workbench/&quot;&gt;MySQL Workbench&lt;/a&gt;.  I’m sure there are a variety of other good admin tools for MySQL, but this is the one I use and its okay.  This was a complicated part with the google cloud installation, and it took be the better part of a morning to work through the various tutorials to make it come together.  The real challenge is getting the CloudSQL Proxy set up. Because we’re using a second generation instance, the ip management is handled by Google Cloud and its CloudSQL Proxy directly, rather than manually by us.  Here we will assume you are using a Mac running OSX.&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Get the Dependencies.  First, you need to get &lt;a href=&quot;http://rudix.org/packages/wget.html&quot;&gt;wget&lt;/a&gt; for your operating system.  Wget is a client for downloading files that is available on linux operating systems, but can be installed for windows and mac from third-parties.  Second, you need FUSE.  Not really sure what it does, but you need it and you can get it &lt;a href=&quot;https://sourceforge.net/projects/osxfuse/files/&quot;&gt;here&lt;/a&gt;.  I downloaded version &lt;code&gt;osxfuse-2.8.3 &lt;/code&gt; because it had 11,000 more downloads than any other version.&lt;/li&gt;
+  &lt;li&gt;Download and configure your proxy script.  First &lt;code&gt;cd&lt;/code&gt; into your project root.
+    &lt;pre&gt;
+wget https://dl.google.com/cloudsql/cloud_sql_proxy.linux.amd64
+mv cloud_sql_proxy.linux.amd64 cloud_sql_proxy
+chmod +x cloud_sql_proxy
+&lt;/pre&gt;
+  &lt;/li&gt;
+  &lt;li&gt;Configure your service account.
+    &lt;ol&gt;
+      &lt;li&gt;Go to the Cloud Console and select your projects&lt;/li&gt;
+      &lt;li&gt;Click the button to Create Credentials&lt;/li&gt;
+      &lt;li&gt;Choose Service Account Key&lt;/li&gt;
+      &lt;li&gt;Choose to create a new Service Account&lt;/li&gt;
+      &lt;li&gt;Proceed through the wizard and make sure that the key type is JSON&lt;/li&gt;
+      &lt;li&gt;Create the key and store the automatically downloaded file somewhere safe on your computer.&lt;/li&gt;
+    &lt;/ol&gt;
+  &lt;/li&gt;
+  &lt;li&gt;Setup a directory for the Proxy
+    &lt;pre&gt;
+sudo mkdir /cloudsql; sudo chmod 777 /cloudsql
+&lt;/pre&gt;
+  &lt;/li&gt;
+  &lt;li&gt;Run the proxy by referencing the key file that your downloaded
+    &lt;pre&gt;
+sudo ./cloud_sql_proxy -dir=/cloudsql -fuse -credential_file=path/to/keyfile &amp;amp;
+&lt;/pre&gt;
+  &lt;/li&gt;
+  &lt;li&gt;Start up MySQL Workbench
+    &lt;ol&gt;
+      &lt;li&gt;Find the Static IP address for your database server from the SQL instances console page on the Google Platform and copy it&lt;/li&gt;
+      &lt;li&gt;Name the connection&lt;/li&gt;
+      &lt;li&gt;Input the IP address but leave port 3306&lt;/li&gt;
+      &lt;li&gt;Unless you changed the SQL, stick with root and be ready to enter the root password&lt;/li&gt;
+      &lt;li&gt;Click test connection, enter your password, and you should be able to connect!!&lt;/li&gt;
+    &lt;/ol&gt;
+  &lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h3 id=&quot;repeated-use&quot;&gt;Repeated Use&lt;/h3&gt;
+&lt;p&gt;I am sometimes able to reconnect with a stored connection in MySQL Workbench, but sometimes I get a &lt;code&gt;Refused to Connect&lt;/code&gt; error.  When this happened I just restarted the proxy with&lt;/p&gt;
+&lt;pre&gt;sudo ./cloud_sql_proxy -dir=/cloudsql -fuse -credential_file=path/to/keyfile &amp;amp;&lt;/pre&gt;
+&lt;p&gt;making sure I was in the same directory that I downloaded the cloudSQL proxy into originally.  After entering this command in the terminal, you should be able to connect to the database instance.&lt;/p&gt;
+
+&lt;h3 id=&quot;on-the-compute-engine-server&quot;&gt;On the Compute Engine Server&lt;/h3&gt;
+&lt;p&gt;If you’re also using the compute engine instances, you must go through a similar process of setting up the proxy on each one of your virtual machines before you can connect to the database server.&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;
+    &lt;p&gt;Before your create an instance that you plan to connect to the database server with, make sure that when you’re setting it up you give it  Full API access (or at least selectively enable the Cloud SQL API).  You can’t do this step later, you need to create a new virtual machine instance if you forget.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;SSH into your new computing instance.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;Install mysql.  I always do my calls from python or R, but can’t hurt to install the mysql client on the new machine.  Its easier to test if things are going right too.
+    &lt;pre&gt;
+sudo apt-get update
+sudo apt-get install mysql-client
+&lt;/pre&gt;
+  &lt;/li&gt;
+  &lt;li&gt;Install the proxy like you did on your local computer.
+    &lt;pre&gt;
+wget https://dl.google.com/cloudsql/cloud_sql_proxy.linux.amd64
+mv cloud_sql_proxy.linux.amd64 cloud_sql_proxy
+chmod +x cloud_sql_proxy
+&lt;/pre&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Find out what your database server’s connection name is.  It is listed on the sql instances page, and is something like [projectid]:[zone]:[instanceName].  It is not the compute engine instance name (tried that, didn’t work).&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;Start the proxy.  Probably want to be in a root directory for this.
+    &lt;pre&gt;
+sudo mkdir /cloudsql; sudo chmod 777 /cloudsql
+sudo ./cloud_sql_proxy -dir=/cloudsql -instances=[INSTANCE_CONNECTION_NAME] &amp;amp;
+&lt;/pre&gt;
+    &lt;p&gt;with the [INSTANCE_CONNECTION_NAME] set to the connection name of your database server.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;Start the MySQL
+    &lt;pre&gt;
+mysql -u root -p -S /cloudsql/[INSTANCE_CONNECTION_NAME]
+&lt;/pre&gt;
+    &lt;p&gt;Assuming everything worked as planned, you should now be able to see a &lt;code&gt;mysql&lt;/code&gt; prompt, and be able to play with your databases.&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h3 id=&quot;connecting-from-code&quot;&gt;Connecting from Code&lt;/h3&gt;
+&lt;p&gt;If you installed the proxy on your compute engine instance, you probably are also interested in doing some database manipulation from scripts.  For me, I was not able to connect via the &lt;code class=&quot;highlighter-rouge&quot;&gt;host&lt;/code&gt; parameter in the database connection functions, and instead needed to use a unix socket.&lt;/p&gt;
+
+&lt;p&gt;These steps are done on your virtual machine.  SSH into it.  For you can use &lt;code class=&quot;highlighter-rouge&quot;&gt;nano&lt;/code&gt; or &lt;code class=&quot;highlighter-rouge&quot;&gt;vim&lt;/code&gt; or other text editor to do the steps in your script.  For R, you could use the rStudio server page.&lt;/p&gt;
+
+&lt;h4 id=&quot;python&quot;&gt;Python&lt;/h4&gt;
+&lt;ol&gt;
+  &lt;li&gt;Install your favorite mysql connector module.
+    &lt;pre&gt;
+  sudo apt-get install mysqldb-python
+&lt;/pre&gt;
+  &lt;/li&gt;
+  &lt;li&gt;In your script:&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;&lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;MySQLdb&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;con&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;MySQLdb&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;connect&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;unix_socket&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&#39;/cloudsql/&#39;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&#39;[INSTANCE_CONNECTION_NAME]&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;user&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&#39;root&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;db&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&#39;[your_database]&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;passwd&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&#39;[your_password]&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;print&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;Connected to the database!&quot;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Proceed with scripting.&lt;/p&gt;
+
+&lt;h4 id=&quot;r&quot;&gt;R&lt;/h4&gt;
+&lt;ol&gt;
+  &lt;li&gt;Install your favorite mysql connector package with the R package manager.
+    &lt;pre&gt;
+install.packages(&quot;RMySQL&quot;)
+&lt;/pre&gt;
+  &lt;/li&gt;
+  &lt;li&gt;In your script, make the connection.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-r&quot; data-lang=&quot;r&quot;&gt;&lt;span class=&quot;n&quot;&gt;library&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;RMySQL&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;## for database communication
+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;drv&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dbDriver&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;MySQL&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;con&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dbConnect&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;drv&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;unix.socket&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&#39;/cloudsql/[INSTANCE_CONNECTION_NAME]&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;username&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&#39;root&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;password&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&#39;[your_password]&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dbname&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&#39;[your_database]&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Proceed with scripting.&lt;/p&gt;
+
+&lt;h3 id=&quot;conclusion&quot;&gt;Conclusion&lt;/h3&gt;
+&lt;p&gt;It’s definitely not easy, but after spending several hours at it, it sometimes works.&lt;/p&gt;
+</description>
+        <pubDate>Thu, 02 Jun 2016 11:22:52 -0500</pubDate>
+        <link>http://scottsfarley.com/blog/research/cloudcomputing/2016/06/02/adventures-in-google-cloud-I.html</link>
+        <guid isPermaLink="true">http://scottsfarley.com/blog/research/cloudcomputing/2016/06/02/adventures-in-google-cloud-I.html</guid>
+        
+        
+        <category>Research</category>
+        
+        <category>CloudComputing</category>
+        
+      </item>
+    
+      <item>
+        <title>On Finding Data for Cartography Projects, Part II: Spatial Data Services and APIs</title>
+        <description>&lt;h3&gt;Using APIs and Data Services&lt;/h3&gt;
+&lt;p&gt;This is the second installment in my series about finding data from new and different sources for use in your cartography or GIS projects.  Last time I discussed looking through existing source code to find hidden datasets that might be useful. Today, I will walk through using an API service to tap into an organization’s database.  As a simple google search will reveal, there are other resources, blogs, and tutorials out there that talk about how to use an API as a data source, but I will focus particularly on converting data from an API into a useful spatial data format that can be used in mapping and analysis.  Tons of APIs have spatial data (usually latitude and longitude) attached to their responses, its just a matter of finding the data service and massaging it into the right format.&lt;/p&gt;
+&lt;h4&gt;What is an API?&lt;/h4&gt;
+&lt;p&gt;An API, which stands for Application Programming Interface, is a set of protocols and methods that define how two computers should talk to each other.  An API is a documented set of building blocks (of code) that define how an existing application works.  A programmer can put these blocks together to extend the existing program, or create a new app that uses portions of the existing program.  Consider &lt;a href=&quot;http://twitter.com&quot;&gt;Twitter&lt;/a&gt;.  Twitter is super popular, and a lot of people use it for various things – documenting every facet of their daily lives, reporting news, &lt;a href=&quot;http://chrisscheele.com/&quot;&gt;observing disasters and severe weather&lt;/a&gt;, etc.  To build the platform, Twitter needed to make a whole bunch of computers talk to each other. When a user writes a tweet, it is sent to twitter’s central database, where it is stored, and then pushed back out to other clients.  Multiply this by Twitter’s &amp;gt;310 million users, both reading and writing tweets, and you have a lot of clients that need to communicate with minimal friction.&lt;/p&gt;
+
+&lt;p&gt;Twitter could have kept the language that all of these clients and servers spoke to each other in a secret.  That’s what is called a private API.  Details of private APIs are not released to outside developers, but are (usually) documented and (sometimes) logical for the internal use of the organization or company that created it.  Sometimes they can be hacked (see Google Maps, before they released a public version of their API), but do not promote easy outside development. There are a lot of private APIs that support how your computer works, but we won’t talk about those today.&lt;/p&gt;
+
+&lt;p&gt;Instead of keeping their API private, they released it to the world as a public API. Each method for user management, posting tweets, reading tweets, etc is documented and given with examples on &lt;a href=&quot;https://dev.twitter.com/overview/documentation&quot;&gt;twitter’s development website&lt;/a&gt;. Now any developer in the world can sign up with twitter and start posting and reading tweets through their own code.  If you’ve ever used TweetDeck or another twitter application that isn’t just the twitter app, its based on the public API.  Lots of companies build APIs so that developers outside of the organization can build apps on top of the company’s existing platform.&lt;/p&gt;
+&lt;h4&gt;Using an API&lt;/h4&gt;
+&lt;p&gt;So if I know a little coding, I should be able to tap into any existing public API in a few steps.  Basically, our process will be (1) build a query, (2) submit the query to the API, (3) get the result, (4) use the response.&lt;/p&gt;
+
+&lt;p&gt;For the remainder of this post, I will use the &lt;a href=&quot;http://neotomadb.org&quot;&gt;Neotoma Paleoecological Database &lt;/a&gt;as an example, because (1) I think they have a well-designed, well-documented data service available through an API, and (2) I work on the Neotoma project. The Neotoma database aggregates and disseminates Quaternary fossil plant and animal data that support paleoecological research.  For this example, I want to make a list of fossil sites above 4,000 meters. The neotoma API docs are &lt;a href=&quot;http://api.neotomadb.org/doc&quot;&gt;here&lt;/a&gt;, and might be helpful for following along.&lt;/p&gt;
+
+&lt;h4 id=&quot;api-organization&quot;&gt;&lt;em&gt;API Organization&lt;/em&gt;&lt;/h4&gt;
+&lt;p&gt;An API is typically accessed through a web URL.  The URL is made up of a root, a resource, and a set of key-value pairs that define the parameters of your query. For Neotoma, the root of our query will be&lt;/p&gt;
+&lt;pre&gt;http://api.neotomadb.org/v1/data&lt;/pre&gt;
+&lt;p&gt;On top of the root, we need to specify an resource. The resource is the name of the data that you are trying to obtain.  This requires you to be a little familiar with the organization whose API you are using.  You can usually figure out which resource you want by browsing the API documentation.  For twitter, the resources include ‘friends’, ‘statuses’, ‘timeline’, etc.  In the case of Neotoma, we have ‘Sites’, ‘Taxa’, ‘Datasets’, ‘Downloads’, ‘SampleData’, ‘Publications’, ‘Contacts’, and ‘DBTables’.  Because I want a list of locations, I decide that I want to use the Sites endpoint, though if I want more detailed information, or the actual pollen counts, I might consider using the downloads or SampleData resources.  I add the resource on to my url string like so:&lt;/p&gt;
+&lt;pre&gt;http://api.neotomadb.org/v1/data/sites&lt;/pre&gt;
+&lt;p&gt;If I enter this query into my web browser, it will return every single site that Neotoma stores in its database (several thousand). While this can be useful in some scenarios, it is not what I want right now.  Instead, I want to filter down the result set to show only those sites above 4,000 meters.  I do this through using service parameters.  Each resource can have different parameters, and the parameters each resource has is determined by the developer of the API (not you). We see on the &lt;a href=&quot;http://api.neotomadb.org/doc/resources/sites&quot;&gt;Sites documentation page&lt;/a&gt;, that this resource accepts the parameters ‘sitename’, ‘altmin’, ‘altmax’, ‘loc’, and ‘gpid’.  All parameters are option, and are additive, so you can filter in really customizable ways.  Parameters are just added onto the query string:&lt;/p&gt;
+&lt;pre&gt;?key1=value1&amp;amp;key2=value2&amp;amp;...&amp;amp;keyN=valueN&lt;/pre&gt;
+&lt;p&gt;So our query string becomes&lt;/p&gt;
+&lt;pre&gt;http://api.neotomadb.org/v1/data/sites?altmin=4000&lt;/pre&gt;
+&lt;p&gt;When we enter this into the web browser, we see that the results set is much smaller.&lt;/p&gt;
+
+&lt;h4 id=&quot;api-response&quot;&gt;&lt;em&gt;API Response&lt;/em&gt;&lt;/h4&gt;
+&lt;p&gt;Every organizations API will return a different response, and every resource within an API can return a different response.  Of course, documentation can help you determine when you are looking at, but it can also be super help to just enter your desired query string into your web browser and look at what you are getting back.  Most APIs these days will return JSON formatted responses, though some will return geojson, csv, plain text, xml, or some other data type.  If you are getting a lot of JSON back, a pretty printer like the plug-in for &lt;a href=&quot;https://chrome.google.com/webstore/detail/jsonview/chklaanhfefbnpoihckbnefhakgolnmc?hl=en&quot;&gt;chrome&lt;/a&gt; can really make your life easier.&lt;/p&gt;
+
+&lt;p&gt;In our Neotoma example, our response returned a big json object.  The top level keys are ‘success’ and ‘data’.  If success is false, or 0, you probably entered an invalid query string (specified a resource that does not exist, or gave a parameter that is not accepted), but might also be due to a server outage.  In this case there will also be a ‘message’ key that will tell you the reason that your call failed.  When success is true, or 1, you will get an array of json objects that each have the properties listed in the documentation page for that resource.  We see that our objects will have the properties: ‘SiteID’, ‘SiteName’, ‘LatitudeNorth’, ‘LatitudeSouth’, ‘LongitudeWest’, ‘LongitudeEast’, ‘SiteNotes’,’SiteDescription’, ‘Altitude’.&lt;/p&gt;
+
+&lt;h4 id=&quot;implementing-an-api-call-javascript-and-ajax&quot;&gt;Implementing an API call: Javascript and AJAX&lt;/h4&gt;
+&lt;p&gt;The next two section will demonstrate implementations of the API call that was developed above, the first in asynchronous javascript for use in a web application, and below, in python, to build a CSV that can be used in ArcMap or other projects.&lt;/p&gt;
+
+&lt;p&gt;Here is an example of asking Neotoma for all of the sites above 4,000 meters.  The most important thing to remember is that this an asynchronous AJAX call, so it will take second to respond, and your code has to be able to handle this in its organization.  First we will build the query string, next we will send it to Neotoma using jQuery’s $.ajax function, and finally, we will deal will the response. Another important facet of using jQuery and javascript’s ajax technique is that you don’t have to build the response yourself, you can just pass in a &lt;code&gt;data&lt;/code&gt; parameter in the ajax call, and the string will be built automatically. You can still see the built query string by &lt;code&gt;console.log&lt;/code&gt;-ing the &lt;code&gt;this.url&lt;/code&gt; on &lt;code&gt;beforeSend&lt;/code&gt;.&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;&lt;table style=&quot;border-spacing: 0&quot;&gt;&lt;tbody&gt;&lt;tr&gt;&lt;td class=&quot;gutter gl&quot; style=&quot;text-align: right&quot;&gt;&lt;pre class=&quot;lineno&quot;&gt;1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;getNeotomaData&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;minAlt&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;){&lt;/span&gt;
+  &lt;span class=&quot;nx&quot;&gt;endpoint&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&#39;http://api.neotomadb.org/v1/data/sites&#39;&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;//this is the root and resource&lt;/span&gt;
+  &lt;span class=&quot;nx&quot;&gt;$&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;ajax&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;endpoint&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;//make an ajax call with the query string url&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;dataType&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;jsonp&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;//its json, but coming from a remote server, so jsonp&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;beforeSend&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(){&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;//optional, but helpful for debugging&lt;/span&gt;
+      &lt;span class=&quot;nx&quot;&gt;console&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;log&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;url&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;//to see exactly where the call is going to&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;},&lt;/span&gt;
+    &lt;span class=&quot;nx&quot;&gt;data&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+      &lt;span class=&quot;nl&quot;&gt;altmin&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;minAlt&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;//pass in the key-value parameters&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;},&lt;/span&gt;
+    &lt;span class=&quot;nx&quot;&gt;success&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;response&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;){&lt;/span&gt;
+      &lt;span class=&quot;c1&quot;&gt;//called when the call succeeds&lt;/span&gt;
+      &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;response&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&#39;success&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]){&lt;/span&gt;&lt;span class=&quot;c1&quot;&gt;//check whether the server said okay&lt;/span&gt;
+        &lt;span class=&quot;nx&quot;&gt;data&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;response&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&#39;data&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;//just take the data from the response&lt;/span&gt;
+        &lt;span class=&quot;nx&quot;&gt;doStuffWithData&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;data&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;//callback function to proceed with the script&lt;/span&gt;
+      &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;else&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;c1&quot;&gt;//the server threw an error, so check what it was&lt;/span&gt;
+        &lt;span class=&quot;nx&quot;&gt;console&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;log&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;Error on the API call.&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;nx&quot;&gt;console&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;log&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;response&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&#39;message&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;])&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;//the server will tell you what&#39;s wrong&lt;/span&gt;
+      &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;},&lt;/span&gt;
+    &lt;span class=&quot;nx&quot;&gt;error&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;xhr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;status&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;error&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;){&lt;/span&gt;
+      &lt;span class=&quot;c1&quot;&gt;//there was an AJAX error (communcation problem)&lt;/span&gt;
+      &lt;span class=&quot;nx&quot;&gt;console&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;log&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;AJAX error.&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+      &lt;span class=&quot;nx&quot;&gt;console&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;log&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;error&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;})&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;doStuffWithData&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;dataArray&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;){&lt;/span&gt;
+  &lt;span class=&quot;c1&quot;&gt;//do stuff here&lt;/span&gt;
+  &lt;span class=&quot;c1&quot;&gt;//put the data on a map?&lt;/span&gt;
+  &lt;span class=&quot;c1&quot;&gt;//make a table of the sites?&lt;/span&gt;
+  &lt;span class=&quot;c1&quot;&gt;//do analysis?&lt;/span&gt;
+  &lt;span class=&quot;c1&quot;&gt;//the world is your oyster&lt;/span&gt;
+  &lt;span class=&quot;nx&quot;&gt;console&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;log&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;dataArray&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;//or just print the message&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;If you have a page with jQuery included on it and call &lt;code&gt;getNeotomaData&lt;/code&gt;, you should see the response get logged into the console.&lt;/p&gt;
+
+&lt;p&gt;Pulling from an API in a web app is great because (1) You don’t have to store and maintain a file, and (2) you have access to updates whenever the organization’s database is updated.&lt;/p&gt;
+
+&lt;h4 id=&quot;implementing-an-api-callpython-to-csv&quot;&gt;IMPLEMENTING AN API CALL: Python to CSV&lt;/h4&gt;
+&lt;p&gt;If you’re not making an interactive map for a web app, you’re unlikely to be using javascript and AJAX, but you still might want to tap into the data service.  Here I will demonstrate a simple json to csv conversion script that calls the same API query in the examples above.&lt;/p&gt;
+
+&lt;p&gt;There are some web-based tools to convert json to csv.  However, since JSON can be hierarchical and a csv is flat, it can be difficult for these tools to work correctly.  If you have some level of competency using python, I recommend custom-rolling your conversions each time you need to call a new resource, to make sure you get the fields that you need in your CSV.  This example uses the &lt;code&gt;csv&lt;/code&gt; module for writing the file and the &lt;code&gt;requests&lt;/code&gt; module for making the api call.&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;&lt;table style=&quot;border-spacing: 0&quot;&gt;&lt;tbody&gt;&lt;tr&gt;&lt;td class=&quot;gutter gl&quot; style=&quot;text-align: right&quot;&gt;&lt;pre class=&quot;lineno&quot;&gt;1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;csv&lt;/span&gt;
+&lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;requests&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;saveDataFromNeotoma&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;minAlt&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;outfile&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+    &lt;span class=&quot;c&quot;&gt;## set up the output file&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;f&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;open&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;outfile&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&#39;w&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;c&quot;&gt;## open the file buffer&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;fields&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&#39;SiteID&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&#39;SiteName&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&#39;LatitudeNorth&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+        &lt;span class=&quot;s&quot;&gt;&#39;LatitudeSouth&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&#39;LongitudeEast&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&#39;LongitudeWest&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+        &lt;span class=&quot;s&quot;&gt;&#39;Altitude&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&#39;SiteDescription&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&#39;Notes&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;c&quot;&gt;## fields to use as the header for the CSV&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;writer&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;csv&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;DictWriter&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;f&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;fieldnames&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;fields&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;lineterminator&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&#39;&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\n&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;c&quot;&gt;## write a line when we pass a dictionary&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;writer&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;writeheader&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;c&quot;&gt;## write the top header row&lt;/span&gt;
+    &lt;span class=&quot;c&quot;&gt;## make the query string&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;endpoint&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;http://api.neotomadb.org/v1/data/sites?&quot;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;url&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;endpoint&lt;/span&gt;  &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;altmin=&quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;str&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;minAlt&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;c&quot;&gt;## this is the complete query string&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;try&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;response&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;requests&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;get&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;url&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;json&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;c&quot;&gt;## make the call and parse the response as json&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;except&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;Exception&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;as&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;e&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;c&quot;&gt;## there was a communication error&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;print&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;Failed to reach the neotoma server.&quot;&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;print&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;str&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;e&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;nb&quot;&gt;exit&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;c&quot;&gt;## die&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;not&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;response&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&#39;success&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]:&lt;/span&gt;
+        &lt;span class=&quot;c&quot;&gt;## there was an error on the call&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;print&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;There was a communication error&quot;&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;print&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;response&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&#39;message&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;c&quot;&gt;## this is the error message&lt;/span&gt;
+        &lt;span class=&quot;nb&quot;&gt;exit&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;data&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;response&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&#39;data&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;site&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;data&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;c&quot;&gt;## iterate through all the sites&lt;/span&gt;
+        &lt;span class=&quot;c&quot;&gt;## the fields in the header are all the same as the fields in the response objects&lt;/span&gt;
+        &lt;span class=&quot;c&quot;&gt;## so we can just write with the response objects&lt;/span&gt;
+        &lt;span class=&quot;c&quot;&gt;## otherwise, we could do more manipulation here&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;try&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+            &lt;span class=&quot;c&quot;&gt;# the encoding can be funky when writing to excel, so fix it&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;site&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&#39;SiteName&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;site&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&#39;SiteName&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;encode&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;utf-8&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;site&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&#39;SiteDescription&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;site&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&#39;SiteDescription&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;encode&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;utf-8&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;except&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;AttributeError&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;c&quot;&gt;## site didn&#39;t have site description&lt;/span&gt;
+            &lt;span class=&quot;k&quot;&gt;pass&lt;/span&gt; &lt;span class=&quot;c&quot;&gt;## don&#39;t worry about it&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;writer&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;writerow&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;site&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;c&quot;&gt;## write the row&lt;/span&gt;
+    &lt;span class=&quot;c&quot;&gt;# finish up&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;f&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;close&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+
+&lt;span class=&quot;n&quot;&gt;saveDataFromNeotoma&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;4000&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;/path/to/your/intended/file.csv&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;In this way, you can create a file just like it had been made available for public downloading, but (1) you’ve done it on a resource that was not available as a file download, and (2) you were able to exactly configure the response how you want it, so you don’t have to mess around in excel filtering and sorting.&lt;/p&gt;
+
+&lt;p&gt;Hopefully this post was helpful in getting you started on using APIs and data services, and that you can maybe use these techniques in your own work at some point.  Spatial data APIs are everywhere – happy hunting.&lt;/p&gt;
+</description>
+        <pubDate>Tue, 31 May 2016 11:22:52 -0500</pubDate>
+        <link>http://scottsfarley.com/blog/cartography/2016/05/31/Find-Data-For_Cartography-Projects-II.html</link>
+        <guid isPermaLink="true">http://scottsfarley.com/blog/cartography/2016/05/31/Find-Data-For_Cartography-Projects-II.html</guid>
+        
+        
+        <category>cartography</category>
+        
+      </item>
+    
+      <item>
+        <title>My Thesis Proposal in A Nutshell</title>
+        <description>&lt;p&gt;I was recently tasked with writing a formal proposal for my thesis as the final paper in one of my courses.  The final draft of the proposal was 21 single spaced pages.  I figured I would write a shorter and perhaps more accessible summary of the work I am starting on so those of you out there that are curious what I’m working on don’t have to wade through that.  If you do want to see the real thing, references, equations, and all, you can find it &lt;a href=&quot;http://scottsfarley.com/assets/Farley_Thesis_Proposal_final.pdf&quot;&gt;here&lt;/a&gt;.&lt;/p&gt;
+&lt;h4&gt;In One Sentence:&lt;/h4&gt;
+&lt;p&gt;I am attempting to develop a well-performing predictive model that, given a species distribution model user’s goals and requirements, determines the optimal computing configuration for that modeling routine by balancing the time spent modeling with the cost of the computing equipment used.&lt;/p&gt;
+&lt;h4&gt;More computers: more money, faster execution?&lt;a href=&quot;http://www.scottsfarley.com/blog/blog_img/figure1.png&quot;&gt;&lt;img class=&quot;alignright wp-image-19 &quot; src=&quot;http://www.scottsfarley.com/blog/blog_img/figure1.png&quot; alt=&quot;figure1&quot; width=&quot;385&quot; height=&quot;271&quot; /&gt;&lt;/a&gt;&lt;/h4&gt;
+&lt;p&gt;We work in a modern computing world, where infinitely many computing resources (CPUs, memory, etc) are available for an infinite  cost.  As cloud computing becomes increasingly popular, I can purchase a seemingly endless number of computing nodes to do my work on. Rather than purchasing these resources, providers like Google or Amazon front the cost of buying and maintaining thousands of servers in a massive datacenter somewhere, and then charge me a utility fee for their use based on how many hours I use them for.  On the other hand, I can still purchase a desktop, laptop, or server, and use it continuously for several years – a solution that will likely be of cheaper and less powerful than a cloud solution.  &lt;a href=&quot;http://www.scottsfarley.com/blog/blog_img/figure2.png&quot;&gt;&lt;img class=&quot;alignright wp-image-20 &quot; src=&quot;http://www.scottsfarley.com/blog/blog_img/figure2.png&quot; alt=&quot;figure2&quot; width=&quot;390&quot; height=&quot;258&quot; /&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;So, I can get as much computing power as, say, Netflix, but (1) I couldn’t pay for it, and (2) adding a gargantuan amount of computing power to my modeling problems probably wouldn’t be worth it.  Faster CPUs and additional CPUs can decrease the running time of an algorithm by increasing the number of instructions per second that can be executed by the computer. Adding more memory reduces the number of times the computer has to go all the way to the hard disk to get new instructions.  In any case, if my algorithms don’t run in parallel 100% of the time (theoretically impossible [I think]), I will always run into a lower bound on execution time called Amdhal’s Law, which says that the addition of machines to a computer program increases its execution time proportional to the fraction of the algorithm that can be run in parallel.  Since I will be working with serial algorithms, running on only a single CPU core, this doesn’t totally apply, but it makes the point that throwing more and more and more computing power at an algorithm, especially one not specially designed to run in a super-computing environment, doesn’t always come with large gains in performance. Moreover, most people, especially those in an academic setting, don’t have the financial ability to buy a really large amount of time on advanced cloud systems.  Potential of going over budget, in either time or money, will typically result in a modification of the project towards a less computationally intensive research question.&lt;/p&gt;
+&lt;h4&gt;Models and Model Users&lt;/h4&gt;
+&lt;p&gt;In this work, I’m focusing specifically on species distribution models.  These are a class of statistical models that relate a species’ abundance (or presence) with environmental gradients. In simpler terms, I know where a plant species grows now, so I can look at all of the properties that make up its niche at each occurrence – precipitation, winter temperature, annual mean temperature, etc– to build a model of how it responds to changes in these variables.  I then use this model to predict how a species may fare in a new place, or, in my case, a new time period, such as 2100AD after humans have totally messed up the climate system.&lt;/p&gt;
+
+&lt;p&gt;These models get used for a lot of things: reserve planning, invasive species identification, ecological theory testing, phylogeographic studies, climate model verification, etc.  Everyone using these models has a specific goal they wish to accomplish by employing the modeling framework: each study has some required geographic extent, spatial resolution, number of points used to train the model, number of predictors used to fit the model, accuracy required, number of time periods to project onto, etc…&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;http://www.scottsfarley.com/blog/blog_img/figure4.png&quot;&gt;&lt;img class=&quot;alignright wp-image-22 &quot; src=&quot;http://www.scottsfarley.com/blog/blog_img/figure4.png&quot; alt=&quot;figure4&quot; width=&quot;410&quot; height=&quot;305&quot; /&gt;&lt;/a&gt;Because of the diverse array of traits that each user brings to the modeling table, each is going to spend a different amount of time spent modeling.  For example, &lt;a href=&quot;http://onlinelibrary.wiley.com/doi/10.1111/j.2006.0906-7590.04596.x/abstract&quot;&gt;a study that compares 226 species, 16 modeling algorithms, over six world regions, &lt;/a&gt;is going to spend a lot longer modeling than a study that say, looks at the invasive potential of a single species at 2100, using a single modeling technique.  The first study might benefit from a cloud computing solution, where the latter probably would not.&lt;/p&gt;
+
+&lt;p&gt;But there are other things that affect a modeling workflow’s time to complete as well, beyond just time time needed to compute a model. If I am starting a modeling project, I need to go and find the data, both for the points of occurrence, usually from a natural history museum collection or other information facility, and for the predictor layers, which are usually climate rasters.  I need to manage all of this data, keep it in the right projection, spatial extent, and spatial resolution, and not lose it on my hard drive (there is a lot of data to keep track of).  I need also need to keep track of the output from the models, and keep that organized.  Finally, I need to be able to evaluate the output of the model, see if it did an accuracy job of predicting species abundance, and determine whether the output answers my original questions.&lt;/p&gt;
+
+&lt;p&gt;All of these get tacked on to the raw computing time of the algorithm, and are mostly a factor of the data (what is it? how large is it? how complex is it?) and me (how skilled am I at manipulating the data? how familiar am I with interpreting SDM output?).  I can add all of these time costs up, along with the time to execute, and for any combination of model data, user, skill level, and computing configuration, get an estimate of how long that modeling procedure would take. For my work, I will hold model data, user, and skill level constant as experimental parameters, and look at how the total time to execute changes with the addition of more advanced computing solutions. Future work could look at differences in interface complexity, data management, and other facets to get a more complete picture of the modeling workflow.&lt;/p&gt;
+&lt;h4&gt;Hypothesis&lt;/h4&gt;
+&lt;p&gt;Now we have all of the pieces in place:&lt;/p&gt;
+&lt;ul&gt;
+ 	&lt;li&gt;Each model user has her own set of modeling traits, and thus, her own continuous curve of model execution time,&lt;/li&gt;
+ 	&lt;li&gt;Computer programs will decrease in execution time with the addition of more computing power, but the time will never go to zero,&lt;/li&gt;
+ 	&lt;li&gt;More computers = more money&lt;a href=&quot;http://www.scottsfarley.com/blog/blog_img/figure3.png&quot;&gt;&lt;img class=&quot;alignright wp-image-21 &quot; src=&quot;http://www.scottsfarley.com/blog/blog_img/figure3.png&quot; alt=&quot;figure3&quot; width=&quot;324&quot; height=&quot;294&quot; /&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt; &lt;/p&gt;
+
+&lt;p&gt;So, my hypothesis is that we can find an optimal computing solution for each set of modeling activities, and that optimal will occur at the joint of time spent modeling and dollars spent on computing time.&lt;/p&gt;
+&lt;h4&gt;Research Questions&lt;/h4&gt;
+&lt;p&gt;Based on my hypothesis, I am asking the following research questions:&lt;/p&gt;
+&lt;ol&gt;
+ 	&lt;li&gt;Does this seem reasonable? Do different algorithm configurations really respond differently to different computing configurations? Does the addition of cloud computing and/or high powered servers affect the outcome of the models?&lt;/li&gt;
+ 	&lt;li&gt;Can I build a predictive model for the total time to complete a modeling study that outperforms a null model that suggests that all researchers just buy a single desktop computer to do their modeling on?&lt;/li&gt;
+ 	&lt;li&gt;Can I identify any users whose modeling traits suggest that they should perform their work in a cloud environment? Are there any other clear clusters of modeling activities about which we can make a statement regarding their modeling and computing resources?&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt; &lt;/p&gt;
+
+&lt;p&gt; &lt;/p&gt;
+</description>
+        <pubDate>Sun, 22 May 2016 11:22:52 -0500</pubDate>
+        <link>http://scottsfarley.com/blog/research/2016/05/22/My-Thesis-Proposal-In-A-Nutshell.html</link>
+        <guid isPermaLink="true">http://scottsfarley.com/blog/research/2016/05/22/My-Thesis-Proposal-In-A-Nutshell.html</guid>
+        
+        
+        <category>Research</category>
+        
+      </item>
+    
+      <item>
+        <title>Selecting Variables for Species Distribution Models</title>
+        <description>&lt;p&gt;When running statistical models, like multiple linear regression or generalized linear models, it is typically not a good idea to use multiple predictor variables that are highly correlated with one another, as it may result in an unstable final model. This guideline also applies to many of various flavors of species distribution models (SDMs), which take in two or more (usually climatic) predictor variables to model a species response to environmental gradients.  Given modeled climate output, the SDM models can be used to estimate the probability of a species occurring in a different time period, say at the last glacial maximum – 22,000 years ago–, or in 2100, once humans have contributed several degrees to the earth’s temperature.  While these models differ in their statistical techniques, most behave a little like multiple regression, where a set of predict variables are combined in some parametric or non-parametric way to estimate the response as a function of these inputs.  Thus, just like in a standard regression, using highly correlated climatic predictor variables can  contribute to instability in the modeled response.  This post describes the methods I chose to identify correlated variables and choose the ones I wanted to remain in my study.&lt;/p&gt;
+&lt;blockquote&gt;Collinearity can increase estimates of parameter variance; yield models in which no variable is statistically significant even though R&lt;sup&gt;2&lt;/sup&gt;&lt;sub&gt;y&lt;/sub&gt; is large; produce parameter estimates of the “incorrect sign” and of implausible magnitude; create situations in which small changes in the data produce wide swings in parameter estimates; and, in truly extreme cases, prevent the numerical solution of a model &lt;a href=&quot;http://web.unbc.ca/~michael/courses/stats/lectures/VIF%20articlea.pdf&quot;&gt;(O’BRIEN, 2007)&lt;/a&gt;&lt;/blockquote&gt;
+&lt;h3&gt;The data&lt;/h3&gt;
+&lt;p&gt;The data I am using here is a set of 19 &lt;a href=&quot;https://pubs.usgs.gov/ds/691/ds691.pdf&quot;&gt;bioclimatic variables&lt;/a&gt;, commonly used in SDMs, that describe potentially meaningful ecological parameters, such as average precipitation in the warmest quarter of the year, and are derived from monthly climatic GCM output.  My data is derived from a 0.5x0.5 degree &lt;a href=&quot;http://www.cesm.ucar.edu/models/ccsm3.0/&quot;&gt;CCSM3&lt;/a&gt; climate model run, and is in raster grid format.&lt;/p&gt;
+&lt;h3&gt;Correlation&lt;/h3&gt;
+&lt;p&gt;The first natural thing to do when looking at collinearity between variables would be to look at the pairwise correlation between them.  This will show us the correlation between each raster, and every other raster in the set.  We’re going to first do this by taking a large random sampling of spatial coordinates from the raster  set.  I have my predictor variables stored as a RasterStack, so I can use the sampleRandom tool in the raster package to generate n random points over my grid.  I now how a dataframe that shows the climatic values at each of the random points. I can scatter them together, and interrogate each one for pearson’s r correlation.  &lt;a href=&quot;http://www.scottsfarley.com/blogblog_img/bio2_7.png&quot;&gt;&lt;img align=&quot;right&quot; src=&quot;http://www.scottsfarley.com/blog/blog_img/bio2_7.png&quot; alt=&quot;bio2_7&quot; width=&quot;415&quot; height=&quot;340&quot; /&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;The figure here shows an example of scattering biovariable 2 with biovariable 7, resulting in an R&lt;sup&gt;2 &lt;/sup&gt; value of ~0.45. Now, I can do this procedure for all 19 of my predictor variables, but that would be kind of tedious.  We would be left with 361 R&lt;sup&gt;2 &lt;/sup&gt;values to compare, and 361 scatter plots to &lt;a href=&quot;http://www.scottsfarley.com/blog/blog_img/file-page1.jpg&quot;&gt;&lt;img class=&quot;wp-image-13 alignleft&quot; align=&quot;right&quot; src=&quot;http://www.scottsfarley.com/blog/blog_img/file-page1.jpg&quot; alt=&quot;file-page1&quot; width=&quot;337&quot; height=&quot;436&quot; /&gt;&lt;/a&gt;interrogate.  Sounds annoying.  We can simplify the visual comparison somewhat by plotting the correlation matrix. You can derived the correlation matrix for pearson’s r by using the &lt;a href=&quot;http://www.inside-r.org/packages/cran/raster/docs/layerStats&quot;&gt;layerStats&lt;/a&gt; function in the raster package.  Using the corrplot library in R, we can format the correlation matrix so that we can easily visualization the magnitude and direction of the correlations.  But, pretty much all we get out of this is that some variables are very well correlated and others are less correlated.  Not easy to compare, still annoying.&lt;/p&gt;
+&lt;h3&gt;Variance Inflation Factor&lt;/h3&gt;
+&lt;p&gt;The variance inflation factor (VIF) was conceived for exactly this purpose – comparing collinearity between regression predictors. The VIF quantified the expected amount of variance in a regression coefficient that is due to collinearity in the predictors. The VIF is bounded on the bottom by 1, and has no upper bound. A VIF of 1 indicates that that no extra variance is caused by collinearity in the factors.  A higher VIF indicates higher amounts of variances caused by collinearity, for example, a VIF of 5.1 suggests 510% extra variance in the regression coefficient. VIFs are comparable so we can directly compare and choose variables to eliminate based on this index.&lt;/p&gt;
+&lt;h6&gt;Calculating the VIF:&lt;/h6&gt;
+&lt;p&gt;Calculating the VIF index is pretty simple, actually, and can be done very quickly.  To calculate the index for layer &lt;i&gt;i&lt;/i&gt;, run a regression of X&lt;sub&gt;i &lt;/sub&gt; in terms of all of the other predictors that you wish to use.  The form of the equation is:&lt;/p&gt;
+
+&lt;p&gt;X&lt;sub&gt;i&lt;/sub&gt; = α&lt;sub&gt;j&lt;/sub&gt;X&lt;sub&gt;j&lt;/sub&gt; + α&lt;sub&gt;k&lt;/sub&gt;X&lt;sub&gt;k&lt;/sub&gt; + … + α&lt;sub&gt;n&lt;/sub&gt;X&lt;sub&gt;n&lt;/sub&gt; + ε&lt;sub&gt;i&lt;/sub&gt;&lt;/p&gt;
+
+&lt;p&gt;Note that this is not a regression of the response variable for the model, instead, its a regression of the layer in terms of linear combinations of the other predictors.&lt;/p&gt;
+
+&lt;p&gt;Now, calculate the R&lt;sup&gt;2&lt;/sup&gt;&lt;sub&gt;i&lt;/sub&gt; coefficient of determination value for X&lt;sub&gt;i&lt;/sub&gt;.&lt;/p&gt;
+
+&lt;p&gt;Finally, calculate the VIF for predictor &lt;i&gt;i&lt;/i&gt; by using VIF=1/(1-R&lt;sup&gt;2&lt;/sup&gt;&lt;sub&gt;i&lt;/sub&gt;).&lt;/p&gt;
+
+&lt;p&gt;If R&lt;sup&gt;2&lt;/sup&gt;&lt;sub&gt;i&lt;/sub&gt; is high for this layer, then the denominator of the VIF equation will be very small.  Once evaluated, if R&lt;sup&gt;2&lt;/sup&gt;&lt;sub&gt;i&lt;/sub&gt; is close to 1 (perfectly correlated) then the VIF will go to infinity. On the other hand, if R&lt;sup&gt;2&lt;/sup&gt;&lt;sub&gt;i&lt;/sub&gt; is not correlated with any of the other predictors at all (R&lt;sup&gt;2&lt;/sup&gt;&lt;sub&gt;i&lt;/sub&gt; = 0), then the denominator of the VIF will be 1-0, and the VIF term will evaluate to just 1.  We can do this for each one of our raster predictor layers, and then compare apples-to-apples how collinear they are.&lt;/p&gt;
+
+&lt;p&gt;I calculated the inflation factor using the R package &lt;a href=&quot;https://cran.r-project.org/web/packages/usdm/usdm.pdf&quot;&gt;usdm&lt;/a&gt;, which made the raster calculations quite convenient.  Since R is open source, you can check out the source to see exactly what it’s doing, or you could probably roll your own VIF script pretty easily. In any case, the vifcor function in usdm was designed for finding collinear variables for species distribution models, returns both the VIF and the R&lt;sup&gt;2 &lt;/sup&gt; value, was easy to use, and all-in-all, seemed like the right tool for the job.&lt;/p&gt;
+&lt;h3&gt;Using the VIF&lt;/h3&gt;
+&lt;p&gt;So, now we have the variance inflation factor for all of our layers we can figure out which ones are the most collinear and eliminate the ones might cause instability in our model. Plotting out the results of the VIF calculation, we can see what the correlation matrix plot suggested earlier. Some variables, like #11 and #1, are super, super correlated with the other variables in the set.  But now we know exactly how much that would affect the predictive model.
+&lt;a href=&quot;http://www.scottsfarley.com/blog/blog_img/vif_plot-1.png&quot;&gt;&lt;img align=&quot;right&quot; src=&quot;http://www.scottsfarley.com/blog/blog_img/vif_plot-1-791x1024.png&quot; alt=&quot;vif_plot-1&quot; width=&quot;350&quot; height=&quot;425&quot; /&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;Scholars debate how much inflation should be allowed in the model.  Some say 10 (which appears to the the internet’s rule of thumb), some say five, some say 2.5.  In any case, variable 11’s VF of ~7000 is probably above the acceptable threshold. For my purposes, all of the VIFs seemed quite high (none under 2.5).  So, perhaps I should use different predictor variables.  Since this set of biovariables is common standard for SDM modeling, I think its worth noting just how correlated they are with each other and the potential for instability that this causes.  However, since they are such a standard, I decided to just take the seven least correlated predictors and use those as my final predictor set.&lt;/p&gt;
+&lt;table width=&quot;500&quot;&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td width=&quot;53&quot;&gt;Biovariable&lt;/td&gt;
+&lt;td width=&quot;53&quot;&gt;VIF&lt;/td&gt;
+&lt;td width=&quot;234&quot;&gt;Interpretation&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;2&lt;/td&gt;
+&lt;td&gt;36.405&lt;/td&gt;
+&lt;td&gt;Mean Diurnal Range&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;7&lt;/td&gt;
+&lt;td&gt;9.597&lt;/td&gt;
+&lt;td&gt;Temperature Annual Range&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;8&lt;/td&gt;
+&lt;td&gt;26.479&lt;/td&gt;
+&lt;td&gt;Mean Temperature of Wettest Quarter&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;15&lt;/td&gt;
+&lt;td&gt;94.520456&lt;/td&gt;
+&lt;td&gt;Precipitation Seasonality&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;18&lt;/td&gt;
+&lt;td&gt;17.879&lt;/td&gt;
+&lt;td&gt;Precipitation of Warmest Quarter&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;17&lt;/td&gt;
+&lt;td&gt;12.981&lt;/td&gt;
+&lt;td&gt;Precipitation of Driest Quarter&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;p&gt;When we reduce our predictor to use these variables and re-run the VIF calculation, our variance inflation is much lower (since there are less correlated things to be collinear with), and the analysis falls within the accepted standards for variable collinearity.  The maximum correlation that remains is between #2 and #15, at only R=0.51, which seems reasonable.&lt;/p&gt;
+
+&lt;table width=&quot;250&quot;&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td width=&quot;76&quot;&gt;Variable&lt;/td&gt;
+&lt;td width=&quot;53&quot;&gt;VIF&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;bio2&lt;/td&gt;
+&lt;td&gt;2.349056&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;bio7&lt;/td&gt;
+&lt;td&gt;1.554106&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;bio8&lt;/td&gt;
+&lt;td&gt;1.660181&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;bio15&lt;/td&gt;
+&lt;td&gt;1.721449&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;bio18&lt;/td&gt;
+&lt;td&gt;1.434528&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;bio19&lt;/td&gt;
+&lt;td&gt;1.362137&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;p&gt;In most cases, it is good to reduce multicollinearity between predictors.  However, it’s also important to remember to keep ecologically meaningful predictors in your set so that you’re not just producing models of statistical artifacts.&lt;/p&gt;
+</description>
+        <pubDate>Fri, 20 May 2016 11:22:52 -0500</pubDate>
+        <link>http://scottsfarley.com/blog/research/sdm/2016/05/20/Selecting-Variables-for-SDM.html</link>
+        <guid isPermaLink="true">http://scottsfarley.com/blog/research/sdm/2016/05/20/Selecting-Variables-for-SDM.html</guid>
+        
+        
+        <category>Research</category>
+        
+        <category>SDM</category>
+        
+      </item>
+    
+      <item>
+        <title>On Finding Data for Cartography Projects, Part I: Reading Existing Source Code</title>
+        <description>&lt;p&gt;Sometimes, it can be hard to find the data we want.  We spend hours looking in all our normal places.  We cruise the census bureau, hit the EPA’s data portal, and browse UW’s collection of geospatial resources. If you have a topic or a storyline in mind, it can be really frustrating to find that you can’t find the right data.  In most cases, the data you seek is actually out there, it might just be a little harder to find that you might hope.  I’ll discuss a couple of techniques I use from time to time when I find myself in this situation.  This is my first blog post, so stay with me.&lt;/p&gt;
+
+&lt;h3 id=&quot;reverse-engineer-someone-elses-work&quot;&gt;Reverse engineer someone else’s work&lt;/h3&gt;
+&lt;p&gt;Chances are, if you’re exploring a topic, you’ve seen a map that shows some data that you’d like to use.  If you haven’t seen a map like this, either (a) you’re doing a topic that shouldn’t be mapped/isn’t spatial, (b) you already have your data in hand and don’t need to reverse engineer someone else work, or (c) you haven’t looked hard enough.  In many cases, these maps will show the &lt;em&gt;exact &lt;/em&gt;data that you want to map with, just presented in a different way than what you’re thinking.  If the map you’ve found is made in-browser (slippy map, svg illustration, etc), chances are you can find the data that was used to create it.  If you find a pdf, png, or other more traditional desktop format, you’d be hard pressed to reverse engineer the data – I wouldn’t bother, since the spatial information has been lost.&lt;/p&gt;
+
+&lt;p&gt;I recently wanted to make a map of Syrian refugee routes to Europe.  I found that UNHCR has a great data portal, which supports some nice visualizations. It’s hard, though, to pull the data out of the visualizations, since the specific numbers are only shown when elements are moused over.  I will use this case as an example, and walk through the steps I took before eventually finding an excel file that contained all the data I wanted and more! The data portal can be found (here)[ http://data.unhcr.org/mediterranean/regional.php].&lt;/p&gt;
+
+&lt;h4 id=&quot;view-source&quot;&gt;View-Source:&lt;/h4&gt;
+&lt;p&gt;So you’ve found a map to take a look at.  The first thing you want to do is to dig into the source code of the web page.  This can be overwhelming if you’re not familiar with html, css, and, particularly, javascript.  However, there’s a couple key things to look for that might lead to data discovery. They won’t work for every website, but some mixing and matching might yield good results for you. In any case, it’ll probably take some time, so be prepared to look at code for a hot minute. To look at a webpage’s source code, enter view-source: directly before the pages url.&lt;/p&gt;
+&lt;pre&gt;view-source:http://data.unhcr.org/mediterranean/regional.php&lt;/pre&gt;
+&lt;p&gt;Now I can see all of the html written on the page.&lt;/p&gt;
+
+&lt;p&gt;Things to look for at this stage: javascript files and iframes. iframes: iframes are a somewhat outdated method of putting a whole external webpage inside of another page, they can be holders for visualizations.  Javascript files: Many (most?) modern interactive web maps are written in javascript, so they are what we eventually want to get to.  It can take some practice and some time to browse through the source and find things that look important.  HTML sources will link to external the js files, so click on these so you can look at them.  Also it can be helpful to open both the page source and the rendered HTML page at the same time in different tabs, so that you can keep track of what you’re looking at in the source.&lt;/p&gt;
+
+&lt;p&gt;In the UNCHR page example, I see both a main.js file and an iframe. I see at lot more written in the page, but it’s all below the map in the rendered page.  I browse the main.js file, but its not quite what I’m looking for. I don’t see anything that looks like its drawing a visualization, so I skip it for now – may I’ll need to come back later.  Next, I examine the iframe, click the link, and see the map in its own web page, without the extra information provided in the portal entry point. One step closer!  Let’s take a look at the source of the iframe.  The iframe is the link:&lt;/p&gt;
+&lt;pre&gt;http://data.unhcr.org/medportalviz/dist/index.html?year=2016&amp;amp;cache=4&lt;/pre&gt;
+
+&lt;h4 id=&quot;unminify&quot;&gt;Unminify:&lt;/h4&gt;
+&lt;p&gt;When looking at the source of the iframe, things get a little more complicated.  Everything is much more condensed, and less readable.  But, its shorter, so there are less items to consider. There’s a couple of different links in the html part of the page, and I see two javascript &amp;lt;script&amp;gt; links.  Main.js usually contains custom written components, so its a good place to start.  I would recommend pursuing the main.js file over other, more generically named js files. When I click to look at the main.js script of the iframe, I see that its been minified.  Its totally impossible to read.  The solution: unminify!&lt;/p&gt;
+
+&lt;p&gt;Minification is a way to reduce file size, and thus improve performance of the application, because less data has to be transferred across the network. Minification is done by removing extra characters, comments, and whitespace, resulting in a compact, but unreadable file.  One solution when looking at other people’s sources is to use a tool like &lt;a href=&quot;&#39;http://unminify.com&#39;&quot;&gt;http://unminify.com/&lt;/a&gt;, which will expand the code, add whitespace, and make it much more readable.&lt;/p&gt;
+
+&lt;p&gt;When I unminify the code, I finally see the javascript that is controlling the map.  There’s two benefits to reaching this point: (1) I can see how the original developer of the application wrote the code.  Often the code will contain a license clause showing ownership and reusability.  If there is no license, be careful about copying the code.  In any case, it is okay to look at the general coding strategy and use it as an example for developing your own applications in the future. In this case, we see that the authors use some D3 and some additional third part libraries.&lt;/p&gt;
+
+&lt;p&gt;More importantly for our purposes right now, though, is (2): We can find the data that the javascript visualization is pulling from.  It will often be from an api, json file, or csv file.  In this case, we see several local files that are clearly the boundary and basemap files. Finally, I find the line:&lt;/p&gt;
+&lt;pre&gt; dataSrc = &quot;http://data.unhcr.org/data_sources/mediterranean/data.xls&quot;&lt;/pre&gt;
+&lt;p&gt;Seems promising! I copy and paste the link into my browser – Jackpot! an excel file containing all of the data that the original visualization was built on.  In fact, in this case, theres much more data than just what is shown in the UN visualization. I am free to build new and creative visualizations from the data, or just to look and inspect it.&lt;/p&gt;
+
+&lt;p&gt;Lessons Learned:&lt;/p&gt;
+&lt;ol&gt;
+ 	&lt;li&gt;Use view-source: to look at the webpage source&lt;/li&gt;
+ 	&lt;li&gt; Look for iframes and javascript files&lt;/li&gt;
+ 	&lt;li&gt;Make use of tools like unminify.com to make minified code more readable.&lt;/li&gt;
+ 	&lt;li&gt;Prioritize main.js files over other files.&lt;/li&gt;
+ 	&lt;li&gt;Practice! You might not always find what you want and you might waste some time, but in any case, you will learn how other developers structure their web pages and develop web visualizations.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;&lt;em&gt;Disclaimer: Use the advice here at your own discretion.  Sometimes, it may not be appropriate to use other people’s data, so make sure that you’re ethical in what you’re doing.&lt;/em&gt;&lt;/p&gt;
+</description>
+        <pubDate>Sun, 08 May 2016 11:22:52 -0500</pubDate>
+        <link>http://scottsfarley.com/blog/cartography/2016/05/08/on-finding-data-for-cartography-projects-I.html</link>
+        <guid isPermaLink="true">http://scottsfarley.com/blog/cartography/2016/05/08/on-finding-data-for-cartography-projects-I.html</guid>
+        
+        
+        <category>cartography</category>
+        
+      </item>
+    
+  </channel>
+</rss>

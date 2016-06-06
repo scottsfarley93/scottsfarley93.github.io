@@ -76,22 +76,28 @@
 <p>As noted in the documentation, you can write the script in a number of languages by changing the shebang line at the top of the script.  To run a bash script, the first line of the script should be <code>#! /bin/bash</code>.  A python script could be run by changing this line to <code>#!/usr/bin/python</code>.</p>
 
 <h3 id="adding-a-script-to-a-single-instance">Adding a script to a single instance</h3>
-<p>If you want to add a startup script to a single instance that is currently running:
-1.  Click on the instance properties in the Console
-2.  Click on edit, at the top
-3.  Scroll to the ‘Custom Metadata’ section
-4.  For key, enter <code>startup-script</code>
-5.  In the value field, write your script
-6.  Click save at the bottom and restart the instance.</p>
+<p>If you want to add a startup script to a single instance that is currently running:</p>
+
+<ol>
+  <li>Click on the instance properties in the Console</li>
+  <li>Click on edit, at the top</li>
+  <li>Scroll to the ‘Custom Metadata’ section</li>
+  <li>For key, enter <code>startup-script</code></li>
+  <li>In the value field, write your script</li>
+  <li>Click save at the bottom and restart the instance.</li>
+</ol>
 
 <h3 id="adding-a-script-to-all-instances-in-your-project">Adding a script to all instances in your project:</h3>
-<p>These items will be applied to all <em>new</em> instances in your project.<br />
-1.  Open the Cloud Computing Console
-2.  Click ‘Metadata’ in the lefthand navigation bar
-3.  Click ‘Edit’ at the top
-4.  Click ‘Add item’ to add a new key value pair
-5.  As above, for key enter <code>startup-script</code>, and for value write your script
-6.  Save and close.</p>
+<p>These items will be applied to all <em>new</em> instances in your project.</p>
+
+<ol>
+  <li>Open the Cloud Computing Console</li>
+  <li>Click ‘Metadata’ in the lefthand navigation bar</li>
+  <li>Click ‘Edit’ at the top</li>
+  <li>Click ‘Add item’ to add a new key value pair</li>
+  <li>As above, for key enter <code>startup-script</code>, and for value write your script</li>
+  <li>Save and close.</li>
+</ol>
 
 <p>It can be confusing sometimes because the metadata added here in this panel is automatically applied to all of your new instances.  You cannot see these key-value pairs in the metadata section of instance, so just remember it’s there.</p>
 
@@ -181,6 +187,7 @@ rm -rf /home/rstudio/thesis-scripts
 </pre>
 
 <pre>Rscript /home/rstudio/thesis-scripts/R/time_sdm.R 50 TRUE
+
 --&gt;Start the experiment script to run 50 iterations and then shutdown the machine.
 </pre>
 

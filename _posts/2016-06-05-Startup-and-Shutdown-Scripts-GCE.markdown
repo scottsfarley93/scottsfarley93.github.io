@@ -13,6 +13,7 @@ As noted in the documentation, you can write the script in a number of languages
 
 ### Adding a script to a single instance
 If you want to add a startup script to a single instance that is currently running:
+
 1.  Click on the instance properties in the Console
 2.  Click on edit, at the top
 3.  Scroll to the 'Custom Metadata' section
@@ -22,6 +23,7 @@ If you want to add a startup script to a single instance that is currently runni
 
 ### Adding a script to all instances in your project:
 These items will be applied to all *new* instances in your project.  
+
 1.  Open the Cloud Computing Console
 2.  Click 'Metadata' in the lefthand navigation bar
 3.  Click 'Edit' at the top
@@ -121,5 +123,6 @@ rm -rf /home/rstudio/thesis-scripts
 </pre>
 
 <pre>Rscript /home/rstudio/thesis-scripts/R/time_sdm.R 50 TRUE
+
 -->Start the experiment script to run 50 iterations and then shutdown the machine.
 </pre>

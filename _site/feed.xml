@@ -6,8 +6,8 @@
 </description>
     <link>http://scottsfarley.com/</link>
     <atom:link href="http://scottsfarley.com/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Sun, 05 Jun 2016 21:35:34 -0500</pubDate>
-    <lastBuildDate>Sun, 05 Jun 2016 21:35:34 -0500</lastBuildDate>
+    <pubDate>Sun, 05 Jun 2016 21:40:12 -0500</pubDate>
+    <lastBuildDate>Sun, 05 Jun 2016 21:40:12 -0500</lastBuildDate>
     <generator>Jekyll v3.1.6</generator>
     
       <item>
@@ -19,22 +19,28 @@
 &lt;p&gt;As noted in the documentation, you can write the script in a number of languages by changing the shebang line at the top of the script.  To run a bash script, the first line of the script should be &lt;code&gt;#! /bin/bash&lt;/code&gt;.  A python script could be run by changing this line to &lt;code&gt;#!/usr/bin/python&lt;/code&gt;.&lt;/p&gt;
 
 &lt;h3 id=&quot;adding-a-script-to-a-single-instance&quot;&gt;Adding a script to a single instance&lt;/h3&gt;
-&lt;p&gt;If you want to add a startup script to a single instance that is currently running:
-1.  Click on the instance properties in the Console
-2.  Click on edit, at the top
-3.  Scroll to the ‘Custom Metadata’ section
-4.  For key, enter &lt;code&gt;startup-script&lt;/code&gt;
-5.  In the value field, write your script
-6.  Click save at the bottom and restart the instance.&lt;/p&gt;
+&lt;p&gt;If you want to add a startup script to a single instance that is currently running:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Click on the instance properties in the Console&lt;/li&gt;
+  &lt;li&gt;Click on edit, at the top&lt;/li&gt;
+  &lt;li&gt;Scroll to the ‘Custom Metadata’ section&lt;/li&gt;
+  &lt;li&gt;For key, enter &lt;code&gt;startup-script&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;In the value field, write your script&lt;/li&gt;
+  &lt;li&gt;Click save at the bottom and restart the instance.&lt;/li&gt;
+&lt;/ol&gt;
 
 &lt;h3 id=&quot;adding-a-script-to-all-instances-in-your-project&quot;&gt;Adding a script to all instances in your project:&lt;/h3&gt;
-&lt;p&gt;These items will be applied to all &lt;em&gt;new&lt;/em&gt; instances in your project.&lt;br /&gt;
-1.  Open the Cloud Computing Console
-2.  Click ‘Metadata’ in the lefthand navigation bar
-3.  Click ‘Edit’ at the top
-4.  Click ‘Add item’ to add a new key value pair
-5.  As above, for key enter &lt;code&gt;startup-script&lt;/code&gt;, and for value write your script
-6.  Save and close.&lt;/p&gt;
+&lt;p&gt;These items will be applied to all &lt;em&gt;new&lt;/em&gt; instances in your project.&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Open the Cloud Computing Console&lt;/li&gt;
+  &lt;li&gt;Click ‘Metadata’ in the lefthand navigation bar&lt;/li&gt;
+  &lt;li&gt;Click ‘Edit’ at the top&lt;/li&gt;
+  &lt;li&gt;Click ‘Add item’ to add a new key value pair&lt;/li&gt;
+  &lt;li&gt;As above, for key enter &lt;code&gt;startup-script&lt;/code&gt;, and for value write your script&lt;/li&gt;
+  &lt;li&gt;Save and close.&lt;/li&gt;
+&lt;/ol&gt;
 
 &lt;p&gt;It can be confusing sometimes because the metadata added here in this panel is automatically applied to all of your new instances.  You cannot see these key-value pairs in the metadata section of instance, so just remember it’s there.&lt;/p&gt;
 
@@ -124,6 +130,7 @@ rm -rf /home/rstudio/thesis-scripts
 &lt;/pre&gt;
 
 &lt;pre&gt;Rscript /home/rstudio/thesis-scripts/R/time_sdm.R 50 TRUE
+
 --&amp;gt;Start the experiment script to run 50 iterations and then shutdown the machine.
 &lt;/pre&gt;
 </description>

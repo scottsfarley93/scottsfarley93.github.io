@@ -6,22 +6,135 @@
 </description>
     <link>http://scottsfarley.com/</link>
     <atom:link href="http://scottsfarley.com/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Sun, 05 Jun 2016 21:18:57 -0500</pubDate>
-    <lastBuildDate>Sun, 05 Jun 2016 21:18:57 -0500</lastBuildDate>
+    <pubDate>Sun, 05 Jun 2016 21:35:34 -0500</pubDate>
+    <lastBuildDate>Sun, 05 Jun 2016 21:35:34 -0500</lastBuildDate>
     <generator>Jekyll v3.1.6</generator>
     
       <item>
-        <title>Startup And Shutdown Scripts Gce</title>
-        <description>&lt;p&gt;layout: post
-title:  “On Finding Data for Cartography Projects, Part I: Reading Existing Source Code”
-date:   2016-05-8 11:22:52 -0500
-categories: Research CloudComputing
-—&lt;/p&gt;
+        <title>Startup and Shutdown Scripts in Google Cloud Compute Engine</title>
+        <description>&lt;p&gt;In continuing my meditations on beginning to use the Google Cloud Computing platform, this post will describe the use of startup and shutdown scripts. If you want to start multiple instances that are all the same in terms of programs, data, etc (but perhaps of different size), you have two options. First, you could save your fully configured machine as an image, or more likely, as a snapshot.  Booting with this configuration is easy, just select the option from the menu when starting the new instance. Proceeding in this way has several potential drawbacks, however.  Most notably, it is very difficult to keep everything updated with this method.  Unless you manually update the snapshot pretty often, your software is going to be out of date.  Moreover, if you decide to make a small change in the scripts or programs you’re running on the instance, you will need to make an update to the snapshot.&lt;/p&gt;
+
+&lt;p&gt;Instead of using a pre-configured snapshot, you can make use of Google Cloud’s ability to automatically run a script at boot time.  Using this script allows us to automatically install the latest version our programs using the &lt;code&gt;apt-get&lt;/code&gt; or other linux package manager, and if using version control software like git, download the latest working version of the scripts.  Google provides fairly easy-to-follow documentation about startup scripts &lt;a href=&quot;https://cloud.google.com/compute/docs/startupscript&quot;&gt;here&lt;/a&gt;.  In the same vein, Google provides a beta feature to run a script on machine termination, so you can save your work, etc.  There are a variety of limitations described in the &lt;a href=&quot;https://cloud.google.com/compute/docs/shutdownscript&quot;&gt;shutdown-script documentation&lt;/a&gt;, but they can be handy to run short cleanup jobs.&lt;/p&gt;
+
+&lt;p&gt;As noted in the documentation, you can write the script in a number of languages by changing the shebang line at the top of the script.  To run a bash script, the first line of the script should be &lt;code&gt;#! /bin/bash&lt;/code&gt;.  A python script could be run by changing this line to &lt;code&gt;#!/usr/bin/python&lt;/code&gt;.&lt;/p&gt;
+
+&lt;h3 id=&quot;adding-a-script-to-a-single-instance&quot;&gt;Adding a script to a single instance&lt;/h3&gt;
+&lt;p&gt;If you want to add a startup script to a single instance that is currently running:
+1.  Click on the instance properties in the Console
+2.  Click on edit, at the top
+3.  Scroll to the ‘Custom Metadata’ section
+4.  For key, enter &lt;code&gt;startup-script&lt;/code&gt;
+5.  In the value field, write your script
+6.  Click save at the bottom and restart the instance.&lt;/p&gt;
+
+&lt;h3 id=&quot;adding-a-script-to-all-instances-in-your-project&quot;&gt;Adding a script to all instances in your project:&lt;/h3&gt;
+&lt;p&gt;These items will be applied to all &lt;em&gt;new&lt;/em&gt; instances in your project.&lt;br /&gt;
+1.  Open the Cloud Computing Console
+2.  Click ‘Metadata’ in the lefthand navigation bar
+3.  Click ‘Edit’ at the top
+4.  Click ‘Add item’ to add a new key value pair
+5.  As above, for key enter &lt;code&gt;startup-script&lt;/code&gt;, and for value write your script
+6.  Save and close.&lt;/p&gt;
+
+&lt;p&gt;It can be confusing sometimes because the metadata added here in this panel is automatically applied to all of your new instances.  You cannot see these key-value pairs in the metadata section of instance, so just remember it’s there.&lt;/p&gt;
+
+&lt;h4 id=&quot;adding-a-shutdown-script&quot;&gt;Adding a shutdown script&lt;/h4&gt;
+&lt;p&gt;Follow the same steps as to run a startup script, but instead of the &lt;code&gt;startup-script&lt;/code&gt; key, put &lt;code&gt;shutdown-script&lt;/code&gt;.  Super easy.  Be warned, though, that shutdown scripts are not guaranteed to run, Google completes them on a ‘best effort basis.’&lt;/p&gt;
+
+&lt;h3 id=&quot;my-startup-script&quot;&gt;My Startup Script&lt;/h3&gt;
+&lt;p&gt;I’ll describe my startup script and what I choose to do for each instance to set them up to run the experiments I am working with.  In general, I download, install, and update a bunch of software, I configure the google cloud proxy, and then I clone my github repository which contains all of my working files.  Then, when all is complete, I automatically start my experiments to run through an &lt;code&gt;Rscript&lt;/code&gt; and then terminate the machine when they’re complete.  The script is automatically run as root, from the root directory, so all of the &lt;code&gt;sudo&lt;/code&gt;’s are repetitive.&lt;/p&gt;
+
+&lt;pre&gt;#! /bin/bash
+
+--&amp;gt;Tell the computer I&#39;m working in a bash script
+
+&lt;/pre&gt;
+
+&lt;pre&gt;sudo apt-get update
+
+--&amp;gt;Update the base packages that are installed on the instance
+&lt;/pre&gt;
+
+&lt;pre&gt;sudo apt-get -y install git
+--&amp;gt;Install Git version control.  
+&lt;/pre&gt;
+
+&lt;p&gt;The &lt;code&gt;-y&lt;/code&gt; flag automatically answers &lt;code&gt;y&lt;/code&gt; to any queries presented by the download manager (i.e., are you sure you want to download this package? y/n).&lt;/p&gt;
+
+&lt;pre&gt;sudo apt-get -y install r-base
+--&amp;gt;Install R
+&lt;/pre&gt;
+
+&lt;pre&gt;sudo apt-get install -y gdebi-core
+--&amp;gt;Install a utility dependency for use in installing RStudio
+&lt;/pre&gt;
+
+&lt;pre&gt;sudo apt-get install -y aptitude
+--&amp;gt; Install the aptitude package manager
+&lt;/pre&gt;
+
+&lt;p&gt;Aptitude is a &lt;a href=&quot;http://askubuntu.com/questions/1743/is-aptitude-still-considered-superior-to-apt-get&quot;&gt;different&lt;/a&gt; package manager for linux systems.  This is the only one I could find that has a gdal package.&lt;/p&gt;
+
+&lt;pre&gt;sudo aptitude install -y libgdal-dev
+sudo aptitude install -y libproj-dev
+
+--&amp;gt;Install gdal and proj4 libraries.
+&lt;/pre&gt;
+
+&lt;pre&gt;sudo apt-get install -y  libmariadb-client-lgpl-dev
+
+--&amp;gt;Install a database dependency necessary for installing RMySQL
+&lt;/pre&gt;
+
+&lt;pre&gt;
+wget https://download2.rstudio.org/rstudio-server-0.99.902-amd64.deb
+sudo gdebi -y rstudio-server-0.99.902-amd64.deb
+
+--&amp;gt; Download and install RStudio
+&lt;/pre&gt;
+
+&lt;pre&gt;
+wget https://dl.google.com/cloudsql/cloud_sql_proxy.linux.amd64
+mv cloud_sql_proxy.linux.amd64 cloud_sql_proxy
+chmod +x cloud_sql_proxy
+
+--&amp;gt;Download the cloud proxy script into your root directory and make it an executable.
+&lt;/pre&gt;
+
+&lt;pre&gt;
+sudo mkdir cloudsql; sudo chmod 777 cloudsql
+
+--&amp;gt;Make a directory for your cloudsql proxy sockets
+&lt;/pre&gt;
+
+&lt;pre&gt;
+rm -rf /home/rstudio/thesis-scripts
+
+--&amp;gt;Remove any old version of the script directory I&#39;ll be using.
+&lt;/pre&gt;
+
+&lt;pre&gt;git clone http://github.com/scottsfarley93/thesis-scripts /home/rstudio/thesis-scripts
+
+--&amp;gt;Clone the latest and greatest version of my repo into my instance.
+&lt;/pre&gt;
+
+&lt;pre&gt;sudo ./cloud_sql_proxy  -dir=/cloudsql -instances=thesis-1329:us-central1:sdm-database-3 &amp;amp;
+
+--&amp;gt;Start the cloudsql proxy so we can make database connections.
+&lt;/pre&gt;
+
+&lt;pre&gt;Rscript /home/rstudio/thesis-scripts/R/time_sdm.R 50 TRUE
+--&amp;gt;Start the experiment script to run 50 iterations and then shutdown the machine.
+&lt;/pre&gt;
 </description>
-        <pubDate>Sun, 05 Jun 2016 00:00:00 -0500</pubDate>
-        <link>http://scottsfarley.com/2016/06/05/Startup-and-Shutdown-Scripts-GCE.html</link>
-        <guid isPermaLink="true">http://scottsfarley.com/2016/06/05/Startup-and-Shutdown-Scripts-GCE.html</guid>
+        <pubDate>Sun, 05 Jun 2016 11:22:52 -0500</pubDate>
+        <link>http://scottsfarley.com/research/cloudcomputing/2016/06/05/Startup-and-Shutdown-Scripts-GCE.html</link>
+        <guid isPermaLink="true">http://scottsfarley.com/research/cloudcomputing/2016/06/05/Startup-and-Shutdown-Scripts-GCE.html</guid>
         
+        
+        <category>Research</category>
+        
+        <category>CloudComputing</category>
         
       </item>
     

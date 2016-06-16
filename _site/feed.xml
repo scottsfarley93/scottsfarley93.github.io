@@ -4,10 +4,10 @@
     <title>Scott&#39;s Blog</title>
     <description>I am a graduate student at UW Madison studying computing applications to physical geography and paleoecological change.
 </description>
-    <link>http://scottsfarley.com/</link>
-    <atom:link href="http://scottsfarley.com/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Mon, 13 Jun 2016 08:39:31 -0500</pubDate>
-    <lastBuildDate>Mon, 13 Jun 2016 08:39:31 -0500</lastBuildDate>
+    <link>http://scottsfarley.com/blog/</link>
+    <atom:link href="http://scottsfarley.com/blog/feed.xml" rel="self" type="application/rss+xml"/>
+    <pubDate>Thu, 16 Jun 2016 08:15:46 -0500</pubDate>
+    <lastBuildDate>Thu, 16 Jun 2016 08:15:46 -0500</lastBuildDate>
     <generator>Jekyll v3.1.6</generator>
     
       <item>
@@ -77,8 +77,8 @@ sudo mv [APPLICATION-NAME].conf /etc/supervisor/conf.d
 &lt;p&gt;There are many ways to control your long running processes.  One of the ones I did not mention here is to create the script as its own service.  However, I like the management and flexibility of the tools I discussed here.  Both of these tools would work to do either job too, so I think its really a matter of preference to pick one out.&lt;/p&gt;
 </description>
         <pubDate>Sun, 12 Jun 2016 11:22:52 -0500</pubDate>
-        <link>http://scottsfarley.com/research/cloudcomputing/2016/06/12/managing-long-running-linux-processes.html</link>
-        <guid isPermaLink="true">http://scottsfarley.com/research/cloudcomputing/2016/06/12/managing-long-running-linux-processes.html</guid>
+        <link>http://scottsfarley.com/blog/research/cloudcomputing/2016/06/12/managing-long-running-linux-processes.html</link>
+        <guid isPermaLink="true">http://scottsfarley.com/blog/research/cloudcomputing/2016/06/12/managing-long-running-linux-processes.html</guid>
         
         
         <category>Research</category>
@@ -212,8 +212,8 @@ rm -rf /home/rstudio/thesis-scripts
 &lt;/pre&gt;
 </description>
         <pubDate>Sun, 05 Jun 2016 11:22:52 -0500</pubDate>
-        <link>http://scottsfarley.com/research/cloudcomputing/2016/06/05/Startup-and-Shutdown-Scripts-GCE.html</link>
-        <guid isPermaLink="true">http://scottsfarley.com/research/cloudcomputing/2016/06/05/Startup-and-Shutdown-Scripts-GCE.html</guid>
+        <link>http://scottsfarley.com/blog/research/cloudcomputing/2016/06/05/Startup-and-Shutdown-Scripts-GCE.html</link>
+        <guid isPermaLink="true">http://scottsfarley.com/blog/research/cloudcomputing/2016/06/05/Startup-and-Shutdown-Scripts-GCE.html</guid>
         
         
         <category>Research</category>
@@ -389,8 +389,8 @@ install.packages(&quot;RMySQL&quot;)
 &lt;p&gt;It’s definitely not easy, but after spending several hours at it, it sometimes works.&lt;/p&gt;
 </description>
         <pubDate>Thu, 02 Jun 2016 11:22:52 -0500</pubDate>
-        <link>http://scottsfarley.com/research/cloudcomputing/2016/06/02/adventures-in-google-cloud-I.html</link>
-        <guid isPermaLink="true">http://scottsfarley.com/research/cloudcomputing/2016/06/02/adventures-in-google-cloud-I.html</guid>
+        <link>http://scottsfarley.com/blog/research/cloudcomputing/2016/06/02/adventures-in-google-cloud-I.html</link>
+        <guid isPermaLink="true">http://scottsfarley.com/blog/research/cloudcomputing/2016/06/02/adventures-in-google-cloud-I.html</guid>
         
         
         <category>Research</category>
@@ -607,8 +607,8 @@ install.packages(&quot;RMySQL&quot;)
 &lt;p&gt;Hopefully this post was helpful in getting you started on using APIs and data services, and that you can maybe use these techniques in your own work at some point.  Spatial data APIs are everywhere – happy hunting.&lt;/p&gt;
 </description>
         <pubDate>Tue, 31 May 2016 11:22:52 -0500</pubDate>
-        <link>http://scottsfarley.com/cartography/2016/05/31/Find-Data-For_Cartography-Projects-II.html</link>
-        <guid isPermaLink="true">http://scottsfarley.com/cartography/2016/05/31/Find-Data-For_Cartography-Projects-II.html</guid>
+        <link>http://scottsfarley.com/blog/cartography/2016/05/31/Find-Data-For_Cartography-Projects-II.html</link>
+        <guid isPermaLink="true">http://scottsfarley.com/blog/cartography/2016/05/31/Find-Data-For_Cartography-Projects-II.html</guid>
         
         
         <category>cartography</category>
@@ -656,8 +656,8 @@ install.packages(&quot;RMySQL&quot;)
 &lt;p&gt; &lt;/p&gt;
 </description>
         <pubDate>Sun, 22 May 2016 11:22:52 -0500</pubDate>
-        <link>http://scottsfarley.com/research/2016/05/22/My-Thesis-Proposal-In-A-Nutshell.html</link>
-        <guid isPermaLink="true">http://scottsfarley.com/research/2016/05/22/My-Thesis-Proposal-In-A-Nutshell.html</guid>
+        <link>http://scottsfarley.com/blog/research/2016/05/22/My-Thesis-Proposal-In-A-Nutshell.html</link>
+        <guid isPermaLink="true">http://scottsfarley.com/blog/research/2016/05/22/My-Thesis-Proposal-In-A-Nutshell.html</guid>
         
         
         <category>Research</category>
@@ -773,8 +773,8 @@ install.packages(&quot;RMySQL&quot;)
 &lt;p&gt;In most cases, it is good to reduce multicollinearity between predictors.  However, it’s also important to remember to keep ecologically meaningful predictors in your set so that you’re not just producing models of statistical artifacts.&lt;/p&gt;
 </description>
         <pubDate>Fri, 20 May 2016 11:22:52 -0500</pubDate>
-        <link>http://scottsfarley.com/research/sdm/2016/05/20/Selecting-Variables-for-SDM.html</link>
-        <guid isPermaLink="true">http://scottsfarley.com/research/sdm/2016/05/20/Selecting-Variables-for-SDM.html</guid>
+        <link>http://scottsfarley.com/blog/research/sdm/2016/05/20/Selecting-Variables-for-SDM.html</link>
+        <guid isPermaLink="true">http://scottsfarley.com/blog/research/sdm/2016/05/20/Selecting-Variables-for-SDM.html</guid>
         
         
         <category>Research</category>
@@ -824,8 +824,8 @@ install.packages(&quot;RMySQL&quot;)
 &lt;p&gt;&lt;em&gt;Disclaimer: Use the advice here at your own discretion.  Sometimes, it may not be appropriate to use other people’s data, so make sure that you’re ethical in what you’re doing.&lt;/em&gt;&lt;/p&gt;
 </description>
         <pubDate>Sun, 08 May 2016 11:22:52 -0500</pubDate>
-        <link>http://scottsfarley.com/cartography/2016/05/08/on-finding-data-for-cartography-projects-I.html</link>
-        <guid isPermaLink="true">http://scottsfarley.com/cartography/2016/05/08/on-finding-data-for-cartography-projects-I.html</guid>
+        <link>http://scottsfarley.com/blog/cartography/2016/05/08/on-finding-data-for-cartography-projects-I.html</link>
+        <guid isPermaLink="true">http://scottsfarley.com/blog/cartography/2016/05/08/on-finding-data-for-cartography-projects-I.html</guid>
         
         
         <category>cartography</category>

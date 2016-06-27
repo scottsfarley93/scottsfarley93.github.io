@@ -94,7 +94,36 @@
 Postgres is a relational database management system that has a great collection of spatial types included in the PostGIS extension.  With this extension, postgres has the ability to store large gridded datasets and to query them spatially.  It also includes the ability to store lines, polygons, multipolygons, and many other types of geometry if you want. Spatial queries are perfect for my task, because I can ask for the value of the raster at a latitude/longitude point.  I could also ask things like which cells are crossed by a line, or included in a polygon, but we’ll stick with points for now.</p>
 
 <h4 id="raster-input-to-database">Raster Input to Database</h4>
-<p>Getting rasters into the database is pretty easy, if you have them in a supported format (which NetCDF is not).  The workflow here was to first convert each band of the NetCDF (they’re not really bands, in this case they’re the discrete time/month/variable combinations) to a tiff file.  Then, using the <code class="highlighter-rouge">raster2pgsql</code> tool included with postgres, I’ll then convert each image file to a SQL table of the Binary Large Object (BLOb) type.  Finally, using the <code class="highlighter-rouge">psql</code> command shell, I can create a new table for this dataset in my dataset. I’ll typically do this in a python script that loops over all files in a directory.</p>
+<p>Getting rasters into the database is pretty easy, if you have them in a supported format (which NetCDF is not).  The workflow here was to first convert each band of the NetCDF (they’re not really bands, in this case they’re the discrete time/month/variable combinations) to a tiff file.  Then, using the <code class="highlighter-rouge">raster2pgsql</code> tool included with postgres, I’ll then convert each image file to a SQL table of the Binary Large Object (BLOb) type.  Finally, using the <code class="highlighter-rouge">psql</code> command shell, I can create a new table for this dataset in my dataset. I’ll typically do this in a python script that loops over all files in a directory.  Once I have a directory of tif files, I can do something like:</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">subprocess</span>
+<span class="kn">import</span> <span class="nn">psycopg2</span>
+<span class="c"># connect to the database</span>
+<span class="n">connectString</span> <span class="o">=</span> <span class="s">"dbname='"</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">database</span><span class="p">)</span> <span class="o">+</span> <span class="s">"' user='"</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">username</span><span class="p">)</span> <span class="o">+</span> <span class="s">"' host='"</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">host</span><span class="p">)</span> <span class="o">+</span> <span class="s">"' password='"</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">password</span><span class="p">)</span> <span class="o">+</span> <span class="s">"'"</span>
+<span class="n">conn</span> <span class="o">=</span> <span class="n">psycopg2</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">connectString</span><span class="p">)</span>
+<span class="n">cursor</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+<span class="c"># look through my local directory</span>
+<span class="n">basePath</span> <span class="o">=</span> <span class="s">"/my/dir/of/files"</span>
+<span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="s">"/my/dir/of/files"</span><span class="p">):</span>
+    <span class="c"># get the file name</span>
+    <span class="n">fullName</span> <span class="o">=</span> <span class="n">f</span> <span class="o">+</span> <span class="s">"/"</span> <span class="o">+</span> <span class="n">basePath</span>
+    <span class="n">tableName</span> <span class="o">=</span> <span class="s">"RandomStringOfLettersAndNumbers"</span>
+    <span class="c"># build the command</span>
+    <span class="n">command</span> <span class="o">=</span> <span class="s">"raster2pgsql "</span>
+    <span class="n">command</span> <span class="o">+=</span> <span class="s">" -s 4326"</span> <span class="c">##wgs 1984 coordinate system</span>
+    <span class="n">command</span> <span class="o">+=</span> <span class="s">" -d"</span> <span class="c">## overwrite this table name if it already exits</span>
+    <span class="n">command</span> <span class="o">+=</span> <span class="s">" -I"</span> <span class="c">##spatial index</span>
+    <span class="n">command</span> <span class="o">+=</span> <span class="s">" -C "</span> <span class="c">##enforce constraints</span>
+    <span class="c">#command += " -M " ##vaccuum analyze</span>
+    <span class="n">command</span> <span class="o">+=</span> <span class="n">rasterOnDisk</span>
+    <span class="n">command</span> <span class="o">+=</span> <span class="s">" -t 5x5 "</span> <span class="c">##pixels per tile, the smaller the better</span>
+    <span class="n">command</span> <span class="o">+=</span> <span class="n">tableName</span> <span class="c">##</span>
+    <span class="c"># run the command we've just built</span>
+    <span class="n">process</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span><span class="n">command</span><span class="p">,</span> <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="p">(</span><span class="n">sql</span><span class="p">,</span> <span class="n">err</span><span class="p">)</span> <span class="o">=</span> <span class="n">process</span><span class="o">.</span><span class="n">communicate</span><span class="p">()</span>
+    <span class="c"># run the SQL through the database connection</span>
+    <span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">sql</span><span class="p">)</span> <span class="c"># now the table is in the database</span></code></pre></figure>
 
 
   </div>

@@ -6,8 +6,8 @@
 </description>
     <link>http://scottsfarley.com/</link>
     <atom:link href="http://scottsfarley.com/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Sun, 26 Jun 2016 14:42:04 -0500</pubDate>
-    <lastBuildDate>Sun, 26 Jun 2016 14:42:04 -0500</lastBuildDate>
+    <pubDate>Mon, 27 Jun 2016 08:31:48 -0500</pubDate>
+    <lastBuildDate>Mon, 27 Jun 2016 08:31:48 -0500</lastBuildDate>
     <generator>Jekyll v3.1.6</generator>
     
       <item>
@@ -247,6 +247,635 @@ The effect of adding additional memory is slightly more clearly linear and decre
         <category>Research</category>
         
         <category>Visualization</category>
+        
+      </item>
+    
+      <item>
+        <title>Building the Niche Database and Web Services</title>
+        <description>&lt;p&gt;I’ve spent some time over the past couple of weeks building out the Niche API, a set of web services that enable you to get global climate model (GCM) simulated climate data for specific points in space and time.  For this project I’ve been mixing database design, backend web programming, and a bit of cloud computing.  It’s been a fun process, and is turning into what I think will be a very useful tool.  In this post, I put down a few thoughts about the decisions I made, the techniques I used, and the problems I faced.&lt;/p&gt;
+
+&lt;h3 id=&quot;the-challenge&quot;&gt;The Challenge&lt;/h3&gt;
+&lt;p&gt;Working with GCM output and other gridded climate products is always challenging. The data is large.  It’s usually in a format that is designed for its transportation rather than its communication (NetCDF). It may be in the wrong projection for the work you need to do.  You might need to resample the spatial resolution of the grid to fit with the other layers in your project.  If you’ve ever done work with these datasets, you’re probably familiar with these obstacles.  An additional challenge that we face in paleoclimate/paleoecological projects is the many different time periods that are included in each dataset. In a NetCDF, the different timestamps are typically shipped as different layers.  However, if you start to unpack these layers, you’ll quickly end up with a tangled mess of rasters describing different time periods.&lt;/p&gt;
+
+&lt;p&gt;In many cases, we don’t need the whole gridded raster dataset for our work.  Maybe we need a small subset representing a study site, or very often, we just want to know the value of a variable at a discrete point in space and time.  In my work with species distribution models, I want to be able to ask the question: What was the precipitation (or maximum temperature, or annual mean temperature, etc) at the coordinates of a sample in the Neotoma database at the time when the sample was dated to.  Traditionally, I would need to manage all sorts of datasets, and use ArcMap or some other utility to get the datapoint I need.&lt;/p&gt;
+
+&lt;h3 id=&quot;the-goal&quot;&gt;The Goal&lt;/h3&gt;
+&lt;p&gt;My goal with this project is to build a web service that does the management and extraction of climate datasets automatically. My objects include:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Store and manage gridded climate datasets in a way that preserves their metadata and makes them available via the internet&lt;/li&gt;
+  &lt;li&gt;Be able to pass geographic coordinates and a calendar year and return an interpolated age for that space-time location&lt;/li&gt;
+  &lt;li&gt;Be able to access the program scripts remotely through a web service&lt;/li&gt;
+  &lt;li&gt;Make the platform generic enough to enable other users with other gridded datasets to contribute to the database&lt;/li&gt;
+  &lt;li&gt;Maintain metadata on each dataset so that users can query for data by its attributes&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;My primary use case that I’m designing for is the &lt;a href=&quot;http://paleo.geography.wisc.edu&quot;&gt;NicheViewer&lt;/a&gt;, which plots samples in Neotoma on environmental axes.  This requires that the program be relatively fast (I’m still working on this) and return in a web-digestable format (JSON).  I’ve made some decision along the way that really reflect having NicheViewer as my target user, but at the &lt;a href=&quot;http://github.com/cyber4paleo&quot;&gt;C4P Hackathon&lt;/a&gt; in Boulder, CO this weekend, people showed significant enthusiasm for the project, and I’ll try to keep these other users in mind going forward.&lt;/p&gt;
+
+&lt;h3 id=&quot;the-database&quot;&gt;The Database&lt;/h3&gt;
+&lt;p&gt;Climate datasets are typically stored at NetCDF objects, a format which has been optimized for the sharing and storage of gridded data.  These files are self describing, with all the metadata needed to use them included in a header.  However, they’re difficult to extract data subsets from. Instead of relying on the NetCDF file type, I am going to the store the climate data as tables in a relational database.&lt;br /&gt;
+Postgres is a relational database management system that has a great collection of spatial types included in the PostGIS extension.  With this extension, postgres has the ability to store large gridded datasets and to query them spatially.  It also includes the ability to store lines, polygons, multipolygons, and many other types of geometry if you want. Spatial queries are perfect for my task, because I can ask for the value of the raster at a latitude/longitude point.  I could also ask things like which cells are crossed by a line, or included in a polygon, but we’ll stick with points for now.&lt;/p&gt;
+
+&lt;h4 id=&quot;raster-input-to-database&quot;&gt;Raster Input to Database&lt;/h4&gt;
+&lt;p&gt;Getting rasters into the database is pretty easy, if you have them in a supported format (which NetCDF is not).  The workflow here was to first convert each band of the NetCDF (they’re not really bands, in this case they’re the discrete time/month/variable combinations) to a tiff file.  Then, using the &lt;code class=&quot;highlighter-rouge&quot;&gt;raster2pgsql&lt;/code&gt; tool included with postgres, I’ll then convert each image file to a SQL table of the Binary Large Object (BLOb) type.  Finally, using the &lt;code class=&quot;highlighter-rouge&quot;&gt;psql&lt;/code&gt; command shell, I can create a new table for this dataset in my dataset. I’ll typically do this in a python script that loops over all files in a directory.  Once I have a directory of tif files, I can do something like:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;&lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;os&lt;/span&gt;
+&lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;subprocess&lt;/span&gt;
+&lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;psycopg2&lt;/span&gt;
+&lt;span class=&quot;c&quot;&gt;# connect to the database&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;connectString&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;dbname=&#39;&quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;str&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;database&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;&#39; user=&#39;&quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;str&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;username&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;&#39; host=&#39;&quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;str&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;host&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;&#39; password=&#39;&quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;str&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;password&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;&#39;&quot;&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;conn&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;psycopg2&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;connect&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;connectString&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;cursor&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;conn&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;cursor&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+&lt;span class=&quot;c&quot;&gt;# look through my local directory&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;basePath&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;/my/dir/of/files&quot;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;f&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;os&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;listdir&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;/my/dir/of/files&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+    &lt;span class=&quot;c&quot;&gt;# get the file name&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;fullName&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;f&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;/&quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;basePath&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;tableName&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;RandomStringOfLettersAndNumbers&quot;&lt;/span&gt;
+    &lt;span class=&quot;c&quot;&gt;# build the command&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;command&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;raster2pgsql &quot;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;command&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot; -s 4326&quot;&lt;/span&gt; &lt;span class=&quot;c&quot;&gt;##wgs 1984 coordinate system&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;command&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot; -d&quot;&lt;/span&gt; &lt;span class=&quot;c&quot;&gt;## overwrite this table name if it already exits&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;command&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot; -I&quot;&lt;/span&gt; &lt;span class=&quot;c&quot;&gt;##spatial index&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;command&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot; -C &quot;&lt;/span&gt; &lt;span class=&quot;c&quot;&gt;##enforce constraints&lt;/span&gt;
+    &lt;span class=&quot;c&quot;&gt;#command += &quot; -M &quot; ##vaccuum analyze&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;command&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;rasterOnDisk&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;command&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot; -t 5x5 &quot;&lt;/span&gt; &lt;span class=&quot;c&quot;&gt;##pixels per tile, the smaller the better&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;command&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;tableName&lt;/span&gt; &lt;span class=&quot;c&quot;&gt;##&lt;/span&gt;
+    &lt;span class=&quot;c&quot;&gt;# run the command we&#39;ve just built&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;process&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;subprocess&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Popen&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;command&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;stdout&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;subprocess&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;PIPE&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;shell&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;True&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sql&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;err&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;process&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;communicate&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+    &lt;span class=&quot;c&quot;&gt;# run the SQL through the database connection&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;cursor&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;execute&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sql&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;c&quot;&gt;# now the table is in the database&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;h4 id=&quot;table-metadata&quot;&gt;Table Metadata&lt;/h4&gt;
+&lt;p&gt;The only way a database like this can succeed is if there is sufficient metadata to allow users to search and filter based on a layer’s metadata: &lt;em&gt;who produced this layer? what are its units? what variable does it represent?&lt;/em&gt;&lt;/p&gt;
+
+&lt;p&gt;My database keeps track of raster layer metadata in a set of postgres tables. These tables are divided into two types: those describing the model and/or entity that produced the dataset and those describing the variable described by the dataset.  I think this is a natural basis for the data model, because GCM models can produce multiple variable types, but each raster layer can have only one variable and one model source.  Similarly, each the details of each variable (units, measurement type, etc) can be the same for different time stamps, and for different climate model sources.&lt;/p&gt;
+
+&lt;p&gt;The metadata is tracked using foreign keys from a central index table.  The index table stores a pointer to the actual data layer table, which is identified by a 64-bit unique identifier.  The random string is used as a table name to ensure that table names will be uniquely mapped to their metadata, even if a lot of tables get added to the database.  The index table also stores layer-specific metadata, such as the spatial resolution of the raster and the time period being represented, which do not map on to sources or variables.  Finally, the table has columns for variables and sources that are further described in those respective tables.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Source Metadata&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;The &lt;em&gt;sources&lt;/em&gt; metadata table keeps track of the model and entity that produced the data layer in the first place. The sources table includes:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;em&gt;Producer:&lt;/em&gt; The name of the modeling entity or research group that produced the layer set, (e.g. National Center for Atmospheric Research [NCAR])&lt;/li&gt;
+  &lt;li&gt;&lt;em&gt;Model:&lt;/em&gt; The name of the model that produced the layer set, (e.g. Community System Climate Model [CCSM])&lt;/li&gt;
+  &lt;li&gt;&lt;em&gt;ModelVersion:&lt;/em&gt; The version of the model that produced the layer set (e.g. 3.0),&lt;/li&gt;
+  &lt;li&gt;&lt;em&gt;Scenario:&lt;/em&gt; The forcing scenario under which the model was run (e.g., UN IPCC RCP8.5),&lt;/li&gt;
+  &lt;li&gt;&lt;em&gt;ProductURL:&lt;/em&gt; The web address of the citation of the model, ideally a permanent &lt;a href=&quot;https://www.doi.org/&quot;&gt;doi&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;strong&gt;Variables Metadata&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;The &lt;em&gt;variables&lt;/em&gt; tables keep track of the thing that is being modeled.&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;em&gt;variableType:&lt;/em&gt; The climate variable being modeled, (e.g. Precipitation)&lt;/li&gt;
+  &lt;li&gt;&lt;em&gt;variableUnits:&lt;/em&gt; The units in which the variable is measured (e.g. centimeters [cm])&lt;/li&gt;
+  &lt;li&gt;&lt;em&gt;variablePeriod:&lt;/em&gt; The time frame over which the variable was measured, as represented by the layer (e.g., January [1])&lt;/li&gt;
+  &lt;li&gt;&lt;em&gt;variablePeriodType:&lt;/em&gt; The type of measuring time frame (e.g. Month, Quarter, Annual)&lt;/li&gt;
+  &lt;li&gt;&lt;em&gt;averagingPeriod:&lt;/em&gt;  The length of time over which the variable has been averaged, (e.g. 10)&lt;/li&gt;
+  &lt;li&gt;&lt;em&gt;averagingPeriodType:&lt;/em&gt;  A description of the units of time describing the averaging period (e.g. Years)&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;These properties can be combined together such that there are many combinations, and detailed metadata can still be kept track of.  The structure is such that a SQL query can enable a machine API to query and search the variables layers.  Each layer must have all properties specified.&lt;/p&gt;
+
+&lt;p&gt;One of the things I am looking at implementing is coming closer to the &lt;a href=&quot;http://cfconventions.org/cf-conventions/v1.6.0/cf-conventions.html&quot;&gt;cf metadata standard&lt;/a&gt; that describes NetCDF files and already has a controlled vocabulary for climate layers.  I also want to change the variablePeriod implementation to reflect finer variations in represented time period, such as the difference between DJF and JFM.&lt;/p&gt;
+
+&lt;h3 id=&quot;the-api&quot;&gt;The API&lt;/h3&gt;
+&lt;p&gt;Once the database is in place, and has some data in it, we can enable programmatic access to its contents using an API. I have the both the database and the API running on a Google Compute Engine server running Debian Linux in the cloud.  This has proved really useful.  The API currently has way too many endpoints – you can add, modify, or delete nearly anything in the database – but that makes it really scalable if others want to start using it later on.  It’s been pretty RESTfully designed, and makes full use of the HTTP verbs.  The API is public, and the latest version of the documentation is &lt;a href=&quot;http://paleo.geography.wisc.edu/docs/&quot;&gt;here&lt;/a&gt;.  The full YAML declarations file is &lt;a href=&quot;http://paleo.geography.wisc.edu/docs/api_version_1_swagger.yaml&quot;&gt;here&lt;/a&gt;.  The API is &lt;a href=&quot;http://130.211.157.239:8080/&quot;&gt;served from here&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h4 id=&quot;modeling-the-api&quot;&gt;Modeling the API&lt;/h4&gt;
+&lt;p&gt;I wanted to be very methodical and document my progress in the development of this project, so I decided to use a modeling language that records the input and output properties of each endpoint.  I used the &lt;a href=&quot;http://editor.swagger.io/#/&quot;&gt;swagger&lt;/a&gt; modeling language and editor, which let me produce documentation and really think through my decisions before I started coding the application.  It’s designed to produce good documentation and is capable of generating client side code stubs for different languages which is kind of nifty.&lt;/p&gt;
+
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th&gt;HTTP request&lt;/th&gt;
+      &lt;th&gt;Description&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;strong&gt;DELETE&lt;/strong&gt; /averagingTypes/{averagingTypeID}&lt;/td&gt;
+      &lt;td&gt;Delete an averaging type using its averagingTypeID&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;strong&gt;GET&lt;/strong&gt; /averagingTypes/{averagingTypeID}&lt;/td&gt;
+      &lt;td&gt;Get details about a specific averaging type using its averagingTypeID&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;strong&gt;PUT&lt;/strong&gt; /averagingTypes/{averagingTypeID}&lt;/td&gt;
+      &lt;td&gt;Update details of a specific averaging type using its averagingTypeID&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;strong&gt;GET&lt;/strong&gt; /averagingTypes&lt;/td&gt;
+      &lt;td&gt;Get a list of the averaging types in the database&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;strong&gt;POST&lt;/strong&gt; /averagingTypes&lt;/td&gt;
+      &lt;td&gt;Add a new averaging period to the database&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;strong&gt;GET&lt;/strong&gt; /data&lt;/td&gt;
+      &lt;td&gt;Get the value of one or more layers at a space-time location&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;strong&gt;GET&lt;/strong&gt; /layers&lt;/td&gt;
+      &lt;td&gt;Get a list of the layers in the database&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;strong&gt;DELETE&lt;/strong&gt; /layers/{layerID}&lt;/td&gt;
+      &lt;td&gt;Delete a layer and its raster table using its layerID&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;strong&gt;GET&lt;/strong&gt; /layers/{layerID}&lt;/td&gt;
+      &lt;td&gt;Get details about a specific layer using its layerID&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;strong&gt;PUT&lt;/strong&gt; /layers/{layerID}&lt;/td&gt;
+      &lt;td&gt;Update a layer&#39;s details using its layerID&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;strong&gt;POST&lt;/strong&gt; /layers&lt;/td&gt;
+      &lt;td&gt;Add a layer to the databases&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;strong&gt;GET&lt;/strong&gt; /sources&lt;/td&gt;
+      &lt;td&gt;Get a list of the data sources and models in the database&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;strong&gt;POST&lt;/strong&gt; /sources&lt;/td&gt;
+      &lt;td&gt;Add a new source to the database.&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;strong&gt;DELETE&lt;/strong&gt; /sources/{sourceID}&lt;/td&gt;
+      &lt;td&gt;Delete a source using its souce id&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;strong&gt;GET&lt;/strong&gt; /sources/{sourceID}&lt;/td&gt;
+      &lt;td&gt;Get details about an specific source using its sourceID&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;strong&gt;PUT&lt;/strong&gt; /sources/{sourceID}&lt;/td&gt;
+      &lt;td&gt;Update details about a specific source using its sourceID&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;strong&gt;GET&lt;/strong&gt; /variableUnits&lt;/td&gt;
+      &lt;td&gt;Get a list of variable units in the database&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;strong&gt;POST&lt;/strong&gt; /variableUnits&lt;/td&gt;
+      &lt;td&gt;Add a new variable unit to the database&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;strong&gt;DELETE&lt;/strong&gt; /variableUnits/{variableUnitID}&lt;/td&gt;
+      &lt;td&gt;Delete a variable unit using its database id&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;strong&gt;GET&lt;/strong&gt; /variableUnits/{variableUnitID}&lt;/td&gt;
+      &lt;td&gt;Get details about a specific variable unit instance&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;strong&gt;PUT&lt;/strong&gt; /variableUnits/{variableUnitID}&lt;/td&gt;
+      &lt;td&gt; &lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;strong&gt;GET&lt;/strong&gt; /variablePeriodTypes&lt;/td&gt;
+      &lt;td&gt;Get a list of the variable period types in the database.&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;strong&gt;POST&lt;/strong&gt; /variablePeriodTypes&lt;/td&gt;
+      &lt;td&gt;Add a new variable period type to the database&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;strong&gt;DELETE&lt;/strong&gt; /variablePeriodTypes/{variablePeriodTypeID}&lt;/td&gt;
+      &lt;td&gt;Delete an variable period instance using its variablePeriodTypeID&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;strong&gt;GET&lt;/strong&gt; /variablePeriodTypes/{variablePeriodTypeID}&lt;/td&gt;
+      &lt;td&gt;Get a details about a specific variable period type using its variablePeriodTypeID.&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;strong&gt;PUT&lt;/strong&gt; /variablePeriodTypes/{variablePeriodTypeID}&lt;/td&gt;
+      &lt;td&gt;Update the details of a specific variable period using its variablePeriodTypeID&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;strong&gt;GET&lt;/strong&gt; /variableTypes&lt;/td&gt;
+      &lt;td&gt;Get a list of variable types in the database.&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;strong&gt;POST&lt;/strong&gt; /variableTypes&lt;/td&gt;
+      &lt;td&gt;Add a new variable type to the database&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;strong&gt;DELETE&lt;/strong&gt; /variableTypes/{variableTypeID}&lt;/td&gt;
+      &lt;td&gt;Delete a variable type instance using its variableID&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;strong&gt;GET&lt;/strong&gt; /variableTypes/{variableTypeID}&lt;/td&gt;
+      &lt;td&gt;Get details about a specific variable type&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;strong&gt;PUT&lt;/strong&gt; /variableTypes/{variableTypeID}&lt;/td&gt;
+      &lt;td&gt;Update details about a specific variable type in the database&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;strong&gt;GET&lt;/strong&gt; /variables&lt;/td&gt;
+      &lt;td&gt;List Niche Variables&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;strong&gt;POST&lt;/strong&gt; /variables&lt;/td&gt;
+      &lt;td&gt;Add a new niche variable&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;strong&gt;DELETE&lt;/strong&gt; /variables/{variableID}&lt;/td&gt;
+      &lt;td&gt; &lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;strong&gt;GET&lt;/strong&gt; /variables/{variableID}&lt;/td&gt;
+      &lt;td&gt;Get details about a specific variable&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;strong&gt;PUT&lt;/strong&gt; /variables/{variableID}&lt;/td&gt;
+      &lt;td&gt; &lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;h4 id=&quot;writing-the-api&quot;&gt;Writing the API&lt;/h4&gt;
+&lt;p&gt;Once modeled, the API script was written in python using the &lt;a href=&quot;http://bottlepy.org/docs/dev/index.html&quot;&gt;bottle&lt;/a&gt; web framework and a paste python-based web server.  Eventually it will be migrated to a windows server housed in our lab, and run behind an apache web server as a CGI module.  Basically, all the API does is receive HTTP requests, route them to functions, then the functions make SQL queries, and return the results as JSON. Pretty simple.  As you can see, there are a lot of endpoints included on the API right now, but the most important one is the &lt;em&gt;data&lt;/em&gt; endpoint, where you can actually get data from the database.&lt;/p&gt;
+
+&lt;p&gt;The server runs forever using the &lt;code class=&quot;highlighter-rouge&quot;&gt;supervisor&lt;/code&gt; linux module (see my post on long running linux programs).&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Making a request&lt;/strong&gt;:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;&lt;span class=&quot;kn&quot;&gt;from&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;bottle&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;route&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;run&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;template&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;response&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;request&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;get&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;post&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;delete&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;put&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;hook&lt;/span&gt;
+&lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;psycopg2&lt;/span&gt; &lt;span class=&quot;c&quot;&gt;## database connector&lt;/span&gt;
+&lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;datetime&lt;/span&gt; &lt;span class=&quot;c&quot;&gt;## for timestamp formatting&lt;/span&gt;
+&lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;json&lt;/span&gt;
+
+
+&lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;JSONResponse&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;():&lt;/span&gt; &lt;span class=&quot;c&quot;&gt;## base response class that returns the json fields I want&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;__init__&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;data&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(),&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;success&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;True&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;message&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;status&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;200&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;timestamp&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&#39;auto&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;data&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;!=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;():&lt;/span&gt;
+            &lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;data&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;data&lt;/span&gt;
+        &lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sucess&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;success&lt;/span&gt;
+        &lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;message&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;message&lt;/span&gt;
+        &lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;status&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;status&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;timestamp&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&#39;auto&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+            &lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;timestamp&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;datetime&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;datetime&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;now&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;strftime&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;Y-&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;m-&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;d &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;H:&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;M:&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;S&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;else&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+            &lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;timestamp&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;timestamp&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;toJSON&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt; &lt;span class=&quot;c&quot;&gt;## just report the class&#39;s fields as a dictionary that will get converted to real json when bottle returns it&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;__dict__&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;connectToDefaultDatabase&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;():&lt;/span&gt;
+    &lt;span class=&quot;s&quot;&gt;&#39;&#39;&#39;Connect to the database using the settings configured in conf.txt&#39;&#39;&#39;&lt;/span&gt;
+    &lt;span class=&quot;c&quot;&gt;## read from the conf.txt file&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;f&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;open&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;conf.txt&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&#39;r&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;header&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&#39;hostname&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&#39;password&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&#39;user&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&#39;dbname&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;d&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{}&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;line&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;f&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;fieldname&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;header&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;line&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;line&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;replace&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\n&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;line&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;line&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;replace&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;&#39;&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;d&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;fieldname&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;line&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;hostname&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;d&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&#39;hostname&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;db&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;d&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&#39;dbname&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;pw&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;d&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&#39;password&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;user&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;d&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&#39;user&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;conn&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;psycopg2&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;connect&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;host&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;hostname&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;user&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;user&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;database&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;db&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;password&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;pw&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;conn&lt;/span&gt;
+
+&lt;span class=&quot;c&quot;&gt;# now we can start making requests&lt;/span&gt;
+&lt;span class=&quot;nd&quot;&gt;@get&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;/someroute&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;doGetStuff&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;():&lt;/span&gt;
+    &lt;span class=&quot;c&quot;&gt;# do some get stuff here!&lt;/span&gt;
+    &lt;span class=&quot;c&quot;&gt;# the query parameters are stored in request.query&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;params&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;request&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;query&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;JSONResponse&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+
+&lt;span class=&quot;c&quot;&gt;#  make it serve&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;run&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;server&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&#39;paste&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;host&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&#39;0.0.0.0&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;  &lt;span class=&quot;n&quot;&gt;port&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;8080&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;debug&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;True&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;&lt;strong&gt;Logging&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;I want to be able to see who calls the API, which endpoints they call, and what kind of tech they’re using to call it.  I set up request logging on every request into a table called &lt;code class=&quot;highlighter-rouge&quot;&gt;call_log&lt;/code&gt;.  I accomplish this using a &lt;code class=&quot;highlighter-rouge&quot;&gt;hook&lt;/code&gt; which is fired before every request is passed on to its respective routing function, and basically just creates an apache style server log.&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;&lt;span class=&quot;c&quot;&gt;# this is the route that happens every time a request to anything is made&lt;/span&gt;
+&lt;span class=&quot;nd&quot;&gt;@hook&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&#39;before_request&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;log_this_request&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;():&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;logRequest&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;request&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+&lt;span class=&quot;c&quot;&gt;## this function deconstructs the request and puts it into a table&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;logRequest&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;req&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;con&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;connectToDefaultDatabase&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;cursor&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;con&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;cursor&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;reqEnv&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;req&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;environ&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;method&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;reqEnv&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&#39;REQUEST_METHOD&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;server_protocol&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;reqEnv&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&#39;SERVER_PROTOCOL&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;user_agent&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;reqEnv&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&#39;HTTP_USER_AGENT&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;remote_ip&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;reqEnv&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&#39;REMOTE_ADDR&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;path&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;  &lt;span class=&quot;n&quot;&gt;req&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;path&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;args&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;req&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;query_string&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;sql&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&#39;&#39;&#39;INSERT INTO call_log VALUES(default, &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%(resource)&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;s, &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%(method)&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;s, &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%(server_protocol)&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;s, &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%(user_agent)&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;s, &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%(remote_ip)&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;s, &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%(args)&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;s, default);&#39;&#39;&#39;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;params&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;s&quot;&gt;&#39;method&#39;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;method&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+        &lt;span class=&quot;s&quot;&gt;&#39;server_protocol&#39;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;server_protocol&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+        &lt;span class=&quot;s&quot;&gt;&#39;user_agent&#39;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;user_agent&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+        &lt;span class=&quot;s&quot;&gt;&#39;remote_ip&#39;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;remote_ip&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+        &lt;span class=&quot;s&quot;&gt;&#39;resource&#39;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;path&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+        &lt;span class=&quot;s&quot;&gt;&#39;args&#39;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;args&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;cursor&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;execute&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sql&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;params&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;con&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;commit&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;cursor&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;close&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;con&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;close&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;&lt;strong&gt;CORS&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;To make post requests from the server where NicheViewer lives, I also needed to enable CORS.  CORS is always a pain in the ass, but its handled in the API like this:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;&lt;span class=&quot;c&quot;&gt;# define the headers&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;_allow_origin&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&#39;*&#39;&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;_allow_methods&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&#39;PUT, GET, POST, DELETE, OPTIONS&#39;&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;_allow_headers&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&#39;Authorization, Origin, Accept, Content-Type, X-Requested-With&#39;&lt;/span&gt;
+
+&lt;span class=&quot;c&quot;&gt;# attach them after every response&lt;/span&gt;
+&lt;span class=&quot;nd&quot;&gt;@hook&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&#39;after_request&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;enable_cors&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;():&lt;/span&gt;
+    &lt;span class=&quot;s&quot;&gt;&#39;&#39;&#39;Add headers to enable CORS&#39;&#39;&#39;&lt;/span&gt;
+
+    &lt;span class=&quot;n&quot;&gt;response&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;headers&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&#39;Access-Control-Allow-Origin&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;_allow_origin&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;response&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;headers&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&#39;Access-Control-Allow-Methods&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;_allow_methods&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;response&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;headers&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&#39;Access-Control-Allow-Headers&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;_allow_headers&lt;/span&gt;
+
+&lt;span class=&quot;c&quot;&gt;# if the browser sends an Options request, let it know that it&#39;s safe to send over a post request&lt;/span&gt;
+&lt;span class=&quot;nd&quot;&gt;@route&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;/data&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;method&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&#39;OPTIONS&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;])&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;returnOptions&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;():&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;bottle&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;HTTPResponse&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;status&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;200&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+&lt;span class=&quot;n&quot;&gt;__&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;&lt;strong&gt;Interpolating the Ages&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;One of the biggest challenges for me was getting the correct query to interpolate variables between ages.  The code ended up looking like this (yes, it is convoluted):&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;&lt;span class=&quot;c&quot;&gt;#...import stuff and set up the connections&lt;/span&gt;
+
+&lt;span class=&quot;nd&quot;&gt;@get&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;/data&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;getData&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;():&lt;/span&gt;
+  &lt;span class=&quot;c&quot;&gt;#...collect query parameters&lt;/span&gt;
+  &lt;span class=&quot;c&quot;&gt;#...get a new DB cursor&lt;/span&gt;
+  &lt;span class=&quot;c&quot;&gt;## fetch the table names that match our query&lt;/span&gt;
+  &lt;span class=&quot;c&quot;&gt;# this query gets the tables and associated metadata that meet the user&#39;s query that have an age OLDER than the query year.&lt;/span&gt;
+   &lt;span class=&quot;n&quot;&gt;greaterThanQuery&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&#39;&#39;&#39;
+       SELECT
+           &quot;tableName&quot;, rasterIndex.yearsBP, sources.sourceID, sources.model, sources.producer, sources.productVersion, variables.variableID,
+           variables.variabledescription, variableTypes.variableType, variableUnits.variableUnitAbbreviation, variables.variablePeriod,
+           variablePeriodTypes.variablePeriodType, variables.variableAveraging, averagingPeriodTypes.averagingPeriodType, sources.producturl
+       from rasterIndex
+       INNER JOIN variables on rasterIndex.variableID=variables.variableID
+       INNER JOIN    sources on rasterIndex.sourceID = sources.sourceID
+       INNER JOIN    variableTypes on variables.variableType = variableTypes.variableTypeID
+       INNER JOIN    variableUnits on variables.variableUnits = variableUnits.variableUnitID
+       INNER JOIN    averagingPeriodTypes on variables.variableAveragingType = averagingPeriodTypes.averagingPeriodTypeID
+       INNER JOIN    variablePeriodTypes on variables.variablePeriodType = variablePeriodTypes.variablePeriodTypeID
+       WHERE rasterIndex.recordID IN
+           (SELECT MIN(recordID) FROM rasterIndex
+                       WHERE 1 = 1
+                       AND (&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%(variableType)&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;s is NULL or &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%(variableType)&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;s LIKE lower(variableTypes.variableTypeAbbreviation) )
+                       AND (&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%(variablePeriod)&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;s is NULL or &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%(variablePeriod)&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;s = variables.variablePeriod )
+                       AND (&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%(variablePeriodType)&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;s is NULL or &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%(variablePeriodType)&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;s LIKE lower(variablePeriodTypes.variablePeriodType) )
+                       AND (&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%(averagingPeriod)&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;s is NULL or &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%(averagingPeriod)&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;s = variableAveraging )
+                       AND (&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%(averagingPeriodType)&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;s is NULL or &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%(averagingPeriodType)&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;s LIKE lower(averagingPeriodTypes.averagingPeriodType) )
+                       AND (&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%(variableUnits)&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;s is NULL or &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%(variableUnits)&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;s LIKE lower(variableUnits.variableUnitAbbreviation))
+                       AND (&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%(variableID)&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;s is NULL or &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%(variableID)&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;s = variables.variableID)
+                       AND (&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%(sourceID)&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;s is NULL or &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%(sourceID)&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;s = sources.sourceID)
+                       AND (&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%(resolution)&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;s is NULL or &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%(resolution)&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;s = resolution)
+                       AND (&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%(modelName)&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;s is NULL or &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%(modelName)&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;s LIKE lower(sources.model) )
+                       AND (&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%(sourceProducer)&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;s is NULL or &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%(sourceProducer)&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;s LIKE lower(sources.producer) )
+                       AND (&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%(modelVersion)&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;s is NULL or &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%(modelVersion)&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;s = sources.productVersion )
+                       AND (&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%(modelScenario)&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;s is NULL or &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%(modelScenario)&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;s LIKE lower(scenario) )
+                       AND (yearsBP &amp;gt;= &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%(yearsBP)&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;s)
+                       GROUP BY variableID
+           )
+       ORDER BY sourceID, variableID;
+       &#39;&#39;&#39;&lt;/span&gt;
+   &lt;span class=&quot;n&quot;&gt;params&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+       &lt;span class=&quot;s&quot;&gt;&#39;variableType&#39;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;variableType&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+       &lt;span class=&quot;s&quot;&gt;&#39;variablePeriod&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;variablePeriod&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+       &lt;span class=&quot;s&quot;&gt;&#39;variablePeriodType&#39;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;variablePeriodType&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+       &lt;span class=&quot;s&quot;&gt;&#39;variableUnits&#39;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;variableUnits&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+       &lt;span class=&quot;s&quot;&gt;&#39;variableID&#39;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;variableID&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+       &lt;span class=&quot;s&quot;&gt;&#39;averagingPeriod&#39;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;averagingPeriod&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+       &lt;span class=&quot;s&quot;&gt;&#39;averagingPeriodType&#39;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;averagingPeriodType&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+       &lt;span class=&quot;s&quot;&gt;&#39;sourceID&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sourceID&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+       &lt;span class=&quot;s&quot;&gt;&#39;sourceProducer&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sourceProducer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+       &lt;span class=&quot;s&quot;&gt;&#39;modelName&#39;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;modelName&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+       &lt;span class=&quot;s&quot;&gt;&#39;modelVersion&#39;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;modelVersion&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+       &lt;span class=&quot;s&quot;&gt;&#39;resolution&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;resolution&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+       &lt;span class=&quot;s&quot;&gt;&#39;modelScenario&#39;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;modelScenario&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+       &lt;span class=&quot;s&quot;&gt;&#39;yearsBP&#39;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;yearsBP&lt;/span&gt;
+   &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+   &lt;span class=&quot;n&quot;&gt;cursor&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;execute&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;greaterThanQuery&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;params&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;c&quot;&gt;## execute this query&lt;/span&gt;
+   &lt;span class=&quot;n&quot;&gt;greaterThanRows&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;cursor&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;fetchall&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;c&quot;&gt;## get and store the request&lt;/span&gt;
+
+   &lt;span class=&quot;c&quot;&gt;## THIS IS THE LESS THAN query&lt;/span&gt;
+   &lt;span class=&quot;c&quot;&gt;##This is the same query, but gets tables YOUNGER than the query age.&lt;/span&gt;
+   &lt;span class=&quot;n&quot;&gt;lessThanQuery&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&#39;&#39;&#39;
+           SELECT
+               &quot;tableName&quot;, rasterIndex.yearsBP, sources.sourceID, sources.model, sources.producer, sources.productVersion, variables.variableID,
+               variables.variabledescription, variableTypes.variableType, variableUnits.variableUnitAbbreviation, variables.variablePeriod,
+               variablePeriodTypes.variablePeriodType, variables.variableAveraging, averagingPeriodTypes.averagingPeriodType, sources.producturl
+           from rasterIndex
+           INNER JOIN variables on rasterIndex.variableID=variables.variableID
+           INNER JOIN    sources on rasterIndex.sourceID = sources.sourceID
+           INNER JOIN    variableTypes on variables.variableType = variableTypes.variableTypeID
+           INNER JOIN    variableUnits on variables.variableUnits = variableUnits.variableUnitID
+           INNER JOIN    averagingPeriodTypes on variables.variableAveragingType = averagingPeriodTypes.averagingPeriodTypeID
+           INNER JOIN    variablePeriodTypes on variables.variablePeriodType = variablePeriodTypes.variablePeriodTypeID
+           WHERE rasterIndex.recordID IN
+               (SELECT MIN(recordID) FROM rasterIndex
+                           WHERE 1 = 1
+                           AND (&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%(variableType)&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;s is NULL or &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%(variableType)&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;s LIKE lower(variableTypes.variableTypeAbbreviation) )
+                           AND (&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%(variablePeriod)&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;s is NULL or &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%(variablePeriod)&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;s = variables.variablePeriod )
+                           AND (&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%(variablePeriodType)&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;s is NULL or &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%(variablePeriodType)&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;s LIKE lower(variablePeriodTypes.variablePeriodType) )
+                           AND (&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%(averagingPeriod)&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;s is NULL or &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%(averagingPeriod)&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;s = variableAveraging )
+                           AND (&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%(averagingPeriodType)&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;s is NULL or &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%(averagingPeriodType)&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;s LIKE lower(averagingPeriodTypes.averagingPeriodType) )
+                           AND (&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%(variableUnits)&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;s is NULL or &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%(variableUnits)&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;s LIKE lower(variableUnits.variableUnitAbbreviation))
+                           AND (&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%(variableID)&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;s is NULL or &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%(variableID)&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;s = variables.variableID)
+                           AND (&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%(sourceID)&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;s is NULL or &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%(sourceID)&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;s = sources.sourceID)
+                           AND (&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%(resolution)&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;s is NULL or &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%(resolution)&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;s = resolution)
+                           AND (&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%(modelName)&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;s is NULL or &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%(modelName)&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;s LIKE lower(sources.model) )
+                           AND (&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%(sourceProducer)&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;s is NULL or &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%(sourceProducer)&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;s LIKE lower(sources.producer) )
+                           AND (&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%(modelVersion)&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;s is NULL or &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%(modelVersion)&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;s = sources.productVersion )
+                           AND (&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%(modelScenario)&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;s is NULL or &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%(modelScenario)&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;s LIKE lower(scenario) )
+                           AND (yearsBP &amp;lt;= &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%(yearsBP)&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;s)
+                           GROUP BY variableID
+               )
+           ORDER BY sourceID, variableID;
+           &#39;&#39;&#39;&lt;/span&gt;
+
+   &lt;span class=&quot;n&quot;&gt;params&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+       &lt;span class=&quot;s&quot;&gt;&#39;variableType&#39;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;variableType&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+       &lt;span class=&quot;s&quot;&gt;&#39;variablePeriod&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;variablePeriod&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+       &lt;span class=&quot;s&quot;&gt;&#39;variablePeriodType&#39;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;variablePeriodType&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+       &lt;span class=&quot;s&quot;&gt;&#39;variableUnits&#39;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;variableUnits&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+       &lt;span class=&quot;s&quot;&gt;&#39;variableID&#39;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;variableID&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+       &lt;span class=&quot;s&quot;&gt;&#39;averagingPeriod&#39;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;averagingPeriod&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+       &lt;span class=&quot;s&quot;&gt;&#39;averagingPeriodType&#39;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;averagingPeriodType&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+       &lt;span class=&quot;s&quot;&gt;&#39;sourceID&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sourceID&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+       &lt;span class=&quot;s&quot;&gt;&#39;sourceProducer&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sourceProducer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+       &lt;span class=&quot;s&quot;&gt;&#39;modelName&#39;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;modelName&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+       &lt;span class=&quot;s&quot;&gt;&#39;modelVersion&#39;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;modelVersion&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+       &lt;span class=&quot;s&quot;&gt;&#39;resolution&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;resolution&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+       &lt;span class=&quot;s&quot;&gt;&#39;modelScenario&#39;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;modelScenario&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+       &lt;span class=&quot;s&quot;&gt;&#39;yearsBP&#39;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;yearsBP&lt;/span&gt;
+   &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+   &lt;span class=&quot;n&quot;&gt;cursor&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;execute&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;lessThanQuery&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;params&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;c&quot;&gt;## execute&lt;/span&gt;
+   &lt;span class=&quot;n&quot;&gt;lessThanRows&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;cursor&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;fetchall&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+
+   &lt;span class=&quot;c&quot;&gt;## these are the fields that will be returned with the response&lt;/span&gt;
+   &lt;span class=&quot;n&quot;&gt;header&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;tableName&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;yearsBP&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;sourceID&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;Model&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;Producer&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;ModelVersion&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;variableID&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+   &lt;span class=&quot;s&quot;&gt;&quot;VariableDescription&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;VariableType&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;variableUnits&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;variablePeriod&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;variablePeriodType&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;averagingPeriod&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;averagingPeriodType&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;dataCitation&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+
+   &lt;span class=&quot;c&quot;&gt;## start building the response&lt;/span&gt;
+   &lt;span class=&quot;n&quot;&gt;out&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[]&lt;/span&gt;
+   &lt;span class=&quot;c&quot;&gt;## fetch the actual point data from each of the returned tables&lt;/span&gt;
+   &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;
+   &lt;span class=&quot;k&quot;&gt;while&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;len&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;greaterThanRows&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+       &lt;span class=&quot;c&quot;&gt;## the row order should match so we can interpolate between the sets of values&lt;/span&gt;
+       &lt;span class=&quot;n&quot;&gt;greaterRow&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;greaterThanRows&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+       &lt;span class=&quot;n&quot;&gt;lesserRow&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;lessThanRows&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+       &lt;span class=&quot;k&quot;&gt;try&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+           &lt;span class=&quot;c&quot;&gt;## go get the actual values from the raster  &lt;/span&gt;
+           &lt;span class=&quot;n&quot;&gt;greaterTable&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;greaterRow&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+           &lt;span class=&quot;n&quot;&gt;greaterYear&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;greaterRow&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+           &lt;span class=&quot;c&quot;&gt;## for the higher value&lt;/span&gt;
+           &lt;span class=&quot;n&quot;&gt;greaterQuery&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&#39;&#39;&#39;SELECT ST_Value(rast,ST_SetSRID(ST_MakePoint(&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%(longitude)&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;s, &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%(latitude)&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;s), 4326)) FROM public.&#39;&#39;&#39;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;greaterTable&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&#39;&#39;&#39;
+               WHERE ST_Intersects(rast, ST_SetSRID(ST_MakePoint(&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%(longitude)&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;s, &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%(latitude)&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;s), 4326));
+           &#39;&#39;&#39;&lt;/span&gt;
+           &lt;span class=&quot;n&quot;&gt;params&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&#39;latitude&#39;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;latitude&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&#39;longitude&#39;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;longitude&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+           &lt;span class=&quot;n&quot;&gt;cursor&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;execute&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;greaterQuery&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;params&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+           &lt;span class=&quot;n&quot;&gt;greaterValue&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;cursor&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;fetchone&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+           &lt;span class=&quot;c&quot;&gt;## for the lesser value&lt;/span&gt;
+           &lt;span class=&quot;n&quot;&gt;lesserTable&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;lesserRow&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+           &lt;span class=&quot;n&quot;&gt;lesserYear&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;lesserRow&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+           &lt;span class=&quot;n&quot;&gt;lesserQuery&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&#39;&#39;&#39;SELECT ST_Value(rast,ST_SetSRID(ST_MakePoint(&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%(longitude)&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;s, &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%(latitude)&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;s), 4326)) FROM public.&#39;&#39;&#39;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;lesserTable&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&#39;&#39;&#39;
+               WHERE ST_Intersects(rast, ST_SetSRID(ST_MakePoint(&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%(longitude)&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;s, &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%(latitude)&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;s), 4326));
+           &#39;&#39;&#39;&lt;/span&gt;
+           &lt;span class=&quot;n&quot;&gt;params&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&#39;latitude&#39;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;latitude&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&#39;longitude&#39;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;longitude&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+           &lt;span class=&quot;n&quot;&gt;cursor&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;execute&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;lesserQuery&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;params&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+           &lt;span class=&quot;n&quot;&gt;lesserValue&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;cursor&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;fetchone&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+           &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;len&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;greaterValue&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;c&quot;&gt;## no results were returned, likely because point was outside of north america&lt;/span&gt;
+               &lt;span class=&quot;n&quot;&gt;greaterValue&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;
+           &lt;span class=&quot;k&quot;&gt;else&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+               &lt;span class=&quot;n&quot;&gt;greaterValue&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;greaterValue&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+
+           &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;len&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;lesserValue&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;c&quot;&gt;## no results were returned, likely because point was outside of north america&lt;/span&gt;
+               &lt;span class=&quot;n&quot;&gt;lesserValue&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;
+           &lt;span class=&quot;k&quot;&gt;else&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+               &lt;span class=&quot;n&quot;&gt;lesserValue&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;lesserValue&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+           &lt;span class=&quot;c&quot;&gt;## now do the Interpolation&lt;/span&gt;
+           &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;lesserYear&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;greaterYear&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+           &lt;span class=&quot;n&quot;&gt;y&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;lesserValue&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;greaterValue&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+           &lt;span class=&quot;n&quot;&gt;predPoint&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;yearsBP&lt;/span&gt;
+           &lt;span class=&quot;k&quot;&gt;print&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;Prediction point is &quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;predPoint&lt;/span&gt;
+           &lt;span class=&quot;n&quot;&gt;f&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;interpolate&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;interp1d&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;y&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+           &lt;span class=&quot;n&quot;&gt;val&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;f&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;predPoint&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+           &lt;span class=&quot;n&quot;&gt;val&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;float&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;val&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+           &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;numpy&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;isnan&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;val&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+               &lt;span class=&quot;n&quot;&gt;val&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;bp&quot;&gt;None&lt;/span&gt;
+           &lt;span class=&quot;n&quot;&gt;p&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;
+           &lt;span class=&quot;n&quot;&gt;d&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{}&lt;/span&gt;
+          &lt;span class=&quot;c&quot;&gt;## add metadata about the table&lt;/span&gt;
+           &lt;span class=&quot;k&quot;&gt;while&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;p&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;len&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;header&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+               &lt;span class=&quot;n&quot;&gt;col&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;header&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;p&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+               &lt;span class=&quot;n&quot;&gt;d&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;col&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;greaterRow&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;p&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+               &lt;span class=&quot;n&quot;&gt;p&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;
+           &lt;span class=&quot;n&quot;&gt;d&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&#39;value&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;val&lt;/span&gt; &lt;span class=&quot;c&quot;&gt;## this is the actual point value&lt;/span&gt;
+           &lt;span class=&quot;n&quot;&gt;d&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&#39;latitude&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;float&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;latitude&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+           &lt;span class=&quot;n&quot;&gt;d&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&#39;longitude&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;float&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;longitude&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+           &lt;span class=&quot;n&quot;&gt;d&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&#39;siteName&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;siteName&lt;/span&gt;
+           &lt;span class=&quot;n&quot;&gt;d&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&#39;sampleID&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sampleID&lt;/span&gt;
+           &lt;span class=&quot;n&quot;&gt;d&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&#39;siteID&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;siteID&lt;/span&gt;
+           &lt;span class=&quot;n&quot;&gt;d&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&#39;yearsBP&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;yearsBP&lt;/span&gt;
+           &lt;span class=&quot;n&quot;&gt;out&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;append&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;d&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+       &lt;span class=&quot;k&quot;&gt;except&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;Exception&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;as&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;e&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;c&quot;&gt;## table doesn&#39;t exist, but record for table does exist --&amp;gt; oops&lt;/span&gt;
+           &lt;span class=&quot;k&quot;&gt;print&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;str&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;e&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+           &lt;span class=&quot;n&quot;&gt;conn&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;rollback&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+       &lt;span class=&quot;k&quot;&gt;finally&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+           &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;
+   &lt;span class=&quot;c&quot;&gt;## return the response&lt;/span&gt;
+   &lt;span class=&quot;n&quot;&gt;r&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;JSONResponse&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;data&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;out&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;message&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Linear interpolation between two nearest neighbors.&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;status&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;200&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+   &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;bottle&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;HTTPResponse&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;status&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;200&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;body&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;r&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;toJSON&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;())&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;h4 id=&quot;api-responses&quot;&gt;API responses&lt;/h4&gt;
+
+&lt;p&gt;The base response from the API includes these fields:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;em&gt;status:&lt;/em&gt; HTTP status code, also included in the response header&lt;/li&gt;
+  &lt;li&gt;&lt;em&gt;timestamp:&lt;/em&gt; Time at which the response was minted by the server&lt;/li&gt;
+  &lt;li&gt;&lt;em&gt;message:&lt;/em&gt; A string produced by the server to specify an error, or note something of importance&lt;/li&gt;
+  &lt;li&gt;&lt;em&gt;success:&lt;/em&gt;  Boolean flag to indicate whether the API call was successful.  If success is &lt;code class=&quot;highlighter-rouge&quot;&gt;true&lt;/code&gt; and &lt;code class=&quot;highlighter-rouge&quot;&gt;data&lt;/code&gt; is empty, then the user can be sure that the call happened correctly, there just was no matching data found in the database.&lt;/li&gt;
+  &lt;li&gt;&lt;em&gt;data:&lt;/em&gt;  An array of objects that meet the search criteria&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;strong&gt;Status Code&lt;/strong&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;em&gt;200:&lt;/em&gt; Success!&lt;/li&gt;
+  &lt;li&gt;&lt;em&gt;201:&lt;/em&gt; The requested object already exists, so the script didn’t create a new one&lt;/li&gt;
+  &lt;li&gt;&lt;em&gt;404:&lt;/em&gt; Object not found (resource doesn’t exist)&lt;/li&gt;
+  &lt;li&gt;&lt;em&gt;400:&lt;/em&gt; Required parameters for the method were not set&lt;/li&gt;
+  &lt;li&gt;&lt;em&gt;204:&lt;/em&gt; Object deleted&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;conclusion&quot;&gt;Conclusion&lt;/h3&gt;
+&lt;p&gt;I believe the current solution described here meets all of the goals I set out to accomplish.  It’s a little hacky in places, and could be more robust, but for the most part it does everything it has to without error.  It currently supports two front ends: the NicheViewer and an R package.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Goals, evaluated&lt;/strong&gt;&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;
+    &lt;p&gt;&lt;em&gt;Store and manage gridded climate datasets in a way that preserves their metadata and makes them available via the internet&lt;/em&gt;: Storing the raster layers in a postgres database makes it available over the internet.  While the metadata becomes divorced from the actual data, storing it in other tables keeps it close by, so we can refer to it if we need it.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;&lt;em&gt;Be able to pass geographic coordinates and a calendar year and return an interpolated age for that space-time location&lt;/em&gt;:  The API supports a SQL query that returns interpolated ages for spatial locations at a spatial location.&lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;&lt;em&gt;Be able to access the program scripts remotely through a web service:&lt;/em&gt;  The API supports RESTful querying of the data layers, so that user’s can get the data without installing software or downloading datasets.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;&lt;em&gt;Make the platform generic enough to enable other users with other gridded datasets to contribute to the database:&lt;/em&gt;  The table structure is generic enough to support (I think) any 2-dimensional gridded climate model output.  3-dimensional (height) datasets will not fit well into the data model, nor will datasets that are not gridded.  Datasets that are not modeled, but perhaps show real observations, should be able to fit into the database, though it hasn’t been tested.  The API needs a little work to support direct data ingestion, but version 1 supports public curation of metadata.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;&lt;em&gt;Maintain metadata on each dataset so that users can query for data by its attributes:&lt;/em&gt; The table structure maintains sufficient metadata on the model and the variable that is represented.  It is stored in several tables which allows it to be included in a structured query.  Version 1 of the API allows clients to query on all facets of what makes up a layer.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;&lt;strong&gt;Future Work&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;I have several things I would like to continue adding to this application.&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Add more data layers, datasets, and models.&lt;/li&gt;
+  &lt;li&gt;Improve API speed and robustness.&lt;/li&gt;
+  &lt;li&gt;Let users query for other geometry types (lines, polygons, etc)&lt;/li&gt;
+  &lt;li&gt;Improve metadata representations of time periods and variable types.&lt;/li&gt;
+&lt;/ol&gt;
+</description>
+        <pubDate>Sun, 26 Jun 2016 08:22:52 -0500</pubDate>
+        <link>http://scottsfarley.com/research/paleoclimate/2016/06/26/the-niche-api-web-service.html</link>
+        <guid isPermaLink="true">http://scottsfarley.com/research/paleoclimate/2016/06/26/the-niche-api-web-service.html</guid>
+        
+        
+        <category>Research</category>
+        
+        <category>Paleoclimate</category>
         
       </item>
     

@@ -6,9 +6,307 @@
 </description>
     <link>http://scottsfarley.com/</link>
     <atom:link href="http://scottsfarley.com/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Mon, 27 Jun 2016 08:31:48 -0500</pubDate>
-    <lastBuildDate>Mon, 27 Jun 2016 08:31:48 -0500</lastBuildDate>
+    <pubDate>Wed, 20 Jul 2016 15:25:43 -0500</pubDate>
+    <lastBuildDate>Wed, 20 Jul 2016 15:25:43 -0500</lastBuildDate>
     <generator>Jekyll v3.1.6</generator>
+    
+      <item>
+        <title>Updating R on Debian Linux</title>
+        <description>&lt;p&gt;Why the &lt;code class=&quot;highlighter-rouge&quot;&gt;apt-get&lt;/code&gt; package manager doesn’t contain the latest version of &lt;code class=&quot;highlighter-rouge&quot;&gt;R&lt;/code&gt; automatically, I’m not sure. I recently realized I have been downloading a 2+ year old distribution for all of my SDM timing runs by running the standard &lt;code class=&quot;highlighter-rouge&quot;&gt;sudo apt-get install r-base&lt;/code&gt; command at the shell.  For several weeks, this was fine, but today the package &lt;code class=&quot;highlighter-rouge&quot;&gt;Rcpp&lt;/code&gt;, which wraps compiled C++ code in the R environment failed to compile.  I spent most of the afternoon trying to figure out what was going on.  I didn’t even occur to me that the  &lt;code class=&quot;highlighter-rouge&quot;&gt;r-base&lt;/code&gt; package I was using was the root cause.&lt;/p&gt;
+
+&lt;p&gt;It is not easy to figure out how to update the core R package, but, like most things in linux, it comes down to a correctly ordered set of calls to a package manager.&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;Note:&lt;/em&gt; I am using a Debian 8 Jessie image, version v20160718&lt;/p&gt;
+
+&lt;p&gt;###Steps:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;sudo apt-get remove r-base&lt;/code&gt;.  Remove the old version of R.&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;sudo nano /etc/apt/sources.list&lt;/code&gt;.  This file holds all of the package repositories for &lt;code class=&quot;highlighter-rouge&quot;&gt;apt-get&lt;/code&gt;.&lt;/li&gt;
+  &lt;li&gt;Inside of it, copy and paste:
+    &lt;pre&gt;
+deb http://cran.rstudio.com/bin/linux/debian jessie-cran3/
+&lt;/pre&gt;
+
+    &lt;p&gt;This tells the manager to look in this repository for a copy of the R distribution.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;Save and close the text editor.&lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;At the shell, type:
+  &lt;code&gt;
+  gpg --keyserver keyserver.ubuntu.com --recv-key E084DAB9
+  &lt;/code&gt;
+  and then
+  &lt;code&gt;
+  gpg -a --export E084DAB9 | sudo apt-key add -
+  &lt;/code&gt;
+  What does this do? I’m not exactly sure, but I think it has to do with the package integrity checks down when downloading things from a package manager.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;sudo apt-get update&lt;/code&gt;.  Update the installed packages.&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;sudo apt-get install r-base&lt;/code&gt;.  Install the core R functionality, hopefully this time using the newest version.&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;sudo apt-get install r-base-dev&lt;/code&gt;.  Install the development headers to allow packages that are not in debian repositories.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;At this point, you should have a newly updated R version.  You can check with R.version.  For me, this worked for updating from R version &lt;code class=&quot;highlighter-rouge&quot;&gt;3.0.1&lt;/code&gt; to R version &lt;code class=&quot;highlighter-rouge&quot;&gt;3.3.1&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;If you have package install error, it’s definitely worth checking if an update in the r-base package could be responsible.&lt;/p&gt;
+</description>
+        <pubDate>Tue, 19 Jul 2016 09:22:52 -0500</pubDate>
+        <link>http://scottsfarley.com/research/cloudcomputing/2016/07/19/Updating-R-on-Debian.html</link>
+        <guid isPermaLink="true">http://scottsfarley.com/research/cloudcomputing/2016/07/19/Updating-R-on-Debian.html</guid>
+        
+        
+        <category>Research</category>
+        
+        <category>CloudComputing</category>
+        
+      </item>
+    
+      <item>
+        <title>Creating the Niche API</title>
+        <description>&lt;h2 id=&quot;documentation-for-api-endpoints&quot;&gt;Documentation for API Endpoints&lt;/h2&gt;
+
+&lt;p&gt;All URIs are relative to &lt;em&gt;http://niche.geography.wisc.edu/v1&lt;/em&gt;&lt;/p&gt;
+
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th&gt;Class&lt;/th&gt;
+      &lt;th&gt;Method&lt;/th&gt;
+      &lt;th&gt;HTTP request&lt;/th&gt;
+      &lt;th&gt;Description&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;em&gt;AveragingTypesApi&lt;/em&gt;&lt;/td&gt;
+      &lt;td&gt;&lt;a href=&quot;docs/AveragingTypesApi.md#averaging_types_averaging_type_id_delete&quot;&gt;&lt;strong&gt;averaging_types_averaging_type_id_delete&lt;/strong&gt;&lt;/a&gt;&lt;/td&gt;
+      &lt;td&gt;&lt;strong&gt;DELETE&lt;/strong&gt; /averagingTypes/{averagingTypeID}&lt;/td&gt;
+      &lt;td&gt;Delete an averaging type using its averagingTypeID&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;em&gt;AveragingTypesApi&lt;/em&gt;&lt;/td&gt;
+      &lt;td&gt;&lt;a href=&quot;docs/AveragingTypesApi.md#averaging_types_averaging_type_id_get&quot;&gt;&lt;strong&gt;averaging_types_averaging_type_id_get&lt;/strong&gt;&lt;/a&gt;&lt;/td&gt;
+      &lt;td&gt;&lt;strong&gt;GET&lt;/strong&gt; /averagingTypes/{averagingTypeID}&lt;/td&gt;
+      &lt;td&gt;Get details about a specific averaging type using its averagingTypeID&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;em&gt;AveragingTypesApi&lt;/em&gt;&lt;/td&gt;
+      &lt;td&gt;&lt;a href=&quot;docs/AveragingTypesApi.md#averaging_types_averaging_type_id_put&quot;&gt;&lt;strong&gt;averaging_types_averaging_type_id_put&lt;/strong&gt;&lt;/a&gt;&lt;/td&gt;
+      &lt;td&gt;&lt;strong&gt;PUT&lt;/strong&gt; /averagingTypes/{averagingTypeID}&lt;/td&gt;
+      &lt;td&gt;Update details of a specific averaging type using its averagingTypeID&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;em&gt;AveragingTypesApi&lt;/em&gt;&lt;/td&gt;
+      &lt;td&gt;&lt;a href=&quot;docs/AveragingTypesApi.md#averaging_types_get&quot;&gt;&lt;strong&gt;averaging_types_get&lt;/strong&gt;&lt;/a&gt;&lt;/td&gt;
+      &lt;td&gt;&lt;strong&gt;GET&lt;/strong&gt; /averagingTypes&lt;/td&gt;
+      &lt;td&gt;Get a list of the averaging types in the database&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;em&gt;AveragingTypesApi&lt;/em&gt;&lt;/td&gt;
+      &lt;td&gt;&lt;a href=&quot;docs/AveragingTypesApi.md#averaging_types_post&quot;&gt;&lt;strong&gt;averaging_types_post&lt;/strong&gt;&lt;/a&gt;&lt;/td&gt;
+      &lt;td&gt;&lt;strong&gt;POST&lt;/strong&gt; /averagingTypes&lt;/td&gt;
+      &lt;td&gt;Add a new averaging period to the database&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;em&gt;DataApi&lt;/em&gt;&lt;/td&gt;
+      &lt;td&gt;&lt;a href=&quot;docs/DataApi.md#data_get&quot;&gt;&lt;strong&gt;data_get&lt;/strong&gt;&lt;/a&gt;&lt;/td&gt;
+      &lt;td&gt;&lt;strong&gt;GET&lt;/strong&gt; /data&lt;/td&gt;
+      &lt;td&gt;Get the value of one or more layers at a space-time location&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;em&gt;LayersApi&lt;/em&gt;&lt;/td&gt;
+      &lt;td&gt;&lt;a href=&quot;docs/LayersApi.md#layers_get&quot;&gt;&lt;strong&gt;layers_get&lt;/strong&gt;&lt;/a&gt;&lt;/td&gt;
+      &lt;td&gt;&lt;strong&gt;GET&lt;/strong&gt; /layers&lt;/td&gt;
+      &lt;td&gt;Get a list of the layers in the database&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;em&gt;LayersApi&lt;/em&gt;&lt;/td&gt;
+      &lt;td&gt;&lt;a href=&quot;docs/LayersApi.md#layers_layer_id_delete&quot;&gt;&lt;strong&gt;layers_layer_id_delete&lt;/strong&gt;&lt;/a&gt;&lt;/td&gt;
+      &lt;td&gt;&lt;strong&gt;DELETE&lt;/strong&gt; /layers/{layerID}&lt;/td&gt;
+      &lt;td&gt;Delete a layer and its raster table using its layerID&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;em&gt;LayersApi&lt;/em&gt;&lt;/td&gt;
+      &lt;td&gt;&lt;a href=&quot;docs/LayersApi.md#layers_layer_id_get&quot;&gt;&lt;strong&gt;layers_layer_id_get&lt;/strong&gt;&lt;/a&gt;&lt;/td&gt;
+      &lt;td&gt;&lt;strong&gt;GET&lt;/strong&gt; /layers/{layerID}&lt;/td&gt;
+      &lt;td&gt;Get details about a specific layer using its layerID&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;em&gt;LayersApi&lt;/em&gt;&lt;/td&gt;
+      &lt;td&gt;&lt;a href=&quot;docs/LayersApi.md#layers_layer_id_put&quot;&gt;&lt;strong&gt;layers_layer_id_put&lt;/strong&gt;&lt;/a&gt;&lt;/td&gt;
+      &lt;td&gt;&lt;strong&gt;PUT&lt;/strong&gt; /layers/{layerID}&lt;/td&gt;
+      &lt;td&gt;Update a layer&#39;s details using its layerID&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;em&gt;LayersApi&lt;/em&gt;&lt;/td&gt;
+      &lt;td&gt;&lt;a href=&quot;docs/LayersApi.md#layers_post&quot;&gt;&lt;strong&gt;layers_post&lt;/strong&gt;&lt;/a&gt;&lt;/td&gt;
+      &lt;td&gt;&lt;strong&gt;POST&lt;/strong&gt; /layers&lt;/td&gt;
+      &lt;td&gt;Add a layer to the databases&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;em&gt;SourcesApi&lt;/em&gt;&lt;/td&gt;
+      &lt;td&gt;&lt;a href=&quot;docs/SourcesApi.md#sources_get&quot;&gt;&lt;strong&gt;sources_get&lt;/strong&gt;&lt;/a&gt;&lt;/td&gt;
+      &lt;td&gt;&lt;strong&gt;GET&lt;/strong&gt; /sources&lt;/td&gt;
+      &lt;td&gt;Get a list of the data sources and models in the database&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;em&gt;SourcesApi&lt;/em&gt;&lt;/td&gt;
+      &lt;td&gt;&lt;a href=&quot;docs/SourcesApi.md#sources_post&quot;&gt;&lt;strong&gt;sources_post&lt;/strong&gt;&lt;/a&gt;&lt;/td&gt;
+      &lt;td&gt;&lt;strong&gt;POST&lt;/strong&gt; /sources&lt;/td&gt;
+      &lt;td&gt;Add a new source to the database.&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;em&gt;SourcesApi&lt;/em&gt;&lt;/td&gt;
+      &lt;td&gt;&lt;a href=&quot;docs/SourcesApi.md#sources_source_id_delete&quot;&gt;&lt;strong&gt;sources_source_id_delete&lt;/strong&gt;&lt;/a&gt;&lt;/td&gt;
+      &lt;td&gt;&lt;strong&gt;DELETE&lt;/strong&gt; /sources/{sourceID}&lt;/td&gt;
+      &lt;td&gt;Delete a source using its souce id&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;em&gt;SourcesApi&lt;/em&gt;&lt;/td&gt;
+      &lt;td&gt;&lt;a href=&quot;docs/SourcesApi.md#sources_source_id_get&quot;&gt;&lt;strong&gt;sources_source_id_get&lt;/strong&gt;&lt;/a&gt;&lt;/td&gt;
+      &lt;td&gt;&lt;strong&gt;GET&lt;/strong&gt; /sources/{sourceID}&lt;/td&gt;
+      &lt;td&gt;Get details about an specific source using its sourceID&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;em&gt;SourcesApi&lt;/em&gt;&lt;/td&gt;
+      &lt;td&gt;&lt;a href=&quot;docs/SourcesApi.md#sources_source_id_put&quot;&gt;&lt;strong&gt;sources_source_id_put&lt;/strong&gt;&lt;/a&gt;&lt;/td&gt;
+      &lt;td&gt;&lt;strong&gt;PUT&lt;/strong&gt; /sources/{sourceID}&lt;/td&gt;
+      &lt;td&gt;Update details about a specific source using its sourceID&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;em&gt;UnitsApi&lt;/em&gt;&lt;/td&gt;
+      &lt;td&gt;&lt;a href=&quot;docs/UnitsApi.md#variable_units_get&quot;&gt;&lt;strong&gt;variable_units_get&lt;/strong&gt;&lt;/a&gt;&lt;/td&gt;
+      &lt;td&gt;&lt;strong&gt;GET&lt;/strong&gt; /variableUnits&lt;/td&gt;
+      &lt;td&gt;Get a list of variable units in the database&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;em&gt;UnitsApi&lt;/em&gt;&lt;/td&gt;
+      &lt;td&gt;&lt;a href=&quot;docs/UnitsApi.md#variable_units_post&quot;&gt;&lt;strong&gt;variable_units_post&lt;/strong&gt;&lt;/a&gt;&lt;/td&gt;
+      &lt;td&gt;&lt;strong&gt;POST&lt;/strong&gt; /variableUnits&lt;/td&gt;
+      &lt;td&gt;Add a new variable unit to the database&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;em&gt;UnitsApi&lt;/em&gt;&lt;/td&gt;
+      &lt;td&gt;&lt;a href=&quot;docs/UnitsApi.md#variable_units_variable_unit_id_delete&quot;&gt;&lt;strong&gt;variable_units_variable_unit_id_delete&lt;/strong&gt;&lt;/a&gt;&lt;/td&gt;
+      &lt;td&gt;&lt;strong&gt;DELETE&lt;/strong&gt; /variableUnits/{variableUnitID}&lt;/td&gt;
+      &lt;td&gt;Delete a variable unit using its database id&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;em&gt;UnitsApi&lt;/em&gt;&lt;/td&gt;
+      &lt;td&gt;&lt;a href=&quot;docs/UnitsApi.md#variable_units_variable_unit_id_get&quot;&gt;&lt;strong&gt;variable_units_variable_unit_id_get&lt;/strong&gt;&lt;/a&gt;&lt;/td&gt;
+      &lt;td&gt;&lt;strong&gt;GET&lt;/strong&gt; /variableUnits/{variableUnitID}&lt;/td&gt;
+      &lt;td&gt;Get details about a specific variable unit instance&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;em&gt;UnitsApi&lt;/em&gt;&lt;/td&gt;
+      &lt;td&gt;&lt;a href=&quot;docs/UnitsApi.md#variable_units_variable_unit_id_put&quot;&gt;&lt;strong&gt;variable_units_variable_unit_id_put&lt;/strong&gt;&lt;/a&gt;&lt;/td&gt;
+      &lt;td&gt;&lt;strong&gt;PUT&lt;/strong&gt; /variableUnits/{variableUnitID}&lt;/td&gt;
+      &lt;td&gt; &lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;em&gt;VariablePeriodsApi&lt;/em&gt;&lt;/td&gt;
+      &lt;td&gt;&lt;a href=&quot;docs/VariablePeriodsApi.md#variable_period_types_get&quot;&gt;&lt;strong&gt;variable_period_types_get&lt;/strong&gt;&lt;/a&gt;&lt;/td&gt;
+      &lt;td&gt;&lt;strong&gt;GET&lt;/strong&gt; /variablePeriodTypes&lt;/td&gt;
+      &lt;td&gt;Get a list of the variable period types in the database.&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;em&gt;VariablePeriodsApi&lt;/em&gt;&lt;/td&gt;
+      &lt;td&gt;&lt;a href=&quot;docs/VariablePeriodsApi.md#variable_period_types_post&quot;&gt;&lt;strong&gt;variable_period_types_post&lt;/strong&gt;&lt;/a&gt;&lt;/td&gt;
+      &lt;td&gt;&lt;strong&gt;POST&lt;/strong&gt; /variablePeriodTypes&lt;/td&gt;
+      &lt;td&gt;Add a new variable period type to the database&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;em&gt;VariablePeriodsApi&lt;/em&gt;&lt;/td&gt;
+      &lt;td&gt;&lt;a href=&quot;docs/VariablePeriodsApi.md#variable_period_types_variable_period_type_id_delete&quot;&gt;&lt;strong&gt;variable_period_types_variable_period_type_id_delete&lt;/strong&gt;&lt;/a&gt;&lt;/td&gt;
+      &lt;td&gt;&lt;strong&gt;DELETE&lt;/strong&gt; /variablePeriodTypes/{variablePeriodTypeID}&lt;/td&gt;
+      &lt;td&gt;Delete an variable period instance using its variablePeriodTypeID&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;em&gt;VariablePeriodsApi&lt;/em&gt;&lt;/td&gt;
+      &lt;td&gt;&lt;a href=&quot;docs/VariablePeriodsApi.md#variable_period_types_variable_period_type_id_get&quot;&gt;&lt;strong&gt;variable_period_types_variable_period_type_id_get&lt;/strong&gt;&lt;/a&gt;&lt;/td&gt;
+      &lt;td&gt;&lt;strong&gt;GET&lt;/strong&gt; /variablePeriodTypes/{variablePeriodTypeID}&lt;/td&gt;
+      &lt;td&gt;Get a details about a specific variable period type using its variablePeriodTypeID.&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;em&gt;VariablePeriodsApi&lt;/em&gt;&lt;/td&gt;
+      &lt;td&gt;&lt;a href=&quot;docs/VariablePeriodsApi.md#variable_period_types_variable_period_type_id_put&quot;&gt;&lt;strong&gt;variable_period_types_variable_period_type_id_put&lt;/strong&gt;&lt;/a&gt;&lt;/td&gt;
+      &lt;td&gt;&lt;strong&gt;PUT&lt;/strong&gt; /variablePeriodTypes/{variablePeriodTypeID}&lt;/td&gt;
+      &lt;td&gt;Update the details of a specific variable period using its variablePeriodTypeID&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;em&gt;VariableTypesApi&lt;/em&gt;&lt;/td&gt;
+      &lt;td&gt;&lt;a href=&quot;docs/VariableTypesApi.md#variable_types_get&quot;&gt;&lt;strong&gt;variable_types_get&lt;/strong&gt;&lt;/a&gt;&lt;/td&gt;
+      &lt;td&gt;&lt;strong&gt;GET&lt;/strong&gt; /variableTypes&lt;/td&gt;
+      &lt;td&gt;Get a list of variable types in the database.&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;em&gt;VariableTypesApi&lt;/em&gt;&lt;/td&gt;
+      &lt;td&gt;&lt;a href=&quot;docs/VariableTypesApi.md#variable_types_post&quot;&gt;&lt;strong&gt;variable_types_post&lt;/strong&gt;&lt;/a&gt;&lt;/td&gt;
+      &lt;td&gt;&lt;strong&gt;POST&lt;/strong&gt; /variableTypes&lt;/td&gt;
+      &lt;td&gt;Add a new variable type to the database&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;em&gt;VariableTypesApi&lt;/em&gt;&lt;/td&gt;
+      &lt;td&gt;&lt;a href=&quot;docs/VariableTypesApi.md#variable_types_variable_type_id_delete&quot;&gt;&lt;strong&gt;variable_types_variable_type_id_delete&lt;/strong&gt;&lt;/a&gt;&lt;/td&gt;
+      &lt;td&gt;&lt;strong&gt;DELETE&lt;/strong&gt; /variableTypes/{variableTypeID}&lt;/td&gt;
+      &lt;td&gt;Delete a variable type instance using its variableID&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;em&gt;VariableTypesApi&lt;/em&gt;&lt;/td&gt;
+      &lt;td&gt;&lt;a href=&quot;docs/VariableTypesApi.md#variable_types_variable_type_id_get&quot;&gt;&lt;strong&gt;variable_types_variable_type_id_get&lt;/strong&gt;&lt;/a&gt;&lt;/td&gt;
+      &lt;td&gt;&lt;strong&gt;GET&lt;/strong&gt; /variableTypes/{variableTypeID}&lt;/td&gt;
+      &lt;td&gt;Get details about a specific variable type&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;em&gt;VariableTypesApi&lt;/em&gt;&lt;/td&gt;
+      &lt;td&gt;&lt;a href=&quot;docs/VariableTypesApi.md#variable_types_variable_type_id_put&quot;&gt;&lt;strong&gt;variable_types_variable_type_id_put&lt;/strong&gt;&lt;/a&gt;&lt;/td&gt;
+      &lt;td&gt;&lt;strong&gt;PUT&lt;/strong&gt; /variableTypes/{variableTypeID}&lt;/td&gt;
+      &lt;td&gt;Update details about a specific variable type in the database&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;em&gt;VariablesApi&lt;/em&gt;&lt;/td&gt;
+      &lt;td&gt;&lt;a href=&quot;docs/VariablesApi.md#variables_get&quot;&gt;&lt;strong&gt;variables_get&lt;/strong&gt;&lt;/a&gt;&lt;/td&gt;
+      &lt;td&gt;&lt;strong&gt;GET&lt;/strong&gt; /variables&lt;/td&gt;
+      &lt;td&gt;List Niche Variables&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;em&gt;VariablesApi&lt;/em&gt;&lt;/td&gt;
+      &lt;td&gt;&lt;a href=&quot;docs/VariablesApi.md#variables_post&quot;&gt;&lt;strong&gt;variables_post&lt;/strong&gt;&lt;/a&gt;&lt;/td&gt;
+      &lt;td&gt;&lt;strong&gt;POST&lt;/strong&gt; /variables&lt;/td&gt;
+      &lt;td&gt;Add a new niche variable&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;em&gt;VariablesApi&lt;/em&gt;&lt;/td&gt;
+      &lt;td&gt;&lt;a href=&quot;docs/VariablesApi.md#variables_variable_id_delete&quot;&gt;&lt;strong&gt;variables_variable_id_delete&lt;/strong&gt;&lt;/a&gt;&lt;/td&gt;
+      &lt;td&gt;&lt;strong&gt;DELETE&lt;/strong&gt; /variables/{variableID}&lt;/td&gt;
+      &lt;td&gt; &lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;em&gt;VariablesApi&lt;/em&gt;&lt;/td&gt;
+      &lt;td&gt;&lt;a href=&quot;docs/VariablesApi.md#variables_variable_id_get&quot;&gt;&lt;strong&gt;variables_variable_id_get&lt;/strong&gt;&lt;/a&gt;&lt;/td&gt;
+      &lt;td&gt;&lt;strong&gt;GET&lt;/strong&gt; /variables/{variableID}&lt;/td&gt;
+      &lt;td&gt;Get details about a specific variable&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;em&gt;VariablesApi&lt;/em&gt;&lt;/td&gt;
+      &lt;td&gt;&lt;a href=&quot;docs/VariablesApi.md#variables_variable_id_put&quot;&gt;&lt;strong&gt;variables_variable_id_put&lt;/strong&gt;&lt;/a&gt;&lt;/td&gt;
+      &lt;td&gt;&lt;strong&gt;PUT&lt;/strong&gt; /variables/{variableID}&lt;/td&gt;
+      &lt;td&gt; &lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+</description>
+        <pubDate>Thu, 14 Jul 2016 09:22:52 -0500</pubDate>
+        <link>http://scottsfarley.com/research/visualization/2016/07/14/Creating-the-Niche-API.html</link>
+        <guid isPermaLink="true">http://scottsfarley.com/research/visualization/2016/07/14/Creating-the-Niche-API.html</guid>
+        
+        
+        <category>Research</category>
+        
+        <category>Visualization</category>
+        
+      </item>
     
       <item>
         <title>Preliminary Thesis Results: Update 6/26</title>
@@ -1609,174 +1907,6 @@ install.packages(&quot;RMySQL&quot;)
         
         
         <category>Research</category>
-        
-      </item>
-    
-      <item>
-        <title>Selecting Variables for Species Distribution Models</title>
-        <description>&lt;p&gt;When running statistical models, like multiple linear regression or generalized linear models, it is typically not a good idea to use multiple predictor variables that are highly correlated with one another, as it may result in an unstable final model. This guideline also applies to many of various flavors of species distribution models (SDMs), which take in two or more (usually climatic) predictor variables to model a species response to environmental gradients.  Given modeled climate output, the SDM models can be used to estimate the probability of a species occurring in a different time period, say at the last glacial maximum – 22,000 years ago–, or in 2100, once humans have contributed several degrees to the earth’s temperature.  While these models differ in their statistical techniques, most behave a little like multiple regression, where a set of predict variables are combined in some parametric or non-parametric way to estimate the response as a function of these inputs.  Thus, just like in a standard regression, using highly correlated climatic predictor variables can  contribute to instability in the modeled response.  This post describes the methods I chose to identify correlated variables and choose the ones I wanted to remain in my study.&lt;/p&gt;
-&lt;blockquote&gt;Collinearity can increase estimates of parameter variance; yield models in which no variable is statistically significant even though R&lt;sup&gt;2&lt;/sup&gt;&lt;sub&gt;y&lt;/sub&gt; is large; produce parameter estimates of the “incorrect sign” and of implausible magnitude; create situations in which small changes in the data produce wide swings in parameter estimates; and, in truly extreme cases, prevent the numerical solution of a model &lt;a href=&quot;http://web.unbc.ca/~michael/courses/stats/lectures/VIF%20articlea.pdf&quot;&gt;(O’BRIEN, 2007)&lt;/a&gt;&lt;/blockquote&gt;
-&lt;h3&gt;The data&lt;/h3&gt;
-&lt;p&gt;The data I am using here is a set of 19 &lt;a href=&quot;https://pubs.usgs.gov/ds/691/ds691.pdf&quot;&gt;bioclimatic variables&lt;/a&gt;, commonly used in SDMs, that describe potentially meaningful ecological parameters, such as average precipitation in the warmest quarter of the year, and are derived from monthly climatic GCM output.  My data is derived from a 0.5x0.5 degree &lt;a href=&quot;http://www.cesm.ucar.edu/models/ccsm3.0/&quot;&gt;CCSM3&lt;/a&gt; climate model run, and is in raster grid format.&lt;/p&gt;
-&lt;h3&gt;Correlation&lt;/h3&gt;
-&lt;p&gt;The first natural thing to do when looking at collinearity between variables would be to look at the pairwise correlation between them.  This will show us the correlation between each raster, and every other raster in the set.  We’re going to first do this by taking a large random sampling of spatial coordinates from the raster  set.  I have my predictor variables stored as a RasterStack, so I can use the sampleRandom tool in the raster package to generate n random points over my grid.  I now how a dataframe that shows the climatic values at each of the random points. I can scatter them together, and interrogate each one for pearson’s r correlation.  &lt;a href=&quot;http://www.scottsfarley.com/blogblog_img/bio2_7.png&quot;&gt;&lt;img align=&quot;right&quot; src=&quot;http://www.scottsfarley.com/blog/blog_img/bio2_7.png&quot; alt=&quot;bio2_7&quot; width=&quot;415&quot; height=&quot;340&quot; /&gt;&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;The figure here shows an example of scattering biovariable 2 with biovariable 7, resulting in an R&lt;sup&gt;2 &lt;/sup&gt; value of ~0.45. Now, I can do this procedure for all 19 of my predictor variables, but that would be kind of tedious.  We would be left with 361 R&lt;sup&gt;2 &lt;/sup&gt;values to compare, and 361 scatter plots to &lt;a href=&quot;http://www.scottsfarley.com/blog/blog_img/file-page1.jpg&quot;&gt;&lt;img class=&quot;wp-image-13 alignleft&quot; align=&quot;right&quot; src=&quot;http://www.scottsfarley.com/blog/blog_img/file-page1.jpg&quot; alt=&quot;file-page1&quot; width=&quot;337&quot; height=&quot;436&quot; /&gt;&lt;/a&gt;interrogate.  Sounds annoying.  We can simplify the visual comparison somewhat by plotting the correlation matrix. You can derived the correlation matrix for pearson’s r by using the &lt;a href=&quot;http://www.inside-r.org/packages/cran/raster/docs/layerStats&quot;&gt;layerStats&lt;/a&gt; function in the raster package.  Using the corrplot library in R, we can format the correlation matrix so that we can easily visualization the magnitude and direction of the correlations.  But, pretty much all we get out of this is that some variables are very well correlated and others are less correlated.  Not easy to compare, still annoying.&lt;/p&gt;
-&lt;h3&gt;Variance Inflation Factor&lt;/h3&gt;
-&lt;p&gt;The variance inflation factor (VIF) was conceived for exactly this purpose – comparing collinearity between regression predictors. The VIF quantified the expected amount of variance in a regression coefficient that is due to collinearity in the predictors. The VIF is bounded on the bottom by 1, and has no upper bound. A VIF of 1 indicates that that no extra variance is caused by collinearity in the factors.  A higher VIF indicates higher amounts of variances caused by collinearity, for example, a VIF of 5.1 suggests 510% extra variance in the regression coefficient. VIFs are comparable so we can directly compare and choose variables to eliminate based on this index.&lt;/p&gt;
-&lt;h6&gt;Calculating the VIF:&lt;/h6&gt;
-&lt;p&gt;Calculating the VIF index is pretty simple, actually, and can be done very quickly.  To calculate the index for layer &lt;i&gt;i&lt;/i&gt;, run a regression of X&lt;sub&gt;i &lt;/sub&gt; in terms of all of the other predictors that you wish to use.  The form of the equation is:&lt;/p&gt;
-
-&lt;p&gt;X&lt;sub&gt;i&lt;/sub&gt; = α&lt;sub&gt;j&lt;/sub&gt;X&lt;sub&gt;j&lt;/sub&gt; + α&lt;sub&gt;k&lt;/sub&gt;X&lt;sub&gt;k&lt;/sub&gt; + … + α&lt;sub&gt;n&lt;/sub&gt;X&lt;sub&gt;n&lt;/sub&gt; + ε&lt;sub&gt;i&lt;/sub&gt;&lt;/p&gt;
-
-&lt;p&gt;Note that this is not a regression of the response variable for the model, instead, its a regression of the layer in terms of linear combinations of the other predictors.&lt;/p&gt;
-
-&lt;p&gt;Now, calculate the R&lt;sup&gt;2&lt;/sup&gt;&lt;sub&gt;i&lt;/sub&gt; coefficient of determination value for X&lt;sub&gt;i&lt;/sub&gt;.&lt;/p&gt;
-
-&lt;p&gt;Finally, calculate the VIF for predictor &lt;i&gt;i&lt;/i&gt; by using VIF=1/(1-R&lt;sup&gt;2&lt;/sup&gt;&lt;sub&gt;i&lt;/sub&gt;).&lt;/p&gt;
-
-&lt;p&gt;If R&lt;sup&gt;2&lt;/sup&gt;&lt;sub&gt;i&lt;/sub&gt; is high for this layer, then the denominator of the VIF equation will be very small.  Once evaluated, if R&lt;sup&gt;2&lt;/sup&gt;&lt;sub&gt;i&lt;/sub&gt; is close to 1 (perfectly correlated) then the VIF will go to infinity. On the other hand, if R&lt;sup&gt;2&lt;/sup&gt;&lt;sub&gt;i&lt;/sub&gt; is not correlated with any of the other predictors at all (R&lt;sup&gt;2&lt;/sup&gt;&lt;sub&gt;i&lt;/sub&gt; = 0), then the denominator of the VIF will be 1-0, and the VIF term will evaluate to just 1.  We can do this for each one of our raster predictor layers, and then compare apples-to-apples how collinear they are.&lt;/p&gt;
-
-&lt;p&gt;I calculated the inflation factor using the R package &lt;a href=&quot;https://cran.r-project.org/web/packages/usdm/usdm.pdf&quot;&gt;usdm&lt;/a&gt;, which made the raster calculations quite convenient.  Since R is open source, you can check out the source to see exactly what it’s doing, or you could probably roll your own VIF script pretty easily. In any case, the vifcor function in usdm was designed for finding collinear variables for species distribution models, returns both the VIF and the R&lt;sup&gt;2 &lt;/sup&gt; value, was easy to use, and all-in-all, seemed like the right tool for the job.&lt;/p&gt;
-&lt;h3&gt;Using the VIF&lt;/h3&gt;
-&lt;p&gt;So, now we have the variance inflation factor for all of our layers we can figure out which ones are the most collinear and eliminate the ones might cause instability in our model. Plotting out the results of the VIF calculation, we can see what the correlation matrix plot suggested earlier. Some variables, like #11 and #1, are super, super correlated with the other variables in the set.  But now we know exactly how much that would affect the predictive model.
-&lt;a href=&quot;http://www.scottsfarley.com/blog/blog_img/vif_plot-1.png&quot;&gt;&lt;img align=&quot;right&quot; src=&quot;http://www.scottsfarley.com/blog/blog_img/vif_plot-1-791x1024.png&quot; alt=&quot;vif_plot-1&quot; width=&quot;350&quot; height=&quot;425&quot; /&gt;&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;Scholars debate how much inflation should be allowed in the model.  Some say 10 (which appears to the the internet’s rule of thumb), some say five, some say 2.5.  In any case, variable 11’s VF of ~7000 is probably above the acceptable threshold. For my purposes, all of the VIFs seemed quite high (none under 2.5).  So, perhaps I should use different predictor variables.  Since this set of biovariables is common standard for SDM modeling, I think its worth noting just how correlated they are with each other and the potential for instability that this causes.  However, since they are such a standard, I decided to just take the seven least correlated predictors and use those as my final predictor set.&lt;/p&gt;
-&lt;table width=&quot;500&quot;&gt;
-&lt;tbody&gt;
-&lt;tr&gt;
-&lt;td width=&quot;53&quot;&gt;Biovariable&lt;/td&gt;
-&lt;td width=&quot;53&quot;&gt;VIF&lt;/td&gt;
-&lt;td width=&quot;234&quot;&gt;Interpretation&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;2&lt;/td&gt;
-&lt;td&gt;36.405&lt;/td&gt;
-&lt;td&gt;Mean Diurnal Range&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;7&lt;/td&gt;
-&lt;td&gt;9.597&lt;/td&gt;
-&lt;td&gt;Temperature Annual Range&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;8&lt;/td&gt;
-&lt;td&gt;26.479&lt;/td&gt;
-&lt;td&gt;Mean Temperature of Wettest Quarter&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;15&lt;/td&gt;
-&lt;td&gt;94.520456&lt;/td&gt;
-&lt;td&gt;Precipitation Seasonality&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;18&lt;/td&gt;
-&lt;td&gt;17.879&lt;/td&gt;
-&lt;td&gt;Precipitation of Warmest Quarter&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;17&lt;/td&gt;
-&lt;td&gt;12.981&lt;/td&gt;
-&lt;td&gt;Precipitation of Driest Quarter&lt;/td&gt;
-&lt;/tr&gt;
-&lt;/tbody&gt;
-&lt;/table&gt;
-
-&lt;p&gt;When we reduce our predictor to use these variables and re-run the VIF calculation, our variance inflation is much lower (since there are less correlated things to be collinear with), and the analysis falls within the accepted standards for variable collinearity.  The maximum correlation that remains is between #2 and #15, at only R=0.51, which seems reasonable.&lt;/p&gt;
-
-&lt;table width=&quot;250&quot;&gt;
-&lt;tbody&gt;
-&lt;tr&gt;
-&lt;td width=&quot;76&quot;&gt;Variable&lt;/td&gt;
-&lt;td width=&quot;53&quot;&gt;VIF&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;bio2&lt;/td&gt;
-&lt;td&gt;2.349056&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;bio7&lt;/td&gt;
-&lt;td&gt;1.554106&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;bio8&lt;/td&gt;
-&lt;td&gt;1.660181&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;bio15&lt;/td&gt;
-&lt;td&gt;1.721449&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;bio18&lt;/td&gt;
-&lt;td&gt;1.434528&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;bio19&lt;/td&gt;
-&lt;td&gt;1.362137&lt;/td&gt;
-&lt;/tr&gt;
-&lt;/tbody&gt;
-&lt;/table&gt;
-
-&lt;p&gt;In most cases, it is good to reduce multicollinearity between predictors.  However, it’s also important to remember to keep ecologically meaningful predictors in your set so that you’re not just producing models of statistical artifacts.&lt;/p&gt;
-</description>
-        <pubDate>Fri, 20 May 2016 11:22:52 -0500</pubDate>
-        <link>http://scottsfarley.com/research/sdm/2016/05/20/Selecting-Variables-for-SDM.html</link>
-        <guid isPermaLink="true">http://scottsfarley.com/research/sdm/2016/05/20/Selecting-Variables-for-SDM.html</guid>
-        
-        
-        <category>Research</category>
-        
-        <category>SDM</category>
-        
-      </item>
-    
-      <item>
-        <title>On Finding Data for Cartography Projects, Part I: Reading Existing Source Code</title>
-        <description>&lt;p&gt;Sometimes, it can be hard to find the data we want.  We spend hours looking in all our normal places.  We cruise the census bureau, hit the EPA’s data portal, and browse UW’s collection of geospatial resources. If you have a topic or a storyline in mind, it can be really frustrating to find that you can’t find the right data.  In most cases, the data you seek is actually out there, it might just be a little harder to find that you might hope.  I’ll discuss a couple of techniques I use from time to time when I find myself in this situation.  This is my first blog post, so stay with me.&lt;/p&gt;
-
-&lt;h3 id=&quot;reverse-engineer-someone-elses-work&quot;&gt;Reverse engineer someone else’s work&lt;/h3&gt;
-&lt;p&gt;Chances are, if you’re exploring a topic, you’ve seen a map that shows some data that you’d like to use.  If you haven’t seen a map like this, either (a) you’re doing a topic that shouldn’t be mapped/isn’t spatial, (b) you already have your data in hand and don’t need to reverse engineer someone else work, or (c) you haven’t looked hard enough.  In many cases, these maps will show the &lt;em&gt;exact &lt;/em&gt;data that you want to map with, just presented in a different way than what you’re thinking.  If the map you’ve found is made in-browser (slippy map, svg illustration, etc), chances are you can find the data that was used to create it.  If you find a pdf, png, or other more traditional desktop format, you’d be hard pressed to reverse engineer the data – I wouldn’t bother, since the spatial information has been lost.&lt;/p&gt;
-
-&lt;p&gt;I recently wanted to make a map of Syrian refugee routes to Europe.  I found that UNHCR has a great data portal, which supports some nice visualizations. It’s hard, though, to pull the data out of the visualizations, since the specific numbers are only shown when elements are moused over.  I will use this case as an example, and walk through the steps I took before eventually finding an excel file that contained all the data I wanted and more! The data portal can be found (here)[ http://data.unhcr.org/mediterranean/regional.php].&lt;/p&gt;
-
-&lt;h4 id=&quot;view-source&quot;&gt;View-Source:&lt;/h4&gt;
-&lt;p&gt;So you’ve found a map to take a look at.  The first thing you want to do is to dig into the source code of the web page.  This can be overwhelming if you’re not familiar with html, css, and, particularly, javascript.  However, there’s a couple key things to look for that might lead to data discovery. They won’t work for every website, but some mixing and matching might yield good results for you. In any case, it’ll probably take some time, so be prepared to look at code for a hot minute. To look at a webpage’s source code, enter view-source: directly before the pages url.&lt;/p&gt;
-&lt;pre&gt;view-source:http://data.unhcr.org/mediterranean/regional.php&lt;/pre&gt;
-&lt;p&gt;Now I can see all of the html written on the page.&lt;/p&gt;
-
-&lt;p&gt;Things to look for at this stage: javascript files and iframes. iframes: iframes are a somewhat outdated method of putting a whole external webpage inside of another page, they can be holders for visualizations.  Javascript files: Many (most?) modern interactive web maps are written in javascript, so they are what we eventually want to get to.  It can take some practice and some time to browse through the source and find things that look important.  HTML sources will link to external the js files, so click on these so you can look at them.  Also it can be helpful to open both the page source and the rendered HTML page at the same time in different tabs, so that you can keep track of what you’re looking at in the source.&lt;/p&gt;
-
-&lt;p&gt;In the UNCHR page example, I see both a main.js file and an iframe. I see at lot more written in the page, but it’s all below the map in the rendered page.  I browse the main.js file, but its not quite what I’m looking for. I don’t see anything that looks like its drawing a visualization, so I skip it for now – may I’ll need to come back later.  Next, I examine the iframe, click the link, and see the map in its own web page, without the extra information provided in the portal entry point. One step closer!  Let’s take a look at the source of the iframe.  The iframe is the link:&lt;/p&gt;
-&lt;pre&gt;http://data.unhcr.org/medportalviz/dist/index.html?year=2016&amp;amp;cache=4&lt;/pre&gt;
-
-&lt;h4 id=&quot;unminify&quot;&gt;Unminify:&lt;/h4&gt;
-&lt;p&gt;When looking at the source of the iframe, things get a little more complicated.  Everything is much more condensed, and less readable.  But, its shorter, so there are less items to consider. There’s a couple of different links in the html part of the page, and I see two javascript &amp;lt;script&amp;gt; links.  Main.js usually contains custom written components, so its a good place to start.  I would recommend pursuing the main.js file over other, more generically named js files. When I click to look at the main.js script of the iframe, I see that its been minified.  Its totally impossible to read.  The solution: unminify!&lt;/p&gt;
-
-&lt;p&gt;Minification is a way to reduce file size, and thus improve performance of the application, because less data has to be transferred across the network. Minification is done by removing extra characters, comments, and whitespace, resulting in a compact, but unreadable file.  One solution when looking at other people’s sources is to use a tool like &lt;a href=&quot;&#39;http://unminify.com&#39;&quot;&gt;http://unminify.com/&lt;/a&gt;, which will expand the code, add whitespace, and make it much more readable.&lt;/p&gt;
-
-&lt;p&gt;When I unminify the code, I finally see the javascript that is controlling the map.  There’s two benefits to reaching this point: (1) I can see how the original developer of the application wrote the code.  Often the code will contain a license clause showing ownership and reusability.  If there is no license, be careful about copying the code.  In any case, it is okay to look at the general coding strategy and use it as an example for developing your own applications in the future. In this case, we see that the authors use some D3 and some additional third part libraries.&lt;/p&gt;
-
-&lt;p&gt;More importantly for our purposes right now, though, is (2): We can find the data that the javascript visualization is pulling from.  It will often be from an api, json file, or csv file.  In this case, we see several local files that are clearly the boundary and basemap files. Finally, I find the line:&lt;/p&gt;
-&lt;pre&gt; dataSrc = &quot;http://data.unhcr.org/data_sources/mediterranean/data.xls&quot;&lt;/pre&gt;
-&lt;p&gt;Seems promising! I copy and paste the link into my browser – Jackpot! an excel file containing all of the data that the original visualization was built on.  In fact, in this case, theres much more data than just what is shown in the UN visualization. I am free to build new and creative visualizations from the data, or just to look and inspect it.&lt;/p&gt;
-
-&lt;p&gt;Lessons Learned:&lt;/p&gt;
-&lt;ol&gt;
- 	&lt;li&gt;Use view-source: to look at the webpage source&lt;/li&gt;
- 	&lt;li&gt; Look for iframes and javascript files&lt;/li&gt;
- 	&lt;li&gt;Make use of tools like unminify.com to make minified code more readable.&lt;/li&gt;
- 	&lt;li&gt;Prioritize main.js files over other files.&lt;/li&gt;
- 	&lt;li&gt;Practice! You might not always find what you want and you might waste some time, but in any case, you will learn how other developers structure their web pages and develop web visualizations.&lt;/li&gt;
-&lt;/ol&gt;
-&lt;p&gt;&lt;em&gt;Disclaimer: Use the advice here at your own discretion.  Sometimes, it may not be appropriate to use other people’s data, so make sure that you’re ethical in what you’re doing.&lt;/em&gt;&lt;/p&gt;
-</description>
-        <pubDate>Sun, 08 May 2016 11:22:52 -0500</pubDate>
-        <link>http://scottsfarley.com/cartography/2016/05/08/on-finding-data-for-cartography-projects-I.html</link>
-        <guid isPermaLink="true">http://scottsfarley.com/cartography/2016/05/08/on-finding-data-for-cartography-projects-I.html</guid>
-        
-        
-        <category>cartography</category>
         
       </item>
     

@@ -6,12 +6,11 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <title>Scott&#39;s Blog</title>
-  <meta name="description" content="I am a graduate student at UW Madison studying computing applications to physical geography and paleoecological change.
-">
+  <title>Updating R on Debian Linux</title>
+  <meta name="description" content="Why the apt-get package manager doesn’t contain the latest version of R automatically, I’m not sure. I recently realized I have been downloading a 2+ year ol...">
 
   <link rel="stylesheet" href="/css/main.css">
-  <link rel="canonical" href="http://scottsfarley.com/">
+  <link rel="canonical" href="http://scottsfarley.com/research/cloudcomputing/2016/07/19/Updating-R-on-Debian.html">
   <link rel="alternate" type="application/rss+xml" title="Scott's Blog" href="http://scottsfarley.com/feed.xml">
 </head>
 
@@ -62,113 +61,59 @@
 
     <div class="page-content">
       <div class="wrapper">
-        <div class="home">
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
 
-  <h1 class="page-heading">Posts</h1>
+  <header class="post-header">
+    <h1 class="post-title" itemprop="name headline">Updating R on Debian Linux</h1>
+    <p class="post-meta"><time datetime="2016-07-19T09:22:52-05:00" itemprop="datePublished">Jul 19, 2016</time></p>
+  </header>
 
-  <ul class="post-list">
-    
-      <li>
-        <span class="post-meta">Jul 19, 2016</span>
+  <div class="post-content" itemprop="articleBody">
+    <p>Why the <code class="highlighter-rouge">apt-get</code> package manager doesn’t contain the latest version of <code class="highlighter-rouge">R</code> automatically, I’m not sure. I recently realized I have been downloading a 2+ year old distribution for all of my SDM timing runs by running the standard <code class="highlighter-rouge">sudo apt-get install r-base</code> command at the shell.  For several weeks, this was fine, but today the package <code class="highlighter-rouge">Rcpp</code>, which wraps compiled C++ code in the R environment failed to compile.  I spent most of the afternoon trying to figure out what was going on.  I didn’t even occur to me that the  <code class="highlighter-rouge">r-base</code> package I was using was the root cause.</p>
 
-        <h2>
-          <a class="post-link" href="/research/cloudcomputing/2016/07/19/Updating-R-on-Debian.html">Updating R on Debian Linux</a>
-        </h2>
-      </li>
-    
-      <li>
-        <span class="post-meta">Jul 14, 2016</span>
+<p>It is not easy to figure out how to update the core R package, but, like most things in linux, it comes down to a correctly ordered set of calls to a package manager.</p>
 
-        <h2>
-          <a class="post-link" href="/research/visualization/2016/07/14/Creating-the-Niche-API.html">Creating the Niche API</a>
-        </h2>
-      </li>
-    
-      <li>
-        <span class="post-meta">Jun 26, 2016</span>
+<p><em>Note:</em> I am using a Debian 8 Jessie image, version v20160718</p>
 
-        <h2>
-          <a class="post-link" href="/research/visualization/2016/06/26/preliminary-thesis-results.html">Preliminary Thesis Results: Update 6/26</a>
-        </h2>
-      </li>
-    
-      <li>
-        <span class="post-meta">Jun 26, 2016</span>
+<p>###Steps:</p>
 
-        <h2>
-          <a class="post-link" href="/research/paleoclimate/2016/06/26/the-niche-api-web-service.html">Building the Niche Database and Web Services</a>
-        </h2>
-      </li>
-    
-      <li>
-        <span class="post-meta">Jun 16, 2016</span>
+<ol>
+  <li><code class="highlighter-rouge">sudo apt-get remove r-base</code>.  Remove the old version of R.</li>
+  <li><code class="highlighter-rouge">sudo nano /etc/apt/sources.list</code>.  This file holds all of the package repositories for <code class="highlighter-rouge">apt-get</code>.</li>
+  <li>Inside of it, copy and paste:
+    <pre>
+deb http://cran.rstudio.com/bin/linux/debian jessie-cran3/
+</pre>
 
-        <h2>
-          <a class="post-link" href="/research/cloudcomputing/2016/06/16/Computing-Configuration-Update.html">Automating my workflow: Building a (somewhat) distributed and (moderately) fault-tolerant system</a>
-        </h2>
-      </li>
-    
-      <li>
-        <span class="post-meta">Jun 12, 2016</span>
+    <p>This tells the manager to look in this repository for a copy of the R distribution.</p>
+  </li>
+  <li>Save and close the text editor.</li>
+  <li>
+    <p>At the shell, type:
+  <code>
+  gpg --keyserver keyserver.ubuntu.com --recv-key E084DAB9
+  </code>
+  and then
+  <code>
+  gpg -a --export E084DAB9 | sudo apt-key add -
+  </code>
+  What does this do? I’m not exactly sure, but I think it has to do with the package integrity checks down when downloading things from a package manager.</p>
+  </li>
+  <li><code class="highlighter-rouge">sudo apt-get update</code>.  Update the installed packages.</li>
+  <li><code class="highlighter-rouge">sudo apt-get install r-base</code>.  Install the core R functionality, hopefully this time using the newest version.</li>
+  <li><code class="highlighter-rouge">sudo apt-get install r-base-dev</code>.  Install the development headers to allow packages that are not in debian repositories.</li>
+</ol>
 
-        <h2>
-          <a class="post-link" href="/research/cloudcomputing/2016/06/12/managing-long-running-linux-processes.html">Managing Long-Running Processes on Linux</a>
-        </h2>
-      </li>
-    
-      <li>
-        <span class="post-meta">Jun 5, 2016</span>
+<p>At this point, you should have a newly updated R version.  You can check with R.version.  For me, this worked for updating from R version <code class="highlighter-rouge">3.0.1</code> to R version <code class="highlighter-rouge">3.3.1</code>.</p>
 
-        <h2>
-          <a class="post-link" href="/research/cloudcomputing/2016/06/05/Startup-and-Shutdown-Scripts-GCE.html">Startup and Shutdown Scripts in Google Cloud Compute Engine</a>
-        </h2>
-      </li>
-    
-      <li>
-        <span class="post-meta">Jun 2, 2016</span>
+<p>If you have package install error, it’s definitely worth checking if an update in the r-base package could be responsible.</p>
 
-        <h2>
-          <a class="post-link" href="/research/cloudcomputing/2016/06/02/adventures-in-google-cloud-I.html">Connecting to Google Cloud SQL</a>
-        </h2>
-      </li>
-    
-      <li>
-        <span class="post-meta">May 31, 2016</span>
+  </div>
 
-        <h2>
-          <a class="post-link" href="/cartography/2016/05/31/Find-Data-For_Cartography-Projects-II.html">On Finding Data for Cartography Projects, Part II: Spatial Data Services and APIs</a>
-        </h2>
-      </li>
-    
-      <li>
-        <span class="post-meta">May 22, 2016</span>
-
-        <h2>
-          <a class="post-link" href="/research/2016/05/22/My-Thesis-Proposal-In-A-Nutshell.html">My Thesis Proposal in A Nutshell</a>
-        </h2>
-      </li>
-    
-      <li>
-        <span class="post-meta">May 20, 2016</span>
-
-        <h2>
-          <a class="post-link" href="/research/sdm/2016/05/20/Selecting-Variables-for-SDM.html">Selecting Variables for Species Distribution Models</a>
-        </h2>
-      </li>
-    
-      <li>
-        <span class="post-meta">May 8, 2016</span>
-
-        <h2>
-          <a class="post-link" href="/cartography/2016/05/08/on-finding-data-for-cartography-projects-I.html">On Finding Data for Cartography Projects, Part I: Reading Existing Source Code</a>
-        </h2>
-      </li>
-    
-  </ul>
-
-  <p class="rss-subscribe">subscribe <a href="/feed.xml">via RSS</a></p>
-
-</div>
+</article>
+<script type="text/javascript"
+    src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
 
       </div>
     </div>

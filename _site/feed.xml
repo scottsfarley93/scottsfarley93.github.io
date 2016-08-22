@@ -6,9 +6,137 @@
 </description>
     <link>http://scottsfarley.com/</link>
     <atom:link href="http://scottsfarley.com/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Wed, 20 Jul 2016 15:26:45 -0500</pubDate>
-    <lastBuildDate>Wed, 20 Jul 2016 15:26:45 -0500</lastBuildDate>
+    <pubDate>Mon, 22 Aug 2016 15:27:18 -0500</pubDate>
+    <lastBuildDate>Mon, 22 Aug 2016 15:27:18 -0500</lastBuildDate>
     <generator>Jekyll v3.1.6</generator>
+    
+      <item>
+        <title>Adding share-able URLs to IceAgeMapper</title>
+        <description>&lt;p&gt;One of the features Rob suggested I add to Ice Age Mapper during our last meeting was a dynamic url that would record the current state of the application, and could thus be shared between users. I took a stab at that last week, and got it working pretty well.  I thought it would be a lot of re-coding from the ground up, but it turns out that most of what I had written previously could be easily converted to load a URL string.  My application only generates a shareable URL when the user clicks the ‘Share’ button, but in theory, the app could easily be modified to generate a new URL each time an action was taken.  I think this would actually &lt;strong&gt;&lt;em&gt;Not&lt;/em&gt;&lt;/strong&gt; be a good idea, because it would mean there would be an entry in the user’s web history for each action they took inside of the application, meaning they would have to click the back button like a million times if they messed up.  Good to know support exists for that though.&lt;/p&gt;
+
+&lt;p&gt;Another plus of designing a dynamic state URL is that it can be used to share the current configuration on Twitter, GooglePlus, by email, or other social media.  While not critical for our purposes, it seems like it’s never a bad thing to tap into social channels.&lt;/p&gt;
+
+&lt;p&gt;There are two main parts of implementing a dynamic state url: generating and parsing.  The generating phase includes functions that get the current state of the system and translate them into a URL variable, and then string the URL variables together into a complete URL.  In the parsing phase, the URL variable parse (or not, if they don’t exist) and translate them into function calls to re-generate the desired state.  Before starting to code, make a list of the parts of the state you want to keep track of.  Do you want to keep track of every click made to get to a certain configuration or just the configuration itself?&lt;/p&gt;
+
+&lt;p&gt;I decided I want to keep track of the following parts of the application state:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;&lt;em&gt;Taxon&lt;/em&gt;: the data that is currently being displayed, as returned from a Neotoma API call.&lt;/li&gt;
+  &lt;li&gt;&lt;em&gt;Map Center&lt;/em&gt;: Geographic center of current map view, as latitude and longitude.&lt;/li&gt;
+  &lt;li&gt;&lt;em&gt;Map Zoom&lt;/em&gt;: Zoom level of current map view.&lt;/li&gt;
+  &lt;li&gt;&lt;em&gt;Minimum Year&lt;/em&gt;: Minimum (most recent) year in temporal view.&lt;/li&gt;
+  &lt;li&gt;&lt;em&gt;Maximum Year&lt;/em&gt;: Maximum (most distant) year in temporal view.&lt;/li&gt;
+  &lt;li&gt;&lt;em&gt;Panel Configuration&lt;/em&gt;: For each panel, is it open or closed?  Currently, there are three panels: Taxonomy, Site, and NicheViewer.&lt;/li&gt;
+  &lt;li&gt;&lt;em&gt;Layer Configuration&lt;/em&gt;:  For each layer, is it visible or hidden?  Currently, there are three layers: Ice Sheets, Sites, and Heatmap.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;You’ll likely find that there are things you want to add to the state at a later time, but with the general framework, such additions should be really easy.&lt;/p&gt;
+
+&lt;h3 id=&quot;part-1-generation&quot;&gt;Part 1: Generation&lt;/h3&gt;
+&lt;p&gt;To generate the URL, I used the &lt;code class=&quot;highlighter-rouge&quot;&gt;URI.js&lt;/code&gt; library.  This &lt;a href=&quot;https://medialize.github.io/URI.js/&quot;&gt;library&lt;/a&gt; makes it easy to parse, add to, and validate URL strings on the current window, or another window.  Generate a new URI for the current window location:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-js&quot; data-lang=&quot;js&quot;&gt;  &lt;span class=&quot;nx&quot;&gt;uri&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;URI&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;And then add query variables as needed, using:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-js&quot; data-lang=&quot;js&quot;&gt;  &lt;span class=&quot;nx&quot;&gt;uri&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;addQuery&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&#39;key&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;value&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;The next, and most intensive step in this phase to get the values of each state component at this point in time.  For some, like the leaflet map center and zoom, it will be easy to do this, because the leaflet map object already tracks these for you (&lt;code class=&quot;highlighter-rouge&quot;&gt;map.getCenter()&lt;/code&gt; and &lt;code class=&quot;highlighter-rouge&quot;&gt;map.getZoom()&lt;/code&gt;).  Depending on your coding style, you may already have pointers to some of the components, or you may need to devise a way of going to get the values.  Because I chose to only generate the new state URL once the user has requested it, we can write some functions to go get the values at the time they click the button. Mostly, though, I use a &lt;code class=&quot;highlighter-rouge&quot;&gt;globals&lt;/code&gt; object, that keeps references to a variety of important properties that I might want to access throughout my code.  I think this is a good compromise between having a ton of global variables floating around, and totally scoping the variables into functions.  Maybe I’m wrong, not sure…&lt;/p&gt;
+
+&lt;p&gt;Anyways, for each of my state components, I go get it’s value, and then set it to our new &lt;code class=&quot;highlighter-rouge&quot;&gt;uri&lt;/code&gt; object.  Remember that the properties should be Boolean, String, or Numeric types, rather than object or something else that can’t be easily serialized into the URI.  This can be a little tricky, but it’s important so think about how you can make it work.  For example, if I want to populate a panel with data, I can’t easily serialize the data into the URI string.  Instead, I tell the URL that I do want to populate that panel, and I want that panel to automatically open.  Then I write re-write the panel function so that it can automatically call Neotoma and populate the details with the API call results. More on that in the next section.&lt;/p&gt;
+
+&lt;p&gt;When the URI component contains all of your desired state components, you can get it’s value by calling &lt;code class=&quot;highlighter-rouge&quot;&gt;uri.toString()&lt;/code&gt;.  If you set &lt;code class=&quot;highlighter-rouge&quot;&gt;window.location.href=uri.toString()&lt;/code&gt; you will reload the page.  If that’s what you want, go for that.  In my case, I set a text box to the value of the &lt;code class=&quot;highlighter-rouge&quot;&gt;toString()&lt;/code&gt; method, which users can copy and paste if they want. In addition, I do add a history entry into the user’s browser history.  This is accomplished by:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-js&quot; data-lang=&quot;js&quot;&gt;  &lt;span class=&quot;nb&quot;&gt;window&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;history&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;pushState&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;Ice Age Mapper&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;Ice Age Mapper&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;uri&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;toString&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;())&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;That’s about all there is on the generation side of things.  The more involved coding comes when trying to parse a share url.&lt;/p&gt;
+
+&lt;h3 id=&quot;part-2-parsing&quot;&gt;Part 2: Parsing&lt;/h3&gt;
+&lt;p&gt;Once you have a URL, you need to put in the infrastructure to generate the state that the URL calls for.  First though, you need to read the url string and parse it into its component parts.  To read the URL, I found that this function was super helpful (I borrowed it from &lt;a href=&quot;http://stackoverflow.com/questions/901115/how-can-i-get-query-string-values-in-javascript&quot;&gt;this StackOverflow post&lt;/a&gt;):&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;  &lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;getURLParameterByName&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;url&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+      &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;!&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;url&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;url&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;window&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;location&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;href&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+      &lt;span class=&quot;nx&quot;&gt;name&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;replace&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;sr&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;[\[\]]&lt;/span&gt;&lt;span class=&quot;sr&quot;&gt;/g&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;\\$&amp;amp;&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+      &lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;regex&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;RegExp&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;[?&amp;amp;]&quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;name&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;(=([^&amp;amp;#]*)|&amp;amp;|#|$)&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+          &lt;span class=&quot;nx&quot;&gt;results&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;regex&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;exec&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;url&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+      &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;!&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;results&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;null&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+      &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;!&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;results&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;])&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&#39;&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+      &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;decodeURIComponent&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;results&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;].&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;replace&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;sr&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\+&lt;/span&gt;&lt;span class=&quot;sr&quot;&gt;/g&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot; &quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;));&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;hr /&gt;
+&lt;p&gt;You can then get the query parameters from the URL string like so:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;  &lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;queryVar&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;getURLParameterByName&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;key&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;For each state component, I parsed the URI variable associated with it.  I also added some checks to make sure that if the query was not in the URI, the application wouldn’t crash, but would instead default to something smart.  For example, to get the currently displayed taxon:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;  &lt;span class=&quot;nx&quot;&gt;taxon&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;getURLParameterByName&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&#39;taxon&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;taxon&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;){&lt;/span&gt;
+    &lt;span class=&quot;nx&quot;&gt;globals&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;taxon&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;taxon&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;//set the name in the search box&lt;/span&gt;
+    &lt;span class=&quot;nx&quot;&gt;$&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;#searchBar&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;val&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;taxon&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;toProperCase&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;())&lt;/span&gt;
+    &lt;span class=&quot;nx&quot;&gt;globals&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;autoload&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Once all of the query variables have been parsed, we need a way of translating the new state information into the actual application state.  I do this in two steps.  First, I have a function that does all of the parsing.  During the parsing, the global variable objects gets property values for the configuration (e.g., &lt;code class=&quot;highlighter-rouge&quot;&gt;globals.taxon = &#39;Quercus&#39;&lt;/code&gt;).  Next, I call a load function, which is pretty much the same as what I had when I didn’t allow URL configuration, but instead of just setting the variables to &lt;code class=&quot;highlighter-rouge&quot;&gt;Null&lt;/code&gt; at the start, it checks to see if the property has already been set during the parsing phase.  This method works really well for components like map zoom and time extent.  However, it will not automatically load the data from Neotoma, because loading the data requires a button click to send an AJAX request to the Neotoma API.  Therefore, we add a &lt;code class=&quot;highlighter-rouge&quot;&gt;globals.autoload&lt;/code&gt; property, which automatically triggers a click on that button, if the necessary state configurtion variables (like taxon) are set in the URL.&lt;/p&gt;
+
+&lt;h3 id=&quot;part-3--sharing-on-social-media&quot;&gt;Part 3:  Sharing on Social Media&lt;/h3&gt;
+&lt;p&gt;One you’ve implemented the generating and parsing, and know that your share URL gives you a reliable application state representation, you can share the URL on twitter or other social media really easily.&lt;br /&gt;
+#### Copying to the clipboard
+While not social, you may wish to allow users to copy the link directly to their copy-paste clipboard.  I read some discussion of how this may be a bad idea for security.  I’m not sure – I added it anyways.&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-js&quot; data-lang=&quot;js&quot;&gt;&lt;span class=&quot;c1&quot;&gt;// create hidden text element, if it doesn&#39;t already exist&lt;/span&gt;
+&lt;span class=&quot;nx&quot;&gt;$&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;#share-link&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;focus&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;//highlight the text element that contains the link&lt;/span&gt;
+&lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;succeed&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;try&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;nx&quot;&gt;succeed&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;document&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;execCommand&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;copy&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;//do the copying&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;catch&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;e&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;){&lt;/span&gt;
+  &lt;span class=&quot;nx&quot;&gt;succeed&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;false&lt;/span&gt;
+  &lt;span class=&quot;nx&quot;&gt;console&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;log&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;e&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;succeed&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;//Boolean&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;h4 id=&quot;sharing-on-twitter&quot;&gt;Sharing on Twitter&lt;/h4&gt;
+&lt;p&gt;Twitter allows you to configure a link that pre-populates a tweet composer with message body, share url, hashtags, mentions, etc.  This was a little hard to get the hang of, and I still don’t think it’s quite right.  I used the &lt;code class=&quot;highlighter-rouge&quot;&gt;URI.js&lt;/code&gt; library again to generate this URL, and then set it to the &lt;code class=&quot;highlighter-rouge&quot;&gt;href&lt;/code&gt; property of a link.  The &lt;code class=&quot;highlighter-rouge&quot;&gt;generateTwitterLink&lt;/code&gt; function is called right after the share URL is generated, so that it is available to the user if they choose to share on twitter. FYI: Even if you have a really long share url, it will only take up 22 characters of your tweet &lt;em&gt;if you are on a real server&lt;/em&gt;.  If you are on localhost, which isn’t a qualified domain, it will take up all of the characters, so might not work.&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-js&quot; data-lang=&quot;js&quot;&gt;&lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;generateTwitterLink&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(){&lt;/span&gt;
+  &lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;twitterURL&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;URI&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;http://twitter.com/share/&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;//base link&lt;/span&gt;
+  &lt;span class=&quot;nx&quot;&gt;twitterURL&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;addQuery&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;url&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;globals&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;shareURI&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;//prepopulate with a URL&lt;/span&gt;
+  &lt;span class=&quot;nx&quot;&gt;twitterURL&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;addQuery&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;text&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;Check out my Ice Age Map!&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;//prepopulate text&lt;/span&gt;
+  &lt;span class=&quot;nx&quot;&gt;twitterURL&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;addQuery&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;hashtags&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;paleo&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+  &lt;span class=&quot;nx&quot;&gt;twitterURL&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;twitterURL&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;toString&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;//generate the string from the object&lt;/span&gt;
+  &lt;span class=&quot;nx&quot;&gt;$&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;.twitter-share-button&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;attr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;href&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;twitterURL&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;//set the link attribute so we actually use the dynamic URL&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;h4 id=&quot;sharing-with-email&quot;&gt;Sharing with Email&lt;/h4&gt;
+&lt;p&gt;Perhaps the most likely way to share an application state for this application is by email, so I added a method that you can easily email the link out to your collaborators from inside the app. This is super easy, you just need to set the subject and body of the &lt;code class=&quot;highlighter-rouge&quot;&gt;mailto:&lt;/code&gt; string inside of the link &lt;code class=&quot;highlighter-rouge&quot;&gt;href&lt;/code&gt;. Since we don’t know who to send it to, we leave the &lt;code class=&quot;highlighter-rouge&quot;&gt;to:&lt;/code&gt; field blank.&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-js&quot; data-lang=&quot;js&quot;&gt;&lt;span class=&quot;nx&quot;&gt;link&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;mailto:?to=&amp;amp;&quot;&lt;/span&gt;
+&lt;span class=&quot;nx&quot;&gt;link&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+=&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;subject=&quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;encodeURIComponent&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;Ice Age Mapper&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;//changes spaces to %20, etc&lt;/span&gt;
+&lt;span class=&quot;nx&quot;&gt;link&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+=&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&amp;amp;body=&quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;shareURI&lt;/span&gt;
+&lt;span class=&quot;nx&quot;&gt;$&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;#emailLink&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;data&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&#39;href&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;link&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;h4 id=&quot;sharing-on-google&quot;&gt;Sharing on Google+&lt;/h4&gt;
+&lt;p&gt;Sharing on Google+, which I don’t know if anyone actually uses – I don’t–  was really, really easy. Assuming you have the required script included, you can have your sharing element be something like:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-html&quot; data-lang=&quot;html&quot;&gt;div class=&quot;g-plus&quot; data-action=&quot;share&quot;&amp;gt;&lt;span class=&quot;nt&quot;&gt;&amp;lt;/div&amp;gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Then you can enable the sharing with your URL by setting the url data attribute inside of your javascript code, again, immediately after you generate the share URL.&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-js&quot; data-lang=&quot;js&quot;&gt;&lt;span class=&quot;nx&quot;&gt;$&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;.g-plus&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;data&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&#39;href&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;shareURI&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+</description>
+        <pubDate>Mon, 22 Aug 2016 08:22:52 -0500</pubDate>
+        <link>http://scottsfarley.com/research/paleo/2016/08/22/Adding-Shareable-URLs-To-IceAgeMapper.html</link>
+        <guid isPermaLink="true">http://scottsfarley.com/research/paleo/2016/08/22/Adding-Shareable-URLs-To-IceAgeMapper.html</guid>
+        
+        
+        <category>Research</category>
+        
+        <category>Paleo</category>
+        
+      </item>
     
       <item>
         <title>Updating R on Debian Linux</title>
@@ -1661,125 +1789,6 @@ install.packages(&quot;RMySQL&quot;)
         
         
         <category>Research</category>
-        
-      </item>
-    
-      <item>
-        <title>Selecting Variables for Species Distribution Models</title>
-        <description>&lt;p&gt;When running statistical models, like multiple linear regression or generalized linear models, it is typically not a good idea to use multiple predictor variables that are highly correlated with one another, as it may result in an unstable final model. This guideline also applies to many of various flavors of species distribution models (SDMs), which take in two or more (usually climatic) predictor variables to model a species response to environmental gradients.  Given modeled climate output, the SDM models can be used to estimate the probability of a species occurring in a different time period, say at the last glacial maximum – 22,000 years ago–, or in 2100, once humans have contributed several degrees to the earth’s temperature.  While these models differ in their statistical techniques, most behave a little like multiple regression, where a set of predict variables are combined in some parametric or non-parametric way to estimate the response as a function of these inputs.  Thus, just like in a standard regression, using highly correlated climatic predictor variables can  contribute to instability in the modeled response.  This post describes the methods I chose to identify correlated variables and choose the ones I wanted to remain in my study.&lt;/p&gt;
-&lt;blockquote&gt;Collinearity can increase estimates of parameter variance; yield models in which no variable is statistically significant even though R&lt;sup&gt;2&lt;/sup&gt;&lt;sub&gt;y&lt;/sub&gt; is large; produce parameter estimates of the “incorrect sign” and of implausible magnitude; create situations in which small changes in the data produce wide swings in parameter estimates; and, in truly extreme cases, prevent the numerical solution of a model &lt;a href=&quot;http://web.unbc.ca/~michael/courses/stats/lectures/VIF%20articlea.pdf&quot;&gt;(O’BRIEN, 2007)&lt;/a&gt;&lt;/blockquote&gt;
-&lt;h3&gt;The data&lt;/h3&gt;
-&lt;p&gt;The data I am using here is a set of 19 &lt;a href=&quot;https://pubs.usgs.gov/ds/691/ds691.pdf&quot;&gt;bioclimatic variables&lt;/a&gt;, commonly used in SDMs, that describe potentially meaningful ecological parameters, such as average precipitation in the warmest quarter of the year, and are derived from monthly climatic GCM output.  My data is derived from a 0.5x0.5 degree &lt;a href=&quot;http://www.cesm.ucar.edu/models/ccsm3.0/&quot;&gt;CCSM3&lt;/a&gt; climate model run, and is in raster grid format.&lt;/p&gt;
-&lt;h3&gt;Correlation&lt;/h3&gt;
-&lt;p&gt;The first natural thing to do when looking at collinearity between variables would be to look at the pairwise correlation between them.  This will show us the correlation between each raster, and every other raster in the set.  We’re going to first do this by taking a large random sampling of spatial coordinates from the raster  set.  I have my predictor variables stored as a RasterStack, so I can use the sampleRandom tool in the raster package to generate n random points over my grid.  I now how a dataframe that shows the climatic values at each of the random points. I can scatter them together, and interrogate each one for pearson’s r correlation.  &lt;a href=&quot;http://www.scottsfarley.com/blogblog_img/bio2_7.png&quot;&gt;&lt;img align=&quot;right&quot; src=&quot;http://www.scottsfarley.com/blog/blog_img/bio2_7.png&quot; alt=&quot;bio2_7&quot; width=&quot;415&quot; height=&quot;340&quot; /&gt;&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;The figure here shows an example of scattering biovariable 2 with biovariable 7, resulting in an R&lt;sup&gt;2 &lt;/sup&gt; value of ~0.45. Now, I can do this procedure for all 19 of my predictor variables, but that would be kind of tedious.  We would be left with 361 R&lt;sup&gt;2 &lt;/sup&gt;values to compare, and 361 scatter plots to &lt;a href=&quot;http://www.scottsfarley.com/blog/blog_img/file-page1.jpg&quot;&gt;&lt;img class=&quot;wp-image-13 alignleft&quot; align=&quot;right&quot; src=&quot;http://www.scottsfarley.com/blog/blog_img/file-page1.jpg&quot; alt=&quot;file-page1&quot; width=&quot;337&quot; height=&quot;436&quot; /&gt;&lt;/a&gt;interrogate.  Sounds annoying.  We can simplify the visual comparison somewhat by plotting the correlation matrix. You can derived the correlation matrix for pearson’s r by using the &lt;a href=&quot;http://www.inside-r.org/packages/cran/raster/docs/layerStats&quot;&gt;layerStats&lt;/a&gt; function in the raster package.  Using the corrplot library in R, we can format the correlation matrix so that we can easily visualization the magnitude and direction of the correlations.  But, pretty much all we get out of this is that some variables are very well correlated and others are less correlated.  Not easy to compare, still annoying.&lt;/p&gt;
-&lt;h3&gt;Variance Inflation Factor&lt;/h3&gt;
-&lt;p&gt;The variance inflation factor (VIF) was conceived for exactly this purpose – comparing collinearity between regression predictors. The VIF quantified the expected amount of variance in a regression coefficient that is due to collinearity in the predictors. The VIF is bounded on the bottom by 1, and has no upper bound. A VIF of 1 indicates that that no extra variance is caused by collinearity in the factors.  A higher VIF indicates higher amounts of variances caused by collinearity, for example, a VIF of 5.1 suggests 510% extra variance in the regression coefficient. VIFs are comparable so we can directly compare and choose variables to eliminate based on this index.&lt;/p&gt;
-&lt;h6&gt;Calculating the VIF:&lt;/h6&gt;
-&lt;p&gt;Calculating the VIF index is pretty simple, actually, and can be done very quickly.  To calculate the index for layer &lt;i&gt;i&lt;/i&gt;, run a regression of X&lt;sub&gt;i &lt;/sub&gt; in terms of all of the other predictors that you wish to use.  The form of the equation is:&lt;/p&gt;
-
-&lt;p&gt;X&lt;sub&gt;i&lt;/sub&gt; = α&lt;sub&gt;j&lt;/sub&gt;X&lt;sub&gt;j&lt;/sub&gt; + α&lt;sub&gt;k&lt;/sub&gt;X&lt;sub&gt;k&lt;/sub&gt; + … + α&lt;sub&gt;n&lt;/sub&gt;X&lt;sub&gt;n&lt;/sub&gt; + ε&lt;sub&gt;i&lt;/sub&gt;&lt;/p&gt;
-
-&lt;p&gt;Note that this is not a regression of the response variable for the model, instead, its a regression of the layer in terms of linear combinations of the other predictors.&lt;/p&gt;
-
-&lt;p&gt;Now, calculate the R&lt;sup&gt;2&lt;/sup&gt;&lt;sub&gt;i&lt;/sub&gt; coefficient of determination value for X&lt;sub&gt;i&lt;/sub&gt;.&lt;/p&gt;
-
-&lt;p&gt;Finally, calculate the VIF for predictor &lt;i&gt;i&lt;/i&gt; by using VIF=1/(1-R&lt;sup&gt;2&lt;/sup&gt;&lt;sub&gt;i&lt;/sub&gt;).&lt;/p&gt;
-
-&lt;p&gt;If R&lt;sup&gt;2&lt;/sup&gt;&lt;sub&gt;i&lt;/sub&gt; is high for this layer, then the denominator of the VIF equation will be very small.  Once evaluated, if R&lt;sup&gt;2&lt;/sup&gt;&lt;sub&gt;i&lt;/sub&gt; is close to 1 (perfectly correlated) then the VIF will go to infinity. On the other hand, if R&lt;sup&gt;2&lt;/sup&gt;&lt;sub&gt;i&lt;/sub&gt; is not correlated with any of the other predictors at all (R&lt;sup&gt;2&lt;/sup&gt;&lt;sub&gt;i&lt;/sub&gt; = 0), then the denominator of the VIF will be 1-0, and the VIF term will evaluate to just 1.  We can do this for each one of our raster predictor layers, and then compare apples-to-apples how collinear they are.&lt;/p&gt;
-
-&lt;p&gt;I calculated the inflation factor using the R package &lt;a href=&quot;https://cran.r-project.org/web/packages/usdm/usdm.pdf&quot;&gt;usdm&lt;/a&gt;, which made the raster calculations quite convenient.  Since R is open source, you can check out the source to see exactly what it’s doing, or you could probably roll your own VIF script pretty easily. In any case, the vifcor function in usdm was designed for finding collinear variables for species distribution models, returns both the VIF and the R&lt;sup&gt;2 &lt;/sup&gt; value, was easy to use, and all-in-all, seemed like the right tool for the job.&lt;/p&gt;
-&lt;h3&gt;Using the VIF&lt;/h3&gt;
-&lt;p&gt;So, now we have the variance inflation factor for all of our layers we can figure out which ones are the most collinear and eliminate the ones might cause instability in our model. Plotting out the results of the VIF calculation, we can see what the correlation matrix plot suggested earlier. Some variables, like #11 and #1, are super, super correlated with the other variables in the set.  But now we know exactly how much that would affect the predictive model.
-&lt;a href=&quot;http://www.scottsfarley.com/blog/blog_img/vif_plot-1.png&quot;&gt;&lt;img align=&quot;right&quot; src=&quot;http://www.scottsfarley.com/blog/blog_img/vif_plot-1-791x1024.png&quot; alt=&quot;vif_plot-1&quot; width=&quot;350&quot; height=&quot;425&quot; /&gt;&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;Scholars debate how much inflation should be allowed in the model.  Some say 10 (which appears to the the internet’s rule of thumb), some say five, some say 2.5.  In any case, variable 11’s VF of ~7000 is probably above the acceptable threshold. For my purposes, all of the VIFs seemed quite high (none under 2.5).  So, perhaps I should use different predictor variables.  Since this set of biovariables is common standard for SDM modeling, I think its worth noting just how correlated they are with each other and the potential for instability that this causes.  However, since they are such a standard, I decided to just take the seven least correlated predictors and use those as my final predictor set.&lt;/p&gt;
-&lt;table width=&quot;500&quot;&gt;
-&lt;tbody&gt;
-&lt;tr&gt;
-&lt;td width=&quot;53&quot;&gt;Biovariable&lt;/td&gt;
-&lt;td width=&quot;53&quot;&gt;VIF&lt;/td&gt;
-&lt;td width=&quot;234&quot;&gt;Interpretation&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;2&lt;/td&gt;
-&lt;td&gt;36.405&lt;/td&gt;
-&lt;td&gt;Mean Diurnal Range&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;7&lt;/td&gt;
-&lt;td&gt;9.597&lt;/td&gt;
-&lt;td&gt;Temperature Annual Range&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;8&lt;/td&gt;
-&lt;td&gt;26.479&lt;/td&gt;
-&lt;td&gt;Mean Temperature of Wettest Quarter&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;15&lt;/td&gt;
-&lt;td&gt;94.520456&lt;/td&gt;
-&lt;td&gt;Precipitation Seasonality&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;18&lt;/td&gt;
-&lt;td&gt;17.879&lt;/td&gt;
-&lt;td&gt;Precipitation of Warmest Quarter&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;17&lt;/td&gt;
-&lt;td&gt;12.981&lt;/td&gt;
-&lt;td&gt;Precipitation of Driest Quarter&lt;/td&gt;
-&lt;/tr&gt;
-&lt;/tbody&gt;
-&lt;/table&gt;
-
-&lt;p&gt;When we reduce our predictor to use these variables and re-run the VIF calculation, our variance inflation is much lower (since there are less correlated things to be collinear with), and the analysis falls within the accepted standards for variable collinearity.  The maximum correlation that remains is between #2 and #15, at only R=0.51, which seems reasonable.&lt;/p&gt;
-
-&lt;table width=&quot;250&quot;&gt;
-&lt;tbody&gt;
-&lt;tr&gt;
-&lt;td width=&quot;76&quot;&gt;Variable&lt;/td&gt;
-&lt;td width=&quot;53&quot;&gt;VIF&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;bio2&lt;/td&gt;
-&lt;td&gt;2.349056&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;bio7&lt;/td&gt;
-&lt;td&gt;1.554106&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;bio8&lt;/td&gt;
-&lt;td&gt;1.660181&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;bio15&lt;/td&gt;
-&lt;td&gt;1.721449&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;bio18&lt;/td&gt;
-&lt;td&gt;1.434528&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;bio19&lt;/td&gt;
-&lt;td&gt;1.362137&lt;/td&gt;
-&lt;/tr&gt;
-&lt;/tbody&gt;
-&lt;/table&gt;
-
-&lt;p&gt;In most cases, it is good to reduce multicollinearity between predictors.  However, it’s also important to remember to keep ecologically meaningful predictors in your set so that you’re not just producing models of statistical artifacts.&lt;/p&gt;
-</description>
-        <pubDate>Fri, 20 May 2016 11:22:52 -0500</pubDate>
-        <link>http://scottsfarley.com/research/sdm/2016/05/20/Selecting-Variables-for-SDM.html</link>
-        <guid isPermaLink="true">http://scottsfarley.com/research/sdm/2016/05/20/Selecting-Variables-for-SDM.html</guid>
-        
-        
-        <category>Research</category>
-        
-        <category>SDM</category>
         
       </item>
     

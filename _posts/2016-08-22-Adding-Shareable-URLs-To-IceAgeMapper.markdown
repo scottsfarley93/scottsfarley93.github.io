@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "Adding share-able URLs to IceAgeMapper"
+title:  "Adding Shareable URLs to IceAgeMapper"
 date:   2016-08-21 8:22:52 -0500
 categories: Research Paleo
 ---

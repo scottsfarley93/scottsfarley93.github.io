@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "Adding share-able URLs to IceAgeMapper"
-date:   2016-08-22 8:22:52 -0500
+date:   2016-08-21 8:22:52 -0500
 categories: Research Paleo
 ---
 One of the features Rob suggested I add to Ice Age Mapper during our last meeting was a dynamic url that would record the current state of the application, and could thus be shared between users. I took a stab at that last week, and got it working pretty well.  I thought it would be a lot of re-coding from the ground up, but it turns out that most of what I had written previously could be easily converted to load a URL string.  My application only generates a shareable URL when the user clicks the 'Share' button, but in theory, the app could easily be modified to generate a new URL each time an action was taken.  I think this would actually ***Not*** be a good idea, because it would mean there would be an entry in the user's web history for each action they took inside of the application, meaning they would have to click the back button like a million times if they messed up.  Good to know support exists for that though.

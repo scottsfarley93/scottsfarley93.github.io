@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "Ecological Data: Is it 'Big Data'?"
-date:   2016-08-21 8:22:52 -0500
+date:   2016-08-31 8:22:52 -0500
 categories: Research Paleo
 ---
 

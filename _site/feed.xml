@@ -62,9 +62,9 @@
 &lt;p&gt;&lt;img src=&quot;/assets/bigData/GBIF_Growth.png&quot; alt=&quot;GBIF_Growth&quot; /&gt;
 &lt;em&gt;Figure 4: Exponential growth of occurrence records in GBIF&lt;/em&gt;&lt;/p&gt;
 
-&lt;link rel=&quot;stylesheet&quot; href=&quot;https://npmcdn.com/leaflet@0.7.7/dist/leaflet.css&quot; /&gt;
+&lt;link rel=&quot;stylesheet&quot; href=&quot;https://unpkg.com/leaflet@0.7.7/dist/leaflet.css&quot; /&gt;
 
-&lt;script src=&quot;https://npmcdn.com/leaflet@0.7.7/dist/leaflet.js&quot;&gt;&lt;/script&gt;
+&lt;script src=&quot;https://unpkg.com/leaflet@0.7.7/dist/leaflet.js&quot;&gt;&lt;/script&gt;
 
 &lt;script src=&quot;https://code.jquery.com/jquery-3.1.0.slim.min.js&quot; integrity=&quot;sha256-cRpWjoSOw5KcyIOaZNo4i6fZ9tKPhYYb6i5T9RSVJG8=&quot; crossorigin=&quot;anonymous&quot;&gt;&lt;/script&gt;
 

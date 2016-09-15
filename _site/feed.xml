@@ -6,9 +6,391 @@
 </description>
     <link>/</link>
     <atom:link href="/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Fri, 02 Sep 2016 13:59:30 -0500</pubDate>
-    <lastBuildDate>Fri, 02 Sep 2016 13:59:30 -0500</lastBuildDate>
+    <pubDate>Thu, 15 Sep 2016 09:46:13 -0500</pubDate>
+    <lastBuildDate>Thu, 15 Sep 2016 09:46:13 -0500</lastBuildDate>
     <generator>Jekyll v3.1.6</generator>
+    
+      <item>
+        <title>William&#39;s Lab Github Practical</title>
+        <description>&lt;h3 id=&quot;objectives&quot;&gt;Objectives&lt;/h3&gt;
+&lt;ol&gt;
+  &lt;li&gt;Introduce Git and Github: what are they, what’s the difference, and how can they be useful to your work in the lab?&lt;/li&gt;
+  &lt;li&gt;Create your first repository and practice the workflow of committing and pulling/pushing files.&lt;/li&gt;
+  &lt;li&gt;Talk about some of the more advanced features of tools: why might you need to use them, particularly in terms of collaboration.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h3 id=&quot;git-and-github&quot;&gt;Git and Github&lt;/h3&gt;
+&lt;p&gt;&lt;strong&gt;Git&lt;/strong&gt; is a open source version control system, a tool that manages the changes of files in a project. Each revision is associated with a timestamp and the person making the change, making it easy to revert back to previous versions of the file if you make a mistake or accidentally break something.  Version control systems are most commonly used for source code management, most any type of files can be managed using a VCS. There are other version control systems on the market today (e.g., Mercurial, Subversion); Git is among the most popular today. Git operates by having distributed project ‘repositories’ that store your code.  Any server can be a Git server.  For example, the William’s lab server could be a Git server if we set it up that way.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Github&lt;/strong&gt; is a company that provides web-based Git repository hosting.  Github manages the servers used to store your project repositories, supports all features of git like branches, merges, and commits, as well as adding additional tools that facilitate project development and collaboration like wiki hosting and issue tracking. Github is a private company valued at over $2 billion with about 20 million &lt;a href=&quot;https://www.quora.com/How-many-users-does-GitHub-have&quot;&gt;users&lt;/a&gt; and nearly 40 million different projects. Before you trust it completely remember (1) it is a company that has motives other than just backing up your code and (2) if you choose to use GitHub and they do something bad or there is a systemwide failure, there are going to be 20 million other people just, if not more, as upset as your are. There are other git hosting platforms as well: Bitbucket, Gitlab, etc.&lt;/p&gt;
+
+&lt;h3 id=&quot;getting-started&quot;&gt;Getting Started&lt;/h3&gt;
+
+&lt;h4 id=&quot;create-an-account&quot;&gt;Create an account&lt;/h4&gt;
+
+&lt;p&gt;To use Github, you need to create an account.  The good news: basic accounts are free to everybody. People with a basic account can create an unlimited of public repositories (can bee seen by anyone). If you have an academic (.edu) email address, you can get an unlimited number of private repositories as well by signing up &lt;a href=&quot;https://education.github.com/pack&quot;&gt;here&lt;/a&gt;. Private repositories let you control who sees your code – it’s hidden from the general public.  In both public and private repositories you can control who changes your code.&lt;/p&gt;
+
+&lt;p&gt;To create an account, go to &lt;a href=&quot;https://github.com/join&quot;&gt;https://github.com/join&lt;/a&gt; and fill out the fields.  Make sure to use you &lt;code class=&quot;highlighter-rouge&quot;&gt;@wisc.edu&lt;/code&gt; email address.  Keep in mind that your user name will be your public name that identifies you on the platform and will be attached to everything you do there. Also, you’ll need to type in your username from time to time, so don’t make it &lt;em&gt;alongandannoyingtotypusername&lt;/em&gt;.&lt;/p&gt;
+
+&lt;h4 id=&quot;getting-git-on-your-computer&quot;&gt;Getting Git on Your Computer&lt;/h4&gt;
+&lt;p&gt;To use Git on your computer, you need to install it and configure it to work with Github servers. This content was borrowed from &lt;a href=&quot;https://help.github.com/articles/set-up-git/&quot;&gt;the Git Docs&lt;/a&gt;.&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;
+    &lt;p&gt;Download the latest version of Git from the &lt;a href=&quot;https://git-scm.com/downloads&quot;&gt;Git Website&lt;/a&gt;. Make sure to get the distribution that corresponds to your operating system, i.e., if you have a Windows machine, don’t opt for the Mac download.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Install Git by following the instructions on the download.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Open the &lt;code class=&quot;highlighter-rouge&quot;&gt;terminal&lt;/code&gt; on your computer.  In windows this is the &lt;code class=&quot;highlighter-rouge&quot;&gt;cmd&lt;/code&gt; shell.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Tell Git your name so your changes will be attributed to your Github account:&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;  git config --global user.name &lt;span class=&quot;s2&quot;&gt;&quot;YOUR NAME&quot;&lt;/span&gt;
+  &lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;If the terminal does not recognize &lt;code class=&quot;highlighter-rouge&quot;&gt;git&lt;/code&gt; as a command, you might not have installed it correctly, return to step 1.&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Tell Git your email address associated with your account.  Make sure to use the same email your signed up with, or things can get funky later on.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;  git config --global user.email &lt;span class=&quot;s2&quot;&gt;&quot;YOUR EMAIL ADDRESS&quot;&lt;/span&gt;
+  &lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;From here on out, the changes you make to your project and other people’s projects (if you’re collaborating) will be attributed to this email address and username.&lt;/p&gt;
+
+&lt;h4 id=&quot;create-a-repository&quot;&gt;Create a repository&lt;/h4&gt;
+
+&lt;p&gt;A repository is where your project lives. From the github &lt;a href=&quot;https://help.github.com/articles/github-glossary/#repository&quot;&gt;documentation&lt;/a&gt;:&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;“A repository is the most basic element of GitHub. They’re easiest to imagine as a project’s folder. A repository contains all of
+  the project files (including documentation), and stores each file’s revision history. Repositories can have multiple collaborators and can be either public or private.”&lt;/em&gt;&lt;/p&gt;
+
+&lt;p&gt;Github is not just a way to version control your code, it’s also a way to organize your work.  A repository should contain all of the code, files, documentation, etc needed for a project.  For example, I have one repository for my thesis, a separate one for &lt;a href=&quot;https://github.com/scottsfarley93/IceAgeMapper&quot;&gt;Ice Age Mapper&lt;/a&gt;, and another one for &lt;a href=&quot;https://github.com/scottsfarley93/scottsfarley93.github.io&quot;&gt;my blog posts&lt;/a&gt;. Each one has everything it needs for someone to download it and work with that project on their own computer, but nothing extra that might span over to another project.&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;
+    &lt;p&gt;There are several ways to create a new repository:&lt;/p&gt;
+
+    &lt;ul&gt;
+      &lt;li&gt;
+        &lt;p&gt;Click on the ‘+’ button in the top right of any page, then select ‘New repository’.
+ &lt;img src=&quot;/assets/github/create_2.png&quot; alt=&quot;Create1&quot; /&gt;&lt;/p&gt;
+      &lt;/li&gt;
+      &lt;li&gt;
+        &lt;p&gt;On your home page, click the green ‘New’ button.
+ &lt;img src=&quot;/assets/github/create_1.png&quot; alt=&quot;Create2&quot; /&gt;&lt;/p&gt;
+      &lt;/li&gt;
+      &lt;li&gt;
+        &lt;p&gt;Go to &lt;a href=&quot;https://github.com/new&quot;&gt;https://github.com/new&lt;/a&gt;.&lt;/p&gt;
+      &lt;/li&gt;
+      &lt;li&gt;
+        &lt;p&gt;Create a repository from your desktop.  This is a bit more involved.  See &lt;a href=&quot;https://help.github.com/articles/adding-an-existing-project-to-github-using-the-command-line/&quot;&gt;this tutorial&lt;/a&gt;.&lt;/p&gt;
+      &lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Give your repository a name.  This name should be short, yet descriptive of your project.  You’ll have to type this name every time you want to access your project so short and sweet is ideal.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Add a description of the project.  This is a useful place to describe a bit more about your project – particularly important if you’re sharing your repo with other collaborators.  Click ‘Initialize this project with a README’. This will give you a &lt;code class=&quot;highlighter-rouge&quot;&gt;README.md&lt;/code&gt; file where you can describe your project in detail. You can populate this file with more details later.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Choose whether to make your project public or private.  I would recommend public repos for most projects, unless they contain sensitive code/information, stuff for publication, or other content you don’t want everyone in the world to see.  A major part of working with code and on github in particular is collaboration and openness with projects. I currently have only two private repositories: (1) labs and solutions for Geography 378 and (2) my thesis, because it contains details about the database I’m pushing data into.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Choose whether to add a &lt;code class=&quot;highlighter-rouge&quot;&gt;.gitignore&lt;/code&gt; file and/or a license file.  The &lt;code class=&quot;highlighter-rouge&quot;&gt;.gitignore&lt;/code&gt; file tells the git system not to track specific file types.  A &lt;code class=&quot;highlighter-rouge&quot;&gt;.gitignore&lt;/code&gt; file can be configured to tell git not to track any type of file.  If you click the box at this point, it will pre-populate a gitignore for you with a list of files that are often ignored when working in a particular language.  For example, if you’re working in R, selecting an &lt;code class=&quot;highlighter-rouge&quot;&gt;R&lt;/code&gt; &lt;code class=&quot;highlighter-rouge&quot;&gt;.gitignore&lt;/code&gt; will stop the tracking of .Rdata (your workspace), .Rhistory (your command history), Rstudio files, caches, tempory directories, and files associated with converting markdown to documentation.  See &lt;a href=&quot;https://github.com/github/gitignore&quot;&gt;this repository&lt;/a&gt; for a list of all the options and the files they ignore. You can add to this file later in the course of your project too.&lt;/p&gt;
+
+    &lt;p&gt;A license file tells users of your code how it may be used.  If you’ve chosen to use a public repository, you’ve already committed to some degree of openness in content use. The license file will discriminate between things like commercial use, totally unrestricted use, etc. Github produced &lt;a href=&quot;http://choosealicense.com/&quot;&gt;this website&lt;/a&gt; if you need to choose a license but don’t know which one you need.  I don’t usually license my repos.&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h4 id=&quot;setting-up-your-repository&quot;&gt;Setting up your repository&lt;/h4&gt;
+
+&lt;p&gt;Now you have a new repository, it’s currently living only on the Github servers. It’s time to set it up on your computer. There are a couple ways to do this.  I’ll focus on using command line, because it provides the most flexibility, though it can be a little intimidating at first. Make sure you have git installed on your computer before starting. I have a mac, so commands here are POSIX (mac and linux) specific, but the same concepts apply to git shell in windows. Kevin uses git on windows, so he can help answer your questions here.&lt;/p&gt;
+
+&lt;p&gt;We’re first going to ‘clone’ the repository into a folder of your choosing.  It will create a new folder, so cloning into your documents folder will make a folder in &lt;code class=&quot;highlighter-rouge&quot;&gt;documents/yourRepo&lt;/code&gt;. Cloning will load all of the files contained in the github repository onto your local machine. The clone URL is the URL of your project, e.g., &lt;a href=&quot;https://github.com/scottsfarley93/IceAgeMapper&quot;&gt;https://github.com/scottsfarley93/IceAgeMapper&lt;/a&gt;. To change folders in the command line shell, you will use the &lt;code class=&quot;highlighter-rouge&quot;&gt;cd&lt;/code&gt; command.  &lt;code class=&quot;highlighter-rouge&quot;&gt;cd ..&lt;/code&gt; navigates up in the directory structure, &lt;code class=&quot;highlighter-rouge&quot;&gt;cd [directoryName]&lt;/code&gt; switches into a directory. &lt;code class=&quot;highlighter-rouge&quot;&gt;ls&lt;/code&gt; lists the content of a directory, and can be helpful to figure out where you are.  Once you’ve found a place you want to clone into, clone the repository:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;  git clone https://github.com/[YOUR USERNAME]/[YOUR REPOSITORY NAME]
+  &lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Your repository is now set up as a repository folder on your computer and any changes we make &lt;em&gt;inside&lt;/em&gt; of that folder, will be tracked.  At specific points in time, we’ll tell Git that we’ve made a suitable number of changes and want to mark that as a waypoint in our project history, using commits.&lt;/p&gt;
+
+&lt;h4 id=&quot;making-changes&quot;&gt;Making Changes&lt;/h4&gt;
+&lt;p&gt;Github tracks things called Diffs – a record of what was added, deleted, or changed inside of every file in your repo, a lot like the track changes functionality in MS Word. Git is different that Word, though, because you can revert back to previous timestamps. To mark a specific timestamp as a place you might want to come back to, you &lt;strong&gt;commit&lt;/strong&gt; your project. Committing is kind of like adding a waypoint to your project – each file is marked at its current configuration at this point in time. First, we’re going to tell Git which files to add to the commit, then we’re going to do the commit, identifying it by a short message. Finally, we will push our local changes to the Github server. Before committing, open a terminal and navigate (using &lt;code class=&quot;highlighter-rouge&quot;&gt;cd&lt;/code&gt;) to inside of your repository folder.&lt;/p&gt;
+
+&lt;p&gt;1. Add files to the commit:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;  git add --all
+  &lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;It is possible to only add specific files to your commit, but I nearly always just tell git to track all of the files inside of my project repository. If you don’t want specific files to be tracked, you can add them to your &lt;code class=&quot;highlighter-rouge&quot;&gt;.gitignore&lt;/code&gt; file.&lt;/p&gt;
+
+&lt;p&gt;2. Make the commit&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;  git commit -m &lt;span class=&quot;s2&quot;&gt;&quot;THIS IS A COMMIT MESSAGE&quot;&lt;/span&gt;
+  &lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Your commit messages should be short, easy to identify messages about what you changed since your last commit.  Traditional commit messages are things like “Added feature XYZ”, “Fixed bug ABC”, “Changed QRS to MNO”, etc. It is important to clearly identify your commits so that if you need to revert back to a previous version, you know which version to use.&lt;/p&gt;
+
+&lt;p&gt;3. Push your changes to the Github server&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;  git push &lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;origin branch]
+  &lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;This step takes all of the commits that we’ve made on the local computer and pushes them out to the Github server.  It is not absolutely necessary to push after every commit, but I usually do – that way it’s backed up remotely on the Github server. Depending on your project configuration and if you’re working on a branch that’s not the default (more on that later) you may need to add the &lt;code class=&quot;highlighter-rouge&quot;&gt;origin branch&lt;/code&gt; at the end of the line to properly push.&lt;/p&gt;
+
+&lt;h4 id=&quot;making-changes-an-example&quot;&gt;Making Changes: An Example&lt;/h4&gt;
+&lt;p&gt;To show you how Github keeps track of things, we’re going to work through a short example.&lt;/p&gt;
+
+&lt;p&gt;1. Open R or RStudio. Open a new RScript. We’re first going to define a variable &lt;code class=&quot;highlighter-rouge&quot;&gt;x&lt;/code&gt; equal to 1. If you don’t like R, just open a text file and play along using your own short content examples.&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-r&quot; data-lang=&quot;r&quot;&gt;    &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;1&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;## define x to be one
+&lt;/span&gt;    &lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Save the file into your project repo folder.&lt;/p&gt;
+
+&lt;p&gt;2. Let’s commit the file now.  It’s traditional on the first commit you make on your project to give it the message &lt;code class=&quot;highlighter-rouge&quot;&gt;&quot;Initial Commit&quot;&lt;/code&gt;.&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;    git add --all
+    git commit -m &lt;span class=&quot;s2&quot;&gt;&quot;Initial Commit&quot;&lt;/span&gt;
+    git push
+    &lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;You should see something like:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;    Scotts-MacBook-Air:Williams-Lab-Github-Practical scottsfarley&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;git commit -m &lt;span class=&quot;s2&quot;&gt;&quot;Initial Commit&quot;&lt;/span&gt;
+  &lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;master 6fef42f] Initial Commit
+   1 file changed, 1 insertion&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;+&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+   create mode 100644 myTrackedFile.R
+  Scotts-MacBook-Air:Williams-Lab-Github-Practical scottsfarley&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;git push
+  warning: push.default is &lt;span class=&quot;nb&quot;&gt;unset&lt;/span&gt;; its implicit value has changed &lt;span class=&quot;k&quot;&gt;in
+  &lt;/span&gt;Git 2.0 from &lt;span class=&quot;s1&quot;&gt;&#39;matching&#39;&lt;/span&gt; to &lt;span class=&quot;s1&quot;&gt;&#39;simple&#39;&lt;/span&gt;. To squelch this message
+  and maintain the traditional behavior, use:
+
+    git config --global push.default matching
+
+  To squelch this message and adopt the new behavior now, use:
+
+    git config --global push.default simple
+
+  When push.default is &lt;span class=&quot;nb&quot;&gt;set &lt;/span&gt;to &lt;span class=&quot;s1&quot;&gt;&#39;matching&#39;&lt;/span&gt;, git will push &lt;span class=&quot;nb&quot;&gt;local &lt;/span&gt;branches
+  to the remote branches that already exist with the same name.
+
+  Since Git 2.0, Git defaults to the more conservative &lt;span class=&quot;s1&quot;&gt;&#39;simple&#39;&lt;/span&gt;
+  behavior, which only pushes the current branch to the corresponding
+  remote branch that &lt;span class=&quot;s1&quot;&gt;&#39;git pull&#39;&lt;/span&gt; uses to update the current branch.
+
+  See &lt;span class=&quot;s1&quot;&gt;&#39;git help config&#39;&lt;/span&gt; and search &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&#39;push.default&#39;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;for &lt;/span&gt;further information.
+  &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;the &lt;span class=&quot;s1&quot;&gt;&#39;simple&#39;&lt;/span&gt; mode was introduced &lt;span class=&quot;k&quot;&gt;in &lt;/span&gt;Git 1.7.11. Use the similar mode
+  &lt;span class=&quot;s1&quot;&gt;&#39;current&#39;&lt;/span&gt; instead of &lt;span class=&quot;s1&quot;&gt;&#39;simple&#39;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;if &lt;/span&gt;you sometimes use older versions of Git&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+
+  Counting objects: 3, &lt;span class=&quot;k&quot;&gt;done&lt;/span&gt;.
+  Delta compression using up to 4 threads.
+  Compressing objects: 100% &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;2/2&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;, &lt;span class=&quot;k&quot;&gt;done&lt;/span&gt;.
+  Writing objects: 100% &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;3/3&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;, 327 bytes | 0 bytes/s, &lt;span class=&quot;k&quot;&gt;done&lt;/span&gt;.
+  Total 3 &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;delta 0&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;, reused 0 &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;delta 0&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+  To https://github.com/scottsfarley93/Williams-Lab-Github-Practical
+     80ddf92..6fef42f  master -&amp;gt; master
+  &lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;If you see a message that informs you that your commit was &lt;strong&gt;&lt;em&gt;rejected&lt;/em&gt;&lt;/strong&gt;, try pulling remote changes first (next section).&lt;/p&gt;
+
+&lt;p&gt;3.  We’re really hard working grad students, so now we’ve updated our R file. Specifically, we no longer think that &lt;code class=&quot;highlighter-rouge&quot;&gt;x&lt;/code&gt; is 1, but rather 2. Also, we’ve discovered a variable &lt;code class=&quot;highlighter-rouge&quot;&gt;y&lt;/code&gt;, and it’s value is 5. In our R file, we’re going to change the value of &lt;code class=&quot;highlighter-rouge&quot;&gt;x&lt;/code&gt; and add the statement defining &lt;code class=&quot;highlighter-rouge&quot;&gt;y&lt;/code&gt;:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-r&quot; data-lang=&quot;r&quot;&gt;  &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;2&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;y&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;5&lt;/span&gt;
+  &lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Save the file and commit again.&lt;/p&gt;
+
+&lt;p&gt;4. Now, go to &lt;a href=&quot;http://github.com&quot;&gt;github.com&lt;/a&gt; and let’s look at the changes that github keeps track of and how we might use the file history.&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;
+    &lt;p&gt;a. Go to your project repository page. Notice that your R file that we’ve been working on appears there now.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;b. Click on the file’s name to see more details about it.&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/github/github_file.png&quot; alt=&quot;GithubFile&quot; /&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;c. Click the &lt;code class=&quot;highlighter-rouge&quot;&gt;history&lt;/code&gt; button to show a summary of the commits that have been placed on that file.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/github/github_history.png&quot; alt=&quot;github_history&quot; /&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;d. Notice that there are two commits on this file: the first one, when we first created it and the second one, after we added the variable &lt;code class=&quot;highlighter-rouge&quot;&gt;y&lt;/code&gt;.  Click on a commit message to see what was changed during that commit. Click on the most recent commit message.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/github/github_commit.png&quot; alt=&quot;github_commit&quot; /&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;
+    &lt;p&gt;e. Here is where we can see what Github is keeping track of. In the red, we see things that we removed from the file in the commit.  In the green are lines that were added to the file during that commit. Each file is identified by a hash – the long string of letters and numbers.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;f. To look at the raw files at the point when the commit was made, go back one page to the listing of commits and click on the &lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;lt; &amp;gt;&lt;/code&gt; button to show the file at that point in time.  You will notice when you do that is not project in its current state, but shows the state of project when you made that commit.&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/github/git_older.png&quot; alt=&quot;github_older&quot; /&gt;&lt;/p&gt;
+
+&lt;h4 id=&quot;pulling-remote-files&quot;&gt;Pulling remote files&lt;/h4&gt;
+&lt;p&gt;One of the most powerful aspects of Github is its ability to unify your workflow across different computers. For example, Kevin is using it to merge code changes across the desktop in his office and his laptop. If you’re using it in this way, you’re going to need to update your working copy (e.g., on your laptop) with other changes you made previously (e.g., on the desktop).  To do that, we’re going to &lt;em&gt;sync&lt;/em&gt; or &lt;em&gt;pull&lt;/em&gt; changes from the Github server. &lt;strong&gt;This is different from a pull request.&lt;/strong&gt;  We’ll touch on pull requests later. The terminology here is one of the most difficult parts of github, because it conflicts with another aspect of the platform and it is different between the command line and the desktop app (if you’ve used that). Nonetheless, it’s actually pretty easy to do:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;  git pull
+  &lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;At this point a number of things might happen:&lt;/p&gt;
+
+&lt;p&gt;1.  Everything you have on your local machine already reflects the most recent changes; there were not remote changes to fetch:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;  Scotts-MacBook-Air:Williams-Lab-Github-Practical scottsfarley&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;git pull
+  Already up-to-date.
+  &lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;2.  You have remote changes, but it can be done without conflicts:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;  Scotts-MacBook-Air:Williams-Lab-Github-Practical scottsfarley&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;git pull
+  remote: Counting objects: 3, &lt;span class=&quot;k&quot;&gt;done&lt;/span&gt;.
+  remote: Compressing objects: 100% &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;2/2&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;, &lt;span class=&quot;k&quot;&gt;done&lt;/span&gt;.
+  remote: Total 3 &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;delta 0&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;, reused 0 &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;delta 0&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;, pack-reused 0
+  Unpacking objects: 100% &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;3/3&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;, &lt;span class=&quot;k&quot;&gt;done&lt;/span&gt;.
+  From https://github.com/scottsfarley93/Williams-Lab-Github-Practical
+     d988f65..1b21b38  master     -&amp;gt; origin/master
+  Updating d988f65..1b21b38
+  Fast-forward
+   myOtherTrackedFile | 1 +
+   1 file changed, 1 insertion&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;+&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+   create mode 100644 myOtherTrackedFile
+  &lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;3.  You have remote changes and they conflict with previous changes you have on your computer that you need to merge manually:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;  remote: Counting objects: 3, &lt;span class=&quot;k&quot;&gt;done&lt;/span&gt;.
+  remote: Compressing objects: 100% &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;2/2&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;, &lt;span class=&quot;k&quot;&gt;done&lt;/span&gt;.
+  remote: Total 3 &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;delta 1&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;, reused 0 &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;delta 0&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;, pack-reused 0
+  Unpacking objects: 100% &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;3/3&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;, &lt;span class=&quot;k&quot;&gt;done&lt;/span&gt;.
+  From https://github.com/scottsfarley93/Williams-Lab-Github-Practical
+     7ebd809..ecf9d38  master     -&amp;gt; origin/master
+  Auto-merging myTrackedFile.R
+  CONFLICT &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;content&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;: Merge conflict &lt;span class=&quot;k&quot;&gt;in &lt;/span&gt;myTrackedFile.R
+  Automatic merge failed; fix conflicts and &lt;span class=&quot;k&quot;&gt;then &lt;/span&gt;commit the result.
+  &lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;In this case, you will need to determine where your changes conflict with each other, fix them, make a new commit, and try syncing again.  If you navigate to your files, you will find something that looks like this:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-r&quot; data-lang=&quot;r&quot;&gt;    &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;2&lt;/span&gt;
+    &lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;lt;&amp;lt;&amp;lt;&amp;lt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;HEAD&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;y&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;6&lt;/span&gt;
+    &lt;span class=&quot;o&quot;&gt;=======&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;y&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;1&lt;/span&gt;
+    &lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&amp;gt;&amp;gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ecf9d381b84656db7f08c480d5989145a5d79b7f&lt;/span&gt;
+
+  &lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;This shows you where the conflict is.  Delete the lines you don’t want, removing the commit hash strings, &lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;lt;&lt;/code&gt; and &lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;gt;&lt;/code&gt; characters as well.  Try committing again. This is a pain in the ass.  Try to avoid having this happen.&lt;/p&gt;
+
+&lt;p&gt;4.  You have remote changes and they conflict with previous changes on your copy, but they can be merged automatically:&lt;/p&gt;
+
+&lt;p&gt;In this case, you will be able to merge automatically, but you will need to add a “merge message” – similar to a commit message.  A text editor will open in your terminal where you can enter this message.  Depending on your computer, one of at least two different editors will open.  On a mac, either &lt;code class=&quot;highlighter-rouge&quot;&gt;vim&lt;/code&gt; or &lt;code class=&quot;highlighter-rouge&quot;&gt;nano&lt;/code&gt; will open to do the changes. To use &lt;code class=&quot;highlighter-rouge&quot;&gt;vim&lt;/code&gt;, type your commit message then &lt;kbd&gt;:&lt;/kbd&gt; + &lt;kbd&gt;q&lt;/kbd&gt; + &lt;kbd&gt;Return/Enter&lt;/kbd&gt;.  To use nano, type your message, then &lt;kbd&gt;Control&lt;/kbd&gt; + &lt;kbd&gt;o&lt;/kbd&gt; to save your edits and &lt;kbd&gt;Control&lt;/kbd&gt; + &lt;kbd&gt;x&lt;/kbd&gt; to exit the editor. On windows, you’re on your own. You can set your default editor using command line, which would be helpful.&lt;/p&gt;
+
+&lt;p&gt;The complexity here is for a reason – to be able to test code that comes from your collaborators before you merge it into your copy.  If you’re just working on your own project, these changes are always your own, so this merging stuff seems like overkill. But, when you’re working with one or more other people, you can’t be sure that something won’t break when you include their code.&lt;/p&gt;
+
+&lt;h4 id=&quot;pulling-remote-files-an-example&quot;&gt;Pulling Remote Files: An Example&lt;/h4&gt;
+&lt;p&gt;Github.com allows you to edit your files online, so we’re going to use that as a proxy for having two computers to work with. Note: I wouldn’t really recommend using the online platform to edit your files in (though I do it all the time).  If you’re going to make changes, just pull your repo and make changes on your local computer, or you risk having a lot of merge conflicts.&lt;/p&gt;
+
+&lt;p&gt;1.  Go to your project repo page on github.com.&lt;/p&gt;
+
+&lt;p&gt;2.  Create a new file, using the &lt;code class=&quot;highlighter-rouge&quot;&gt;Create new file&lt;/code&gt; button.&lt;/p&gt;
+
+&lt;p&gt;3.  Give it a name and remember to add the file extension.&lt;/p&gt;
+
+&lt;p&gt;4.  Type some stuff.  For this example, I’m ‘using’ R, so I’ll define a new variable &lt;code class=&quot;highlighter-rouge&quot;&gt;z&lt;/code&gt;.&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-r&quot; data-lang=&quot;r&quot;&gt;  &lt;span class=&quot;n&quot;&gt;z&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;10238&lt;/span&gt;
+  &lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;5.  Save/commit the file. Github will automatically give you a commit message of “[Create/Update] [YOUR FILENAME]” if you’re doing changes on Github.com, so feel free to use that.&lt;/p&gt;
+
+&lt;p&gt;6.  Return to your terminal, making sure you’re in the right project directory.&lt;/p&gt;
+
+&lt;p&gt;7.  Pull the changes you made remotely.&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;  git pull
+  &lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;8.  Look in the project folder.  Note that the file your created online is now stored on your local computer, the same as any other file in your project.&lt;/p&gt;
+
+&lt;h4 id=&quot;advanced-github-features-and-scenarios&quot;&gt;Advanced Github: Features and Scenarios&lt;/h4&gt;
+
+&lt;p&gt;One of the most confusing and intimidating aspects of Git/Github is the complicated and diverse set of features and terminology that goes along with the core concepts introduced above. Complicated and diverse, but powerful, especially when you work on long projects with multiple collaborators. Here, we will take a look at some of these concepts, when you might need them, and how they might be useful to your work.  By time time you need these constructs, you will be an expert in committing and syncing with remote repositories, so reading the docs for these things shouldn’t be as challenging. Content in the following section makes heavy use of the Github docs.&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;
+    &lt;p&gt;Branches&lt;/p&gt;
+
+    &lt;p&gt;&lt;strong&gt;Scenario&lt;/strong&gt;: You’ve been working super hard all week on some super cool code stuff.  On Friday afternoon, you finally get it to work! You’re super psyched.  But, your weekly meeting with Jack is not until the following Wednesday.  Being the productive grad student that you are, you want to keep working on it over the weekend, adding a new feature.  But you also want to impress Jack with your recent developments and don’t want those to be compromised by having a feature that might break those whole thing all together. What to do?&lt;/p&gt;
+
+    &lt;p&gt;Enter &lt;em&gt;branches&lt;/em&gt;. Branches are parallel projects, isolated from each other, on which you can develop new features, without fear that you will forever break your main code.  From the git documentation: “Branching means you diverge from the main line of development and continue to do work without messing with that main line.”  Git encourages branching early and often, even multiple times in a day.&lt;/p&gt;
+
+    &lt;p&gt;So, in the case of our scenario, we are able to have a branch &lt;code class=&quot;highlighter-rouge&quot;&gt;master&lt;/code&gt; that contains our version that we will show Jack.  On a &lt;em&gt;separate branch&lt;/em&gt; we will have our new feature.  We can develop on our new feature without messing up the master branch. When it comes time to meet with Jack, we will just sync to the latest commit of the master branch.  After we’ve perfected our new feature, we can merge it into the master branch and make it part of the main project.&lt;/p&gt;
+
+    &lt;p&gt;Committing and syncing on feature branches goes the exact same way as committing and syncing on the master branch.  In fact, the master branch isn’t even a special branch, it’s just created by default when you make the repository, and you probably didn’t change it.  When you’re feature is ready to go prime time, you can merge the feature back into the master branch, even if you’ve made additional changes to the master branch since splitting off on the feature branch.  Look at &lt;a href=&quot;https://www.atlassian.com/git/tutorials/using-branches/git-merge&quot;&gt;this tutorial&lt;/a&gt; for an in-depth, accessible look at branching and merging.&lt;/p&gt;
+
+    &lt;p&gt;&lt;a href=&quot;https://www.atlassian.com/git/images/tutorials/collaborating/using-branches/01.svg&quot;&gt;&lt;img src=&quot;https://www.atlassian.com/git/images/tutorials/collaborating/using-branches/01.svg&quot; alt=&quot;git_branches&quot; /&gt;&lt;/a&gt;&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Pull Requests&lt;/p&gt;
+
+    &lt;p&gt;&lt;strong&gt;Scenario&lt;/strong&gt;: You’re favorite R package is lacking a function that you think would be incredibly useful to you and other users of the package. You could submit an &lt;em&gt;issue&lt;/em&gt;, but you’re smart and figured out how to code the solution by yourself. You could just keep the code to yourself, but that’s no fun. Instead, you can make a &lt;em&gt;pull request&lt;/em&gt; to have your new code merged into the R package’s github repository, and thus the R package itself. In general, a pull request is a way to merge code into an existing repo.  If you just automatically merged it, it could break existing code and that would be bad. A pull request lets the owners of the repository test and discuss proposed changes with collaborators and add additional commits before the code is merged. Once everyone has agreed that the changes are good, the pull request can be approved and the changes will be merged.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Issues&lt;/p&gt;
+
+    &lt;p&gt;&lt;strong&gt;Scenario&lt;/strong&gt;: You’re working on a geovisualization platform for Neotoma data.  You talk with Jack, who talks with Eric Grimm and Simon and the other Neotoma folks, and you start getting emails about features that people would like or bugs that people have found while using your code.  You could just keep these emails, perhaps in a separate email folder, to remember what needs fixing or enhancing, or you could create a &lt;em&gt;Github issue&lt;/em&gt; to keep track of each feature and bug.  Issues let you make comments on feature requests and bug reports that are publicly viewable on your repo (if your repo is public). This is especially helpful if you’re working on a shared repository, or your code is being used as a library. You can also add labels and milestones to issues, reference specific commits, or assign issues to specific users. I use issues to track features and bugs even in small projects that I work on alone because they’re a good way to (1) have a to do list and (2) have conversations with myself about what I tried that worked (or not) in relation to a specific issue.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Forks&lt;/p&gt;
+
+    &lt;p&gt;&lt;strong&gt;Scenario&lt;/strong&gt;: You really admire the work that Simon does in his &lt;a href=&quot;https://github.com/SimonGoring/NonAnalogues&quot;&gt;NonAnalogues&lt;/a&gt; and you want to use it in your work. You think that some serious modifications are necessary to the codebase to make it work for your specific application.  Simon is a pretty scary guy, though, so you don’t want to approach him about collaborating on your project, you just want to make the changes yourself.  You have two options: 1) you can download a .zip archive of all the files in their current form from Github and go from there or 2) you can make a &lt;em&gt;fork&lt;/em&gt; of his repository, which creates a new repository under your account, with all of the content from Simon’s project. In essence, a fork is a copy of a repository that allows you to freely experiment with changes without affecting the original project.  Github suggests that forks are most commonly used to either propose changes to someone else’s ideas or to use some else’s project as a starting point for your own idea.  Forks can be superior to downloading the raw files, because they let you stay in sync with the &lt;em&gt;upstream&lt;/em&gt; (original) repository. In this example, if Simon made a bug fix to his NonAnalogues repo at some point in the future, you could sync that change so that you didn’t need to fix that by yourself. Every public repository on Github can be forked by any user.&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h4 id=&quot;collaboration-on-github&quot;&gt;Collaboration on Github&lt;/h4&gt;
+&lt;p&gt;Github provides an excellent platform for collaborative work.  There are two models of collaboration that work well on Github. Now that we’ve talked about some of the more advanced features of Github, I think they will make more sense. The content here is adapted from the &lt;a href=&quot;http://cyber4paleo.github.io/resources/collaborating.html&quot;&gt;Cyber4Paleo (C4P)&lt;/a&gt; workshop resources from the Summer of 2016.&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;
+    &lt;p&gt;Fork and Pull
+  This is the model that works best for large, many user projects require a stable branch for production (e.g., a code library). A user interested in collaborating on the project forks the repository, makes changes as she wants, then makes a pull request.  The maintainers of the project test the new code, make comments and changes as they see fit, and then merge the changes into the repository. This model allows for better project management, since and administrator can reject changes, ask for revisions, or decide the order in which changes are incorporated.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Shared Repository
+  This model is better suited to small projects with intimate/trustworthy teams. In this case, everyone works on the same repository without a forked repository as an intermediary. A user, who has already been vetted as a collaborator on the project, pulls the most recent version of the repository (using clone) onto her machine, makes changes, and then pushes back to the repository, immediate incorporating changes into the parent repository. This model only works with good communication.&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;With slightly larger teams, the shared repository starts to break down.  This can be overcome somewhat by using separate branches, which are then merged together into a master branch.  This allows users to work on their own features and changes, while still contributing to a single repo.&lt;/p&gt;
+</description>
+        <pubDate>Sat, 10 Sep 2016 09:22:52 -0500</pubDate>
+        <link>/tutorial/2016/09/10/Williams-Lab-Github-Lesson.html</link>
+        <guid isPermaLink="true">/tutorial/2016/09/10/Williams-Lab-Github-Lesson.html</guid>
+        
+        
+        <category>Tutorial</category>
+        
+      </item>
     
       <item>
         <title>Ecological Data: Is it &#39;Big Data&#39;?</title>
@@ -131,9 +513,9 @@
 
 &lt;p&gt;&lt;em&gt;Figure 10: GBIF holdings, Annual Change and Rate of Change of Annual Change&lt;/em&gt;&lt;/p&gt;
 </description>
-        <pubDate>Sun, 21 Aug 2016 08:22:52 -0500</pubDate>
-        <link>/research/paleo/2016/08/21/Big-Data-In-Ecology.html</link>
-        <guid isPermaLink="true">/research/paleo/2016/08/21/Big-Data-In-Ecology.html</guid>
+        <pubDate>Wed, 31 Aug 2016 08:22:52 -0500</pubDate>
+        <link>/research/paleo/2016/08/31/Big-Data-In-Ecology.html</link>
+        <guid isPermaLink="true">/research/paleo/2016/08/31/Big-Data-In-Ecology.html</guid>
         
         
         <category>Research</category>
@@ -1656,222 +2038,6 @@ install.packages(&quot;RMySQL&quot;)
         <category>Research</category>
         
         <category>CloudComputing</category>
-        
-      </item>
-    
-      <item>
-        <title>On Finding Data for Cartography Projects, Part II: Spatial Data Services and APIs</title>
-        <description>&lt;h3&gt;Using APIs and Data Services&lt;/h3&gt;
-&lt;p&gt;This is the second installment in my series about finding data from new and different sources for use in your cartography or GIS projects.  Last time I discussed looking through existing source code to find hidden datasets that might be useful. Today, I will walk through using an API service to tap into an organization’s database.  As a simple google search will reveal, there are other resources, blogs, and tutorials out there that talk about how to use an API as a data source, but I will focus particularly on converting data from an API into a useful spatial data format that can be used in mapping and analysis.  Tons of APIs have spatial data (usually latitude and longitude) attached to their responses, its just a matter of finding the data service and massaging it into the right format.&lt;/p&gt;
-&lt;h4&gt;What is an API?&lt;/h4&gt;
-&lt;p&gt;An API, which stands for Application Programming Interface, is a set of protocols and methods that define how two computers should talk to each other.  An API is a documented set of building blocks (of code) that define how an existing application works.  A programmer can put these blocks together to extend the existing program, or create a new app that uses portions of the existing program.  Consider &lt;a href=&quot;http://twitter.com&quot;&gt;Twitter&lt;/a&gt;.  Twitter is super popular, and a lot of people use it for various things – documenting every facet of their daily lives, reporting news, &lt;a href=&quot;http://chrisscheele.com/&quot;&gt;observing disasters and severe weather&lt;/a&gt;, etc.  To build the platform, Twitter needed to make a whole bunch of computers talk to each other. When a user writes a tweet, it is sent to twitter’s central database, where it is stored, and then pushed back out to other clients.  Multiply this by Twitter’s &amp;gt;310 million users, both reading and writing tweets, and you have a lot of clients that need to communicate with minimal friction.&lt;/p&gt;
-
-&lt;p&gt;Twitter could have kept the language that all of these clients and servers spoke to each other in a secret.  That’s what is called a private API.  Details of private APIs are not released to outside developers, but are (usually) documented and (sometimes) logical for the internal use of the organization or company that created it.  Sometimes they can be hacked (see Google Maps, before they released a public version of their API), but do not promote easy outside development. There are a lot of private APIs that support how your computer works, but we won’t talk about those today.&lt;/p&gt;
-
-&lt;p&gt;Instead of keeping their API private, they released it to the world as a public API. Each method for user management, posting tweets, reading tweets, etc is documented and given with examples on &lt;a href=&quot;https://dev.twitter.com/overview/documentation&quot;&gt;twitter’s development website&lt;/a&gt;. Now any developer in the world can sign up with twitter and start posting and reading tweets through their own code.  If you’ve ever used TweetDeck or another twitter application that isn’t just the twitter app, its based on the public API.  Lots of companies build APIs so that developers outside of the organization can build apps on top of the company’s existing platform.&lt;/p&gt;
-&lt;h4&gt;Using an API&lt;/h4&gt;
-&lt;p&gt;So if I know a little coding, I should be able to tap into any existing public API in a few steps.  Basically, our process will be (1) build a query, (2) submit the query to the API, (3) get the result, (4) use the response.&lt;/p&gt;
-
-&lt;p&gt;For the remainder of this post, I will use the &lt;a href=&quot;http://neotomadb.org&quot;&gt;Neotoma Paleoecological Database &lt;/a&gt;as an example, because (1) I think they have a well-designed, well-documented data service available through an API, and (2) I work on the Neotoma project. The Neotoma database aggregates and disseminates Quaternary fossil plant and animal data that support paleoecological research.  For this example, I want to make a list of fossil sites above 4,000 meters. The neotoma API docs are &lt;a href=&quot;http://api.neotomadb.org/doc&quot;&gt;here&lt;/a&gt;, and might be helpful for following along.&lt;/p&gt;
-
-&lt;h4 id=&quot;api-organization&quot;&gt;&lt;em&gt;API Organization&lt;/em&gt;&lt;/h4&gt;
-&lt;p&gt;An API is typically accessed through a web URL.  The URL is made up of a root, a resource, and a set of key-value pairs that define the parameters of your query. For Neotoma, the root of our query will be&lt;/p&gt;
-&lt;pre&gt;http://api.neotomadb.org/v1/data&lt;/pre&gt;
-&lt;p&gt;On top of the root, we need to specify an resource. The resource is the name of the data that you are trying to obtain.  This requires you to be a little familiar with the organization whose API you are using.  You can usually figure out which resource you want by browsing the API documentation.  For twitter, the resources include ‘friends’, ‘statuses’, ‘timeline’, etc.  In the case of Neotoma, we have ‘Sites’, ‘Taxa’, ‘Datasets’, ‘Downloads’, ‘SampleData’, ‘Publications’, ‘Contacts’, and ‘DBTables’.  Because I want a list of locations, I decide that I want to use the Sites endpoint, though if I want more detailed information, or the actual pollen counts, I might consider using the downloads or SampleData resources.  I add the resource on to my url string like so:&lt;/p&gt;
-&lt;pre&gt;http://api.neotomadb.org/v1/data/sites&lt;/pre&gt;
-&lt;p&gt;If I enter this query into my web browser, it will return every single site that Neotoma stores in its database (several thousand). While this can be useful in some scenarios, it is not what I want right now.  Instead, I want to filter down the result set to show only those sites above 4,000 meters.  I do this through using service parameters.  Each resource can have different parameters, and the parameters each resource has is determined by the developer of the API (not you). We see on the &lt;a href=&quot;http://api.neotomadb.org/doc/resources/sites&quot;&gt;Sites documentation page&lt;/a&gt;, that this resource accepts the parameters ‘sitename’, ‘altmin’, ‘altmax’, ‘loc’, and ‘gpid’.  All parameters are option, and are additive, so you can filter in really customizable ways.  Parameters are just added onto the query string:&lt;/p&gt;
-&lt;pre&gt;?key1=value1&amp;amp;key2=value2&amp;amp;...&amp;amp;keyN=valueN&lt;/pre&gt;
-&lt;p&gt;So our query string becomes&lt;/p&gt;
-&lt;pre&gt;http://api.neotomadb.org/v1/data/sites?altmin=4000&lt;/pre&gt;
-&lt;p&gt;When we enter this into the web browser, we see that the results set is much smaller.&lt;/p&gt;
-
-&lt;h4 id=&quot;api-response&quot;&gt;&lt;em&gt;API Response&lt;/em&gt;&lt;/h4&gt;
-&lt;p&gt;Every organizations API will return a different response, and every resource within an API can return a different response.  Of course, documentation can help you determine when you are looking at, but it can also be super help to just enter your desired query string into your web browser and look at what you are getting back.  Most APIs these days will return JSON formatted responses, though some will return geojson, csv, plain text, xml, or some other data type.  If you are getting a lot of JSON back, a pretty printer like the plug-in for &lt;a href=&quot;https://chrome.google.com/webstore/detail/jsonview/chklaanhfefbnpoihckbnefhakgolnmc?hl=en&quot;&gt;chrome&lt;/a&gt; can really make your life easier.&lt;/p&gt;
-
-&lt;p&gt;In our Neotoma example, our response returned a big json object.  The top level keys are ‘success’ and ‘data’.  If success is false, or 0, you probably entered an invalid query string (specified a resource that does not exist, or gave a parameter that is not accepted), but might also be due to a server outage.  In this case there will also be a ‘message’ key that will tell you the reason that your call failed.  When success is true, or 1, you will get an array of json objects that each have the properties listed in the documentation page for that resource.  We see that our objects will have the properties: ‘SiteID’, ‘SiteName’, ‘LatitudeNorth’, ‘LatitudeSouth’, ‘LongitudeWest’, ‘LongitudeEast’, ‘SiteNotes’,’SiteDescription’, ‘Altitude’.&lt;/p&gt;
-
-&lt;h4 id=&quot;implementing-an-api-call-javascript-and-ajax&quot;&gt;Implementing an API call: Javascript and AJAX&lt;/h4&gt;
-&lt;p&gt;The next two section will demonstrate implementations of the API call that was developed above, the first in asynchronous javascript for use in a web application, and below, in python, to build a CSV that can be used in ArcMap or other projects.&lt;/p&gt;
-
-&lt;p&gt;Here is an example of asking Neotoma for all of the sites above 4,000 meters.  The most important thing to remember is that this an asynchronous AJAX call, so it will take second to respond, and your code has to be able to handle this in its organization.  First we will build the query string, next we will send it to Neotoma using jQuery’s $.ajax function, and finally, we will deal will the response. Another important facet of using jQuery and javascript’s ajax technique is that you don’t have to build the response yourself, you can just pass in a &lt;code&gt;data&lt;/code&gt; parameter in the ajax call, and the string will be built automatically. You can still see the built query string by &lt;code&gt;console.log&lt;/code&gt;-ing the &lt;code&gt;this.url&lt;/code&gt; on &lt;code&gt;beforeSend&lt;/code&gt;.&lt;/p&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;&lt;table style=&quot;border-spacing: 0&quot;&gt;&lt;tbody&gt;&lt;tr&gt;&lt;td class=&quot;gutter gl&quot; style=&quot;text-align: right&quot;&gt;&lt;pre class=&quot;lineno&quot;&gt;1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-23
-24
-25
-26
-27
-28
-29
-30
-31
-32
-33
-34
-35
-36
-37&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;getNeotomaData&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;minAlt&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;){&lt;/span&gt;
-  &lt;span class=&quot;nx&quot;&gt;endpoint&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&#39;http://api.neotomadb.org/v1/data/sites&#39;&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;//this is the root and resource&lt;/span&gt;
-  &lt;span class=&quot;nx&quot;&gt;$&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;ajax&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;endpoint&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;//make an ajax call with the query string url&lt;/span&gt;
-    &lt;span class=&quot;na&quot;&gt;dataType&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;jsonp&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;//its json, but coming from a remote server, so jsonp&lt;/span&gt;
-    &lt;span class=&quot;na&quot;&gt;beforeSend&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(){&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;//optional, but helpful for debugging&lt;/span&gt;
-      &lt;span class=&quot;nx&quot;&gt;console&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;log&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;url&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;//to see exactly where the call is going to&lt;/span&gt;
-    &lt;span class=&quot;p&quot;&gt;},&lt;/span&gt;
-    &lt;span class=&quot;nx&quot;&gt;data&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-      &lt;span class=&quot;nl&quot;&gt;altmin&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;minAlt&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;//pass in the key-value parameters&lt;/span&gt;
-    &lt;span class=&quot;p&quot;&gt;},&lt;/span&gt;
-    &lt;span class=&quot;nx&quot;&gt;success&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;response&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;){&lt;/span&gt;
-      &lt;span class=&quot;c1&quot;&gt;//called when the call succeeds&lt;/span&gt;
-      &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;response&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&#39;success&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]){&lt;/span&gt;&lt;span class=&quot;c1&quot;&gt;//check whether the server said okay&lt;/span&gt;
-        &lt;span class=&quot;nx&quot;&gt;data&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;response&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&#39;data&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;//just take the data from the response&lt;/span&gt;
-        &lt;span class=&quot;nx&quot;&gt;doStuffWithData&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;data&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;//callback function to proceed with the script&lt;/span&gt;
-      &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;else&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-        &lt;span class=&quot;c1&quot;&gt;//the server threw an error, so check what it was&lt;/span&gt;
-        &lt;span class=&quot;nx&quot;&gt;console&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;log&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;Error on the API call.&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-        &lt;span class=&quot;nx&quot;&gt;console&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;log&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;response&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&#39;message&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;])&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;//the server will tell you what&#39;s wrong&lt;/span&gt;
-      &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-    &lt;span class=&quot;p&quot;&gt;},&lt;/span&gt;
-    &lt;span class=&quot;nx&quot;&gt;error&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;xhr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;status&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;error&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;){&lt;/span&gt;
-      &lt;span class=&quot;c1&quot;&gt;//there was an AJAX error (communcation problem)&lt;/span&gt;
-      &lt;span class=&quot;nx&quot;&gt;console&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;log&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;AJAX error.&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-      &lt;span class=&quot;nx&quot;&gt;console&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;log&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;error&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-  &lt;span class=&quot;p&quot;&gt;})&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-
-&lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;doStuffWithData&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;dataArray&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;){&lt;/span&gt;
-  &lt;span class=&quot;c1&quot;&gt;//do stuff here&lt;/span&gt;
-  &lt;span class=&quot;c1&quot;&gt;//put the data on a map?&lt;/span&gt;
-  &lt;span class=&quot;c1&quot;&gt;//make a table of the sites?&lt;/span&gt;
-  &lt;span class=&quot;c1&quot;&gt;//do analysis?&lt;/span&gt;
-  &lt;span class=&quot;c1&quot;&gt;//the world is your oyster&lt;/span&gt;
-  &lt;span class=&quot;nx&quot;&gt;console&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;log&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;dataArray&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;//or just print the message&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
-&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-
-&lt;p&gt;If you have a page with jQuery included on it and call &lt;code&gt;getNeotomaData&lt;/code&gt;, you should see the response get logged into the console.&lt;/p&gt;
-
-&lt;p&gt;Pulling from an API in a web app is great because (1) You don’t have to store and maintain a file, and (2) you have access to updates whenever the organization’s database is updated.&lt;/p&gt;
-
-&lt;h4 id=&quot;implementing-an-api-callpython-to-csv&quot;&gt;IMPLEMENTING AN API CALL: Python to CSV&lt;/h4&gt;
-&lt;p&gt;If you’re not making an interactive map for a web app, you’re unlikely to be using javascript and AJAX, but you still might want to tap into the data service.  Here I will demonstrate a simple json to csv conversion script that calls the same API query in the examples above.&lt;/p&gt;
-
-&lt;p&gt;There are some web-based tools to convert json to csv.  However, since JSON can be hierarchical and a csv is flat, it can be difficult for these tools to work correctly.  If you have some level of competency using python, I recommend custom-rolling your conversions each time you need to call a new resource, to make sure you get the fields that you need in your CSV.  This example uses the &lt;code&gt;csv&lt;/code&gt; module for writing the file and the &lt;code&gt;requests&lt;/code&gt; module for making the api call.&lt;/p&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;&lt;table style=&quot;border-spacing: 0&quot;&gt;&lt;tbody&gt;&lt;tr&gt;&lt;td class=&quot;gutter gl&quot; style=&quot;text-align: right&quot;&gt;&lt;pre class=&quot;lineno&quot;&gt;1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-23
-24
-25
-26
-27
-28
-29
-30
-31
-32
-33
-34
-35
-36
-37
-38
-39
-40
-41&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;csv&lt;/span&gt;
-&lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;requests&lt;/span&gt;
-
-&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;saveDataFromNeotoma&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;minAlt&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;outfile&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
-    &lt;span class=&quot;c&quot;&gt;## set up the output file&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;f&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;open&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;outfile&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&#39;w&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;c&quot;&gt;## open the file buffer&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;fields&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&#39;SiteID&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&#39;SiteName&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&#39;LatitudeNorth&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
-        &lt;span class=&quot;s&quot;&gt;&#39;LatitudeSouth&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&#39;LongitudeEast&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&#39;LongitudeWest&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
-        &lt;span class=&quot;s&quot;&gt;&#39;Altitude&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&#39;SiteDescription&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&#39;Notes&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;c&quot;&gt;## fields to use as the header for the CSV&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;writer&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;csv&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;DictWriter&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;f&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;fieldnames&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;fields&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;lineterminator&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&#39;&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\n&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;c&quot;&gt;## write a line when we pass a dictionary&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;writer&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;writeheader&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;c&quot;&gt;## write the top header row&lt;/span&gt;
-    &lt;span class=&quot;c&quot;&gt;## make the query string&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;endpoint&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;http://api.neotomadb.org/v1/data/sites?&quot;&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;url&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;endpoint&lt;/span&gt;  &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;altmin=&quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;str&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;minAlt&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;c&quot;&gt;## this is the complete query string&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;try&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
-        &lt;span class=&quot;n&quot;&gt;response&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;requests&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;get&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;url&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;json&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;c&quot;&gt;## make the call and parse the response as json&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;except&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;Exception&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;as&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;e&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;c&quot;&gt;## there was a communication error&lt;/span&gt;
-        &lt;span class=&quot;k&quot;&gt;print&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;Failed to reach the neotoma server.&quot;&lt;/span&gt;
-        &lt;span class=&quot;k&quot;&gt;print&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;str&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;e&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-        &lt;span class=&quot;nb&quot;&gt;exit&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;c&quot;&gt;## die&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;not&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;response&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&#39;success&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]:&lt;/span&gt;
-        &lt;span class=&quot;c&quot;&gt;## there was an error on the call&lt;/span&gt;
-        &lt;span class=&quot;k&quot;&gt;print&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;There was a communication error&quot;&lt;/span&gt;
-        &lt;span class=&quot;k&quot;&gt;print&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;response&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&#39;message&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;c&quot;&gt;## this is the error message&lt;/span&gt;
-        &lt;span class=&quot;nb&quot;&gt;exit&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;data&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;response&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&#39;data&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;site&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;data&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;c&quot;&gt;## iterate through all the sites&lt;/span&gt;
-        &lt;span class=&quot;c&quot;&gt;## the fields in the header are all the same as the fields in the response objects&lt;/span&gt;
-        &lt;span class=&quot;c&quot;&gt;## so we can just write with the response objects&lt;/span&gt;
-        &lt;span class=&quot;c&quot;&gt;## otherwise, we could do more manipulation here&lt;/span&gt;
-        &lt;span class=&quot;k&quot;&gt;try&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
-            &lt;span class=&quot;c&quot;&gt;# the encoding can be funky when writing to excel, so fix it&lt;/span&gt;
-            &lt;span class=&quot;n&quot;&gt;site&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&#39;SiteName&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;site&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&#39;SiteName&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;encode&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;utf-8&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-            &lt;span class=&quot;n&quot;&gt;site&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&#39;SiteDescription&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;site&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&#39;SiteDescription&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;encode&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;utf-8&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-        &lt;span class=&quot;k&quot;&gt;except&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;AttributeError&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;c&quot;&gt;## site didn&#39;t have site description&lt;/span&gt;
-            &lt;span class=&quot;k&quot;&gt;pass&lt;/span&gt; &lt;span class=&quot;c&quot;&gt;## don&#39;t worry about it&lt;/span&gt;
-        &lt;span class=&quot;n&quot;&gt;writer&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;writerow&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;site&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;c&quot;&gt;## write the row&lt;/span&gt;
-    &lt;span class=&quot;c&quot;&gt;# finish up&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;f&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;close&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
-
-&lt;span class=&quot;n&quot;&gt;saveDataFromNeotoma&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;4000&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;/path/to/your/intended/file.csv&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
-&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-
-&lt;p&gt;In this way, you can create a file just like it had been made available for public downloading, but (1) you’ve done it on a resource that was not available as a file download, and (2) you were able to exactly configure the response how you want it, so you don’t have to mess around in excel filtering and sorting.&lt;/p&gt;
-
-&lt;p&gt;Hopefully this post was helpful in getting you started on using APIs and data services, and that you can maybe use these techniques in your own work at some point.  Spatial data APIs are everywhere – happy hunting.&lt;/p&gt;
-</description>
-        <pubDate>Tue, 31 May 2016 11:22:52 -0500</pubDate>
-        <link>/cartography/2016/05/31/Find-Data-For_Cartography-Projects-II.html</link>
-        <guid isPermaLink="true">/cartography/2016/05/31/Find-Data-For_Cartography-Projects-II.html</guid>
-        
-        
-        <category>cartography</category>
         
       </item>
     

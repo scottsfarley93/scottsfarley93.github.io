@@ -53,8 +53,8 @@ The scale of GBIF is on an entirely different level than Neotoma (perhaps becaus
 ![GBIF_Growth](/assets/bigData/GBIF_Growth.png)
 *Figure 4: Exponential growth of occurrence records in GBIF*
 
-<link rel="stylesheet" href="https://npmcdn.com/leaflet@0.7.7/dist/leaflet.css" />
-<script src="https://npmcdn.com/leaflet@0.7.7/dist/leaflet.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@0.7.7/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@0.7.7/dist/leaflet.js"></script>
 <script   src="https://code.jquery.com/jquery-3.1.0.slim.min.js"   integrity="sha256-cRpWjoSOw5KcyIOaZNo4i6fZ9tKPhYYb6i5T9RSVJG8="   crossorigin="anonymous"></script>
 <div id='map' style='height:500px;'>
 </div>

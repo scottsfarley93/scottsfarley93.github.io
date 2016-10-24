@@ -6,13 +6,32 @@
 </description>
     <link>/</link>
     <atom:link href="/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Mon, 19 Sep 2016 20:35:53 -0500</pubDate>
-    <lastBuildDate>Mon, 19 Sep 2016 20:35:53 -0500</lastBuildDate>
+    <pubDate>Mon, 24 Oct 2016 10:45:10 -0500</pubDate>
+    <lastBuildDate>Mon, 24 Oct 2016 10:45:10 -0500</lastBuildDate>
     <generator>Jekyll v3.1.6</generator>
     
       <item>
+        <title>Occurrences in Neotoma: 18,900,000 and counting...</title>
+        <description>&lt;p&gt;A few weeks ago, I posted about Big Data in the field of ecology, specifically biodiversity informatics, where I looked at the holdings of the Neotoma Paleoecological Database and the Global Biodiversity Information Facility (GBIF). I made some comparisons between the two databases, though the units of scale were different. In Neotoma, I used the number of &lt;em&gt;datasets&lt;/em&gt; that had been submitted, while for GBIF, I commented on the number of &lt;em&gt;occurrences&lt;/em&gt;.  These are two fundamentally different units, so I set out to resolve the issue and find out how many occurrences there are in Neotoma.&lt;/p&gt;
+
+&lt;p&gt;Counting every single taxa in every single level in Neotoma, there are over 18.9 million occurrence records – identifications of a single type at a single space-time locus.&lt;/p&gt;
+
+&lt;p&gt;To be exact, there are 18,903,236 occurrence records, with a steeply increasing trend over the last several months. I suspect we’ll be up over 20 million by the middle of 2017.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/bigData/Neotoma_Occurrences.png&quot; alt=&quot;NeotomaOccurrenceRecords&quot; /&gt;&lt;/p&gt;
+</description>
+        <pubDate>Sat, 22 Oct 2016 09:22:52 -0500</pubDate>
+        <link>/tutorial/2016/10/22/18-Million-Neotoma-Occurrences.html</link>
+        <guid isPermaLink="true">/tutorial/2016/10/22/18-Million-Neotoma-Occurrences.html</guid>
+        
+        
+        <category>Tutorial</category>
+        
+      </item>
+    
+      <item>
         <title>PhD Preview</title>
-        <description>&lt;p&gt;I’ve been thinking a lot about my PhD research, even I’ve been working 12 hours a day to finish my master’s thesis. If you were recently thinking &lt;em&gt;“I wonder what Scott will be doing in Wisconsin for the next 3-6 years”&lt;/em&gt;, wonder no more. This is the Cliff Notes version, expect a 150-200 page version in early 2021.&lt;/p&gt;
+        <description>&lt;p&gt;I’ve been thinking a lot about my PhD research, even as I’ve been working 12 hours a day to finish my master’s thesis. If you were recently thinking &lt;em&gt;“I wonder what Scott will be doing in Wisconsin for the next 3-6 years”&lt;/em&gt;, wonder no more. This is the Cliff Notes version, expect a 150-200 page version in early 2021.&lt;/p&gt;
 
 &lt;p&gt;Contemporary understanding of past land cover dynamics comes primarily from expert interpretation of paleoenvironmental proxies, such as fossil pollen or vertebrate macrofossils. My dissertation research will focus on the link between the paleoecological proxy data, particularly fossil pollen, and the drivers of land use change by developing a hierarchical Bayesian model that calibrates dense networks of modern pollen samples with MODIS remote sensing data.  Once calibrated, the model will be used to develop a gridded dataset that reconstructs tree cover percentage and relative composition of broadleaf and needleleaf plant types at 500-year intervals since the Last Glacial Maximum (22kya). The reconstructions can then be used to to identify and test the drivers of regional and global scale land cover shifts, in response to climate and other forcings. I plan to test the impact of vegetation change during the late Pleistocene to draw inference about megafaunal decline and extinction. My work bridges a key gap by providing a mechanism to propagate our understanding of modern land cover change, in the form of remote sensing data products, back through time while estimating model uncertainty.  Using land cover dynamics from the recent geologic past can help to forecast how land cover and biodiversity will change when exposed to 21st century climatic and anthropogenic forcings.&lt;/p&gt;
 
@@ -1754,141 +1773,6 @@ sudo mv [APPLICATION-NAME].conf /etc/supervisor/conf.d
         <pubDate>Sun, 12 Jun 2016 11:22:52 -0500</pubDate>
         <link>/research/cloudcomputing/2016/06/12/managing-long-running-linux-processes.html</link>
         <guid isPermaLink="true">/research/cloudcomputing/2016/06/12/managing-long-running-linux-processes.html</guid>
-        
-        
-        <category>Research</category>
-        
-        <category>CloudComputing</category>
-        
-      </item>
-    
-      <item>
-        <title>Startup and Shutdown Scripts in Google Cloud Compute Engine</title>
-        <description>&lt;p&gt;In continuing my meditations on beginning to use the Google Cloud Computing platform, this post will describe the use of startup and shutdown scripts. If you want to start multiple instances that are all the same in terms of programs, data, etc (but perhaps of different size), you have two options. First, you could save your fully configured machine as an image, or more likely, as a snapshot.  Booting with this configuration is easy, just select the option from the menu when starting the new instance. Proceeding in this way has several potential drawbacks, however.  Most notably, it is very difficult to keep everything updated with this method.  Unless you manually update the snapshot pretty often, your software is going to be out of date.  Moreover, if you decide to make a small change in the scripts or programs you’re running on the instance, you will need to make an update to the snapshot.&lt;/p&gt;
-
-&lt;p&gt;Instead of using a pre-configured snapshot, you can make use of Google Cloud’s ability to automatically run a script at boot time.  Using this script allows us to automatically install the latest version our programs using the &lt;code&gt;apt-get&lt;/code&gt; or other linux package manager, and if using version control software like git, download the latest working version of the scripts.  Google provides fairly easy-to-follow documentation about startup scripts &lt;a href=&quot;https://cloud.google.com/compute/docs/startupscript&quot;&gt;here&lt;/a&gt;.  In the same vein, Google provides a beta feature to run a script on machine termination, so you can save your work, etc.  There are a variety of limitations described in the &lt;a href=&quot;https://cloud.google.com/compute/docs/shutdownscript&quot;&gt;shutdown-script documentation&lt;/a&gt;, but they can be handy to run short cleanup jobs.&lt;/p&gt;
-
-&lt;p&gt;As noted in the documentation, you can write the script in a number of languages by changing the shebang line at the top of the script.  To run a bash script, the first line of the script should be &lt;code&gt;#! /bin/bash&lt;/code&gt;.  A python script could be run by changing this line to &lt;code&gt;#!/usr/bin/python&lt;/code&gt;.&lt;/p&gt;
-
-&lt;h3 id=&quot;adding-a-script-to-a-single-instance&quot;&gt;Adding a script to a single instance&lt;/h3&gt;
-&lt;p&gt;If you want to add a startup script to a single instance that is currently running:&lt;/p&gt;
-
-&lt;ol&gt;
-  &lt;li&gt;Click on the instance properties in the Console&lt;/li&gt;
-  &lt;li&gt;Click on edit, at the top&lt;/li&gt;
-  &lt;li&gt;Scroll to the ‘Custom Metadata’ section&lt;/li&gt;
-  &lt;li&gt;For key, enter &lt;code&gt;startup-script&lt;/code&gt;&lt;/li&gt;
-  &lt;li&gt;In the value field, write your script&lt;/li&gt;
-  &lt;li&gt;Click save at the bottom and restart the instance.&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;h3 id=&quot;adding-a-script-to-all-instances-in-your-project&quot;&gt;Adding a script to all instances in your project:&lt;/h3&gt;
-&lt;p&gt;These items will be applied to all &lt;em&gt;new&lt;/em&gt; instances in your project.&lt;/p&gt;
-
-&lt;ol&gt;
-  &lt;li&gt;Open the Cloud Computing Console&lt;/li&gt;
-  &lt;li&gt;Click ‘Metadata’ in the lefthand navigation bar&lt;/li&gt;
-  &lt;li&gt;Click ‘Edit’ at the top&lt;/li&gt;
-  &lt;li&gt;Click ‘Add item’ to add a new key value pair&lt;/li&gt;
-  &lt;li&gt;As above, for key enter &lt;code&gt;startup-script&lt;/code&gt;, and for value write your script&lt;/li&gt;
-  &lt;li&gt;Save and close.&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;p&gt;It can be confusing sometimes because the metadata added here in this panel is automatically applied to all of your new instances.  You cannot see these key-value pairs in the metadata section of instance, so just remember it’s there.&lt;/p&gt;
-
-&lt;h4 id=&quot;adding-a-shutdown-script&quot;&gt;Adding a shutdown script&lt;/h4&gt;
-&lt;p&gt;Follow the same steps as to run a startup script, but instead of the &lt;code&gt;startup-script&lt;/code&gt; key, put &lt;code&gt;shutdown-script&lt;/code&gt;.  Super easy.  Be warned, though, that shutdown scripts are not guaranteed to run, Google completes them on a ‘best effort basis.’&lt;/p&gt;
-
-&lt;h3 id=&quot;my-startup-script&quot;&gt;My Startup Script&lt;/h3&gt;
-&lt;p&gt;I’ll describe my startup script and what I choose to do for each instance to set them up to run the experiments I am working with.  In general, I download, install, and update a bunch of software, I configure the google cloud proxy, and then I clone my github repository which contains all of my working files.  Then, when all is complete, I automatically start my experiments to run through an &lt;code&gt;Rscript&lt;/code&gt; and then terminate the machine when they’re complete.  The script is automatically run as root, from the root directory, so all of the &lt;code&gt;sudo&lt;/code&gt;’s are repetitive.&lt;/p&gt;
-
-&lt;pre&gt;#! /bin/bash
-
---&amp;gt;Tell the computer I&#39;m working in a bash script
-
-&lt;/pre&gt;
-
-&lt;pre&gt;sudo apt-get update
-
---&amp;gt;Update the base packages that are installed on the instance
-&lt;/pre&gt;
-
-&lt;pre&gt;sudo apt-get -y install git
---&amp;gt;Install Git version control.  
-&lt;/pre&gt;
-
-&lt;p&gt;The &lt;code&gt;-y&lt;/code&gt; flag automatically answers &lt;code&gt;y&lt;/code&gt; to any queries presented by the download manager (i.e., are you sure you want to download this package? y/n).&lt;/p&gt;
-
-&lt;pre&gt;sudo apt-get -y install r-base
---&amp;gt;Install R
-&lt;/pre&gt;
-
-&lt;pre&gt;sudo apt-get install -y gdebi-core
---&amp;gt;Install a utility dependency for use in installing RStudio
-&lt;/pre&gt;
-
-&lt;pre&gt;sudo apt-get install -y aptitude
---&amp;gt; Install the aptitude package manager
-&lt;/pre&gt;
-
-&lt;p&gt;Aptitude is a &lt;a href=&quot;http://askubuntu.com/questions/1743/is-aptitude-still-considered-superior-to-apt-get&quot;&gt;different&lt;/a&gt; package manager for linux systems.  This is the only one I could find that has a gdal package.&lt;/p&gt;
-
-&lt;pre&gt;sudo aptitude install -y libgdal-dev
-sudo aptitude install -y libproj-dev
-
---&amp;gt;Install gdal and proj4 libraries.
-&lt;/pre&gt;
-
-&lt;pre&gt;sudo apt-get install -y  libmariadb-client-lgpl-dev
-
---&amp;gt;Install a database dependency necessary for installing RMySQL
-&lt;/pre&gt;
-
-&lt;pre&gt;
-wget https://download2.rstudio.org/rstudio-server-0.99.902-amd64.deb
-sudo gdebi -y rstudio-server-0.99.902-amd64.deb
-
---&amp;gt; Download and install RStudio
-&lt;/pre&gt;
-
-&lt;pre&gt;
-wget https://dl.google.com/cloudsql/cloud_sql_proxy.linux.amd64
-mv cloud_sql_proxy.linux.amd64 cloud_sql_proxy
-chmod +x cloud_sql_proxy
-
---&amp;gt;Download the cloud proxy script into your root directory and make it an executable.
-&lt;/pre&gt;
-
-&lt;pre&gt;
-sudo mkdir cloudsql; sudo chmod 777 cloudsql
-
---&amp;gt;Make a directory for your cloudsql proxy sockets
-&lt;/pre&gt;
-
-&lt;pre&gt;
-rm -rf /home/rstudio/thesis-scripts
-
---&amp;gt;Remove any old version of the script directory I&#39;ll be using.
-&lt;/pre&gt;
-
-&lt;pre&gt;git clone http://github.com/scottsfarley93/thesis-scripts /home/rstudio/thesis-scripts
-
---&amp;gt;Clone the latest and greatest version of my repo into my instance.
-&lt;/pre&gt;
-
-&lt;pre&gt;sudo ./cloud_sql_proxy  -dir=/cloudsql -instances=thesis-1329:us-central1:sdm-database-3 &amp;amp;
-
---&amp;gt;Start the cloudsql proxy so we can make database connections.
-&lt;/pre&gt;
-
-&lt;pre&gt;Rscript /home/rstudio/thesis-scripts/R/time_sdm.R 50 TRUE
-
---&amp;gt;Start the experiment script to run 50 iterations and then shutdown the machine.
-&lt;/pre&gt;
-</description>
-        <pubDate>Sun, 05 Jun 2016 11:22:52 -0500</pubDate>
-        <link>/research/cloudcomputing/2016/06/05/Startup-and-Shutdown-Scripts-GCE.html</link>
-        <guid isPermaLink="true">/research/cloudcomputing/2016/06/05/Startup-and-Shutdown-Scripts-GCE.html</guid>
         
         
         <category>Research</category>

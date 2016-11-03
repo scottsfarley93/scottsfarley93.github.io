@@ -6,9 +6,27 @@
 </description>
     <link>/</link>
     <atom:link href="/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Mon, 24 Oct 2016 10:45:10 -0500</pubDate>
-    <lastBuildDate>Mon, 24 Oct 2016 10:45:10 -0500</lastBuildDate>
+    <pubDate>Thu, 03 Nov 2016 14:11:44 -0500</pubDate>
+    <lastBuildDate>Thu, 03 Nov 2016 14:11:44 -0500</lastBuildDate>
     <generator>Jekyll v3.1.6</generator>
+    
+      <item>
+        <title>2016 NACIS Dynamic Mapping Award Win!</title>
+        <description>&lt;p&gt;I’m psyched to put out that a map that I worked on last spring won the North American Cartographic Society Best Dynamic Map award at their annual conference a couple weeks back.  It was a blast working with Starr and Meghan on this project and well worth the late nights. Looking forward to more interactive mapping coming up.  If you’ve got something you want to map – let me know!&lt;/p&gt;
+
+&lt;p&gt;Read more about the application &lt;a href=&quot;http://nacis.org/awards/2016-winner-wooden-ships/&quot;&gt;here&lt;/a&gt; or explore it here.&lt;/p&gt;
+
+&lt;iframe src=&quot;http://wooden-ships.github.io/&quot; style=&quot;height: 1000px; width:100%&quot; /&gt;
+
+</description>
+        <pubDate>Thu, 03 Nov 2016 09:22:52 -0500</pubDate>
+        <link>/tutorial/2016/11/03/Nacis-Award.html</link>
+        <guid isPermaLink="true">/tutorial/2016/11/03/Nacis-Award.html</guid>
+        
+        
+        <category>Tutorial</category>
+        
+      </item>
     
       <item>
         <title>Occurrences in Neotoma: 18,900,000 and counting...</title>
@@ -1696,83 +1714,6 @@ Postgres is a relational database management system that has a great collection 
         <pubDate>Thu, 16 Jun 2016 08:22:52 -0500</pubDate>
         <link>/research/cloudcomputing/2016/06/16/Computing-Configuration-Update.html</link>
         <guid isPermaLink="true">/research/cloudcomputing/2016/06/16/Computing-Configuration-Update.html</guid>
-        
-        
-        <category>Research</category>
-        
-        <category>CloudComputing</category>
-        
-      </item>
-    
-      <item>
-        <title>Managing Long-Running Processes on Linux</title>
-        <description>&lt;p&gt;In my work, I have several times encountered the need to run a script for an extended period of time, or as a daemon (always running as a service).  Whether you’re on your own personal computer or SSHed into a virtual machine in the cloud, managing processes that take a long time can be annoying. If you finish your work day and close your laptop, you’re going to stop your script.  In the cloud (or I guess on a desktop/personal server too) you can take a couple steps to run scripts as services that will not stop when you end your work day.  There are a couple of ways of doing it that I’ve found.  Here are two that matched my needs.&lt;/p&gt;
-
-&lt;h3 id=&quot;forever&quot;&gt;Forever&lt;/h3&gt;
-
-&lt;h4 id=&quot;scenario&quot;&gt;Scenario:&lt;/h4&gt;
-&lt;p&gt;I have a node.js based api server (to be discussed in a future post) that runs common sql queries for me so I can see the progress of my experiments over HTTP instead of typing out the commands manually.  I wrote the app, and can run it with &lt;code&gt;node app.js&lt;/code&gt;.  Works great – until I log off of SSH.  Because its a web server, I want it to be running all the time, so I can see it from anywhere on the internet, not just when I am actively working on my projects.  So I need a way to make this run automatically, 24/7.&lt;/p&gt;
-
-&lt;h4 id=&quot;solution&quot;&gt;Solution:&lt;/h4&gt;
-&lt;p&gt;Forever is a super simple tool designed to make your app run continuously. It is both written in node and designed to run node apps, so it’s a good choice for our scenario.  Also, it’s &lt;a href=&quot;https://github.com/foreverjs/forever&quot;&gt;open source&lt;/a&gt;.&lt;/p&gt;
-
-&lt;p&gt;To install &lt;code&gt;forever&lt;/code&gt;, I will use the node package manager (npm).  &lt;code&gt;cd&lt;/code&gt; into your application’s project directory, then install the package with &lt;code&gt;[sudo] npm install forever -g&lt;/code&gt;.  The g flag should make the package available globally, and, importantly for us, available as a command line tool.  Y&lt;/p&gt;
-
-&lt;p&gt;So I’ve got my app, I’ve debugged it both on a localhost and on the remote machine I’ll be hosting the server on, so I know it is going to work, and I’ve installed the package.  To start the process &lt;code&gt;cd&lt;/code&gt; into the directory you’re going to use, and then start the app with &lt;code&gt;forever [APPLICATION-NAME].js&lt;/code&gt;. In my case, it’s &lt;code&gt;forever app.js&lt;/code&gt;.  And that’s it.  You can check by examining the logs, or, more simply, going to wherever your application is serving content.  I have mine running on the 8080 port of the server I’m using as the master node / database of my project.  If I go there in my web browser, I see that my node project is running as expected.&lt;/p&gt;
-
-&lt;p&gt;If you update your app, you’ll need to restart the service.  You can list the running services controlled by &lt;code&gt;forever&lt;/code&gt; by using &lt;code&gt;forever list&lt;/code&gt;.  Find your process (if you have more than one running), and then stop by &lt;code&gt; forever stop [ID]&lt;/code&gt;. If you have exactly one process running, you can shortcut the listing and just run &lt;code&gt;forever stop 0&lt;/code&gt;.&lt;/p&gt;
-
-&lt;p&gt;In all, &lt;code&gt;forever&lt;/code&gt; is a very simple and easy to use solution for running node apps as services on virtual machines.  I think that we could use it to run scripts in other languages, like python, but I decided to use another tool for that.&lt;/p&gt;
-
-&lt;h3 id=&quot;supervisor&quot;&gt;Supervisor&lt;/h3&gt;
-
-&lt;h4 id=&quot;scenario-1&quot;&gt;Scenario:&lt;/h4&gt;
-&lt;p&gt;I have a python script that I call MasterNode which controls the creation and deletion of all of the other virtual machines that I need to work with for my project.  MasterNode starts, figures out what the next core/memory combination is that has not be finished yet, then fires up a group of servers to do this job. When all of the experiments are complete, the script kills them, deletes them, and starts a new configuration.  The whole point of having MasterNode is that I don’t have to worry about specifying which configuration comes next, I can just sit back and relax while MasterNode figures it out for me.  This only works, though, if MasterNode is running, which stops after I log out of the virtual machine. I like sitting back and relaxing – So clearly I need a way to make it run continuously. I found a tool called &lt;code&gt;supervisor&lt;/code&gt; which is very similar to &lt;code&gt;forever&lt;/code&gt; but looks more robust and versatile.&lt;/p&gt;
-
-&lt;h4 id=&quot;solution-1&quot;&gt;Solution:&lt;/h4&gt;
-&lt;p&gt;Getting it up and running was slightly more challenging – &lt;a href=&quot;https://serversforhackers.com/monitoring-processes-with-supervisord&quot;&gt;this post&lt;/a&gt; was very helpful. To install &lt;code&gt;supervisor&lt;/code&gt; use &lt;code&gt;apt-get&lt;/code&gt;.  Specifically, we will use &lt;code class=&quot;highlighter-rouge&quot;&gt;sudo apt-get install -y supervisor&lt;/code&gt;.  The &lt;code class=&quot;highlighter-rouge&quot;&gt;-y&lt;/code&gt; flag indicates that you will answer yes to any question the system asks you (like ‘Are you sure you want to install this package?’).  Now we’ve installed the package, we need to define a program for it to run.&lt;/p&gt;
-
-&lt;p&gt;Create a new program configuration file using &lt;code class=&quot;highlighter-rouge&quot;&gt;nano [APPLICATION-NAME].conf&lt;/code&gt;.  Inside of the file, you will write the details about where the program executable is located, whether it restarts, etc.  Details are confusing but can be found &lt;a href=&quot;http://supervisord.org/configuration.html&quot;&gt;here&lt;/a&gt;.  My configuration file looks like this: (comments are added, remove them)&lt;/p&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;table style=&quot;border-spacing: 0&quot;&gt;&lt;tbody&gt;&lt;tr&gt;&lt;td class=&quot;gutter gl&quot; style=&quot;text-align: right&quot;&gt;&lt;pre class=&quot;lineno&quot;&gt;1
-2
-3
-4
-5&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;program:masterNode]  &lt;span class=&quot;c&quot;&gt;## name your process&lt;/span&gt;
-&lt;span class=&quot;nb&quot;&gt;command&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;python -u masterNode.py &lt;span class=&quot;c&quot;&gt;## this is the command that supervisor will use to start your script&lt;/span&gt;
-&lt;span class=&quot;nv&quot;&gt;directory&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;/home/rstudio/thesis-scripts/python  &lt;span class=&quot;c&quot;&gt;## this is the directory that your script lives in&lt;/span&gt;
-&lt;span class=&quot;nv&quot;&gt;stdout_logfile&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;/home/rstudio/thesis-scripts/logs/masterNode.log &lt;span class=&quot;c&quot;&gt;## this is where the output of your script will go&lt;/span&gt;
-&lt;span class=&quot;nv&quot;&gt;redirect_stderr&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;true&lt;/span&gt; &lt;span class=&quot;c&quot;&gt;## put errors into your log too&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
-&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-
-&lt;p&gt;Now, move the configuration file into the directory used by the supervisor program:&lt;/p&gt;
-
-&lt;pre&gt;
-sudo mv [APPLICATION-NAME].conf /etc/supervisor/conf.d
-&lt;/pre&gt;
-
-&lt;p&gt;The &lt;code class=&quot;highlighter-rouge&quot;&gt;conf.d&lt;/code&gt; directory holds all of the programs you want to be run by supervisor.  When it starts, it will look in this directory for any &lt;code class=&quot;highlighter-rouge&quot;&gt;.conf&lt;/code&gt; files.&lt;/p&gt;
-
-&lt;p&gt;The first time you run the program, it might try to automatically start your program.  That’s cool, but if it doesn’t you can start your script running under supervisor with these steps:&lt;/p&gt;
-
-&lt;ol&gt;
-  &lt;li&gt;Open the supervisor tool with &lt;code class=&quot;highlighter-rouge&quot;&gt;supervisorctl&lt;/code&gt;, which opens up a new supervisor shell.&lt;/li&gt;
-  &lt;li&gt;Load any new configuration files with &lt;code class=&quot;highlighter-rouge&quot;&gt;reread&lt;/code&gt;, which will print out a list of available programs that you could run.&lt;/li&gt;
-  &lt;li&gt;Start your program with &lt;code class=&quot;highlighter-rouge&quot;&gt;add [programName]&lt;/code&gt;, which will put your program under supervisor’s control.  Now you can sit back and relax :)&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;p&gt;You can review the logs of your scripts by looking at them directly in the folder where you put them, or better, you can view them in real time with &lt;code class=&quot;highlighter-rouge&quot;&gt;tail -f [programName]&lt;/code&gt; from the supervisor shell.&lt;/p&gt;
-
-&lt;p&gt;To stop the program, you can &lt;code class=&quot;highlighter-rouge&quot;&gt;stop [programName]&lt;/code&gt;, which puts your application into paused mode. If you want to remove it from supervisor’s control all together, you can then enter &lt;code class=&quot;highlighter-rouge&quot;&gt;remove [programName]&lt;/code&gt; to take it off of supervisor’s list.&lt;/p&gt;
-
-&lt;p&gt;This technique seemed to work well for me.  It auto-starts and auto-restarts your programs if they get cut off.  The package also comes with a web based manager on port 9001, which you can use to control your processes remotely.  Nifty.&lt;/p&gt;
-
-&lt;h3 id=&quot;conclusion&quot;&gt;Conclusion&lt;/h3&gt;
-&lt;p&gt;There are many ways to control your long running processes.  One of the ones I did not mention here is to create the script as its own service.  However, I like the management and flexibility of the tools I discussed here.  Both of these tools would work to do either job too, so I think its really a matter of preference to pick one out.&lt;/p&gt;
-</description>
-        <pubDate>Sun, 12 Jun 2016 11:22:52 -0500</pubDate>
-        <link>/research/cloudcomputing/2016/06/12/managing-long-running-linux-processes.html</link>
-        <guid isPermaLink="true">/research/cloudcomputing/2016/06/12/managing-long-running-linux-processes.html</guid>
         
         
         <category>Research</category>

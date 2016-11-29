@@ -4,13 +4,37 @@ layout: index-layout
 
 <div class="home">
 
-  <h3 class='page-header'>I'm working on my website!</h3>
+  <h3 class='page-header ph-center'>I'm working on my website!</h3>
   <p>
     I'm working on redoing the portfolio section of my website to reflect my latest work. It will be back up shortly.  In the meantime, please feel free to check out my <a href='cv.html'>CV</a> or browse my research blog.
   </p>
 
+<div id='content'>
+<h2 class='page-header ph-center'>Portfolio</h3>
+<div class='row col-xs-12' id='portfolio'>
+    {% for project in site.projects %}
+    <div class='col-xs-6 portfolio-content'>
+      <a href="{{project.url | prepend: site.baseurl}}">
+        <img class='img img-responsive' src="{{project.thumb | prepend: site.baseurl}}" />
+      <div class="carousel-caption">
+           {% if project.overlay %}
+            <img class='overlay' src="{{project.overlay | prepend: site.baseurl}}"/>
+          {% endif %}
+          {% if project.overlayName %}
+            <h4 class='overlay-name'><i>{{project.overlayName}}</i></h4>
+          {% endif %}
+     </div>
+     <h3>{{project.title}}</h3>
+    </a>
+    </div>
+    {% endfor %}
+</div>
 
-  <ul class="post-list">
+
+<hr />
+
+<h2 class='page-header ph-center' id='blog-header'>Blog</h3>
+  <ul class="post-list" id='blog'>
     {% for post in site.posts %}
       <li>
         <span class="post-meta">{{ post.date | date: "%b %-d, %Y" }}</span>
@@ -23,5 +47,17 @@ layout: index-layout
   </ul>
 
   <p class="rss-subscribe">subscribe <a href="{{ "/feed.xml" | prepend: site.baseurl }}">via RSS</a></p>
-
 </div>
+</div>
+
+<script>
+$(document).ready(function(){
+  $(".portfolio-content").find(".carousel-caption").hide();
+	$(".portfolio-content").mouseenter(function(){
+		$(this).find(".carousel-caption").show();
+	});
+$(".portfolio-content").mouseleave(function(){
+		$(this).find(".carousel-caption").hide();
+	});
+})
+</script>

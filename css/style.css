@@ -15,10 +15,10 @@ html, body{
 	margin-top: 0%;
 }
 
-.row, .portfolio-content{
+/*.row, .portfolio-content{
 	margin-bottom: 8%;
 	text-align: center;
-}
+}*/
 
 #contact-div{
 	margin-bottom:0px;
@@ -48,10 +48,10 @@ footer{
 	width: 100%;
 	margin: 0px;
 }
-.portfolio-content{
+/*.portfolio-content{
 	padding: 0px;
 
-}
+}*/
 .projectDescription{
 
 }
@@ -96,9 +96,32 @@ ul{
 nav{
 	z-index: 1288812;
 }
-#blog{
+.home{
 	text-align: center;
 	position: absolute;
 	top: 100%;
 	left:0px;
+}
+.ph-center{
+	text-align: center;
+	display: block;
+}
+#content{
+	position: relative;
+}
+
+.img{
+	height: 100%!important;
+}
+
+.overlay{
+	height: 40%!important;
+	width: 40%!important;
+	padding-bottom: 10%!important;
+}
+#portfolio{
+	padding-bottom: 250px!important;
+}
+.overlay-name{
+	padding-bottom: 10%;
 }

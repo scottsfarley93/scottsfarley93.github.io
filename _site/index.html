@@ -37,8 +37,12 @@
 
     ga('create', 'UA-83006302-2', 'auto');
     ga('send', 'pageview');
-
   </script>
+
+  <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha256-/SIrNqv8h6QGKDuNoLGA4iret+kyesCkHGzVUUV0shc=" crossorigin="anonymous"></script>
+<!-- Latest compiled and minified JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
 
 </head>
 
@@ -77,17 +81,50 @@
         </div>
     </div>
 
-    <div class="page-content row col-xs-12" id='blog'>
-      <div class="wrapper">
-        <div class="home">
+   <div class="home">
 
-  <h3 class='page-header'>I'm working on my website!</h3>
+  <h3 class='page-header ph-center'>I'm working on my website!</h3>
   <p>
     I'm working on redoing the portfolio section of my website to reflect my latest work. It will be back up shortly.  In the meantime, please feel free to check out my <a href='cv.html'>CV</a> or browse my research blog.
   </p>
 
+<div id='content'>
+<h2 class='page-header ph-center'>Portfolio</h3>
+<div class='row col-xs-12' id='portfolio'>
+    
+    <div class='col-xs-6 portfolio-content'>
+      <a href="/projects/iceAgeMapper.html">
+        <img class='img img-responsive' src="assets/IceAgeMapperThumb.png" />
+      <div class="carousel-caption">
+           
+          
+     </div>
+     <h3>Ice Age Mapper</h3>
+    </a>
+    </div>
+    
+    <div class='col-xs-6 portfolio-content'>
+      <a href="/projects/woodenships.html">
+        <img class='img img-responsive' src="assets/woodenShipsThumb.png" />
+      <div class="carousel-caption">
+           
+            <img class='overlay' src="assets/first_place.png"/>
+          
+          
+            <h4 class='overlay-name'><i>NACIS Dynamic Mapping Competition</i></h4>
+          
+     </div>
+     <h3>Wooden Ships</h3>
+    </a>
+    </div>
+    
+</div>
 
-  <ul class="post-list">
+
+<hr />
+
+<h2 class='page-header ph-center' id='blog-header'>Blog</h3>
+  <ul class="post-list" id='blog'>
     
       <li>
         <span class="post-meta">Nov 3, 2016</span>
@@ -228,11 +265,21 @@
   </ul>
 
   <p class="rss-subscribe">subscribe <a href="/feed.xml">via RSS</a></p>
-
+</div>
 </div>
 
-      </div>
-    </div>
+<script>
+$(document).ready(function(){
+  $(".portfolio-content").find(".carousel-caption").hide();
+	$(".portfolio-content").mouseenter(function(){
+		$(this).find(".carousel-caption").show();
+	});
+$(".portfolio-content").mouseleave(function(){
+		$(this).find(".carousel-caption").hide();
+	});
+})
+</script>
+
 
     <footer >
   <ul class='list-inline'>

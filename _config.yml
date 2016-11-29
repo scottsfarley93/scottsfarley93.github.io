@@ -19,6 +19,9 @@ LIS: true
 production_url : http://scottsfarley93.github.io.com/
 BASE_PATH : http://scottsfarley93.com/
 
+collections:
+  projects:
+    output: true
 
 # Build settings
 markdown: kramdown

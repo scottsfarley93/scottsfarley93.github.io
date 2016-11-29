@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+  <title>Preliminary Thesis Results: Update 6/26</title>
+  <meta name="description" content="I’ve made it through 4,830 of the experiments I want to run for my thesis, so I’m taking this opportunity to reflect on the preliminary results that I have s...">
+
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="canonical" href="/research/visualization/2016/06/26/preliminary-thesis-results.html">
+  <link rel="alternate" type="application/rss+xml" title="Scott's Blog" href="/feed.xml">
+
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name='viewport' content='width=device-width, initial-scale=1'/>
+    <meta name='keywords' content="maps, cartography"/>
+    <!---Links--->
+    <!-- Latest compiled and minified CSS -->
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+<!-- Optional theme -->
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+    <link rel="stylesheet" href='/css/cv.css'>
+    <link rel="stylesheet" href='/css/style.css'>
+    <style>
+    	footer{
+    		text-align:center;
+    	}
+    </style>
+    <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-83006302-2', 'auto');
+    ga('send', 'pageview');
+
+  </script>
+
+</head>
+
+
+  <body>
+
+    
+
+
+<nav class="navbar navbar-default navbar-static-top">
+<div class="container">
+<div class="navbar-header">
+  <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+    <span class="sr-only">Toggle navigation</span>
+    <span class="icon-bar"></span>
+    <span class="icon-bar"></span>
+    <span class="icon-bar"></span>
+  </button>
+  <a class="navbar-brand" href="index.html">Scott Farley</a>
+</div>
+<div id="navbar" class="navbar-collapse collapse">
+  <ul class="nav navbar-nav navbar-right">
+    <li><a href="/index.html">Home</a></li>
+    <li><a href="/cv.html">CV</a></li>
+    <li><a href="/index.html#blog">Blog</a></li>
+</div><!--/.nav-collapse -->
+</div>
+</nav>
+
+
+    <div class="page-content">
+      <div class="wrapper">
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title" itemprop="name headline">Preliminary Thesis Results: Update 6/26</h1>
+    <p class="post-meta"><time datetime="2016-06-26T09:22:52-05:00" itemprop="datePublished">Jun 26, 2016</time></p>
+  </header>
+
+  <div class="post-content" itemprop="articleBody">
+    <p>I’ve made it through 4,830 of the experiments I want to run for my thesis, so I’m taking this opportunity to reflect on the preliminary results that I have so far, visually check what I have so far, and make any necessary changes before doing the more expensive portion of the experiments.  So far, the results look okay, but definitely not what I expected.  The effect of the computing configuration on computing time seems to be minimal.  On the other hand, the effect of different experimental parameters is pretty significant.</p>
+
+<h3 id="status">Status</h3>
+
+<h4 id="completion-statistics">Completion Statistics</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>Property</th>
+      <th>Number Recored</th>
+      <th>Percentage of Completed</th>
+      <th>Percentage of Total</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Completed</td>
+      <td>4830</td>
+      <td>92.18%</td>
+      <td>5.72%</td>
+    </tr>
+    <tr>
+      <td>Error</td>
+      <td>410</td>
+      <td>7.82%</td>
+      <td>0.05%</td>
+    </tr>
+    <tr>
+      <td>Not Started</td>
+      <td>59550</td>
+      <td>0%</td>
+      <td>70.5 %</td>
+    </tr>
+    <tr>
+      <td>Removed*</td>
+      <td>19680</td>
+      <td>0%</td>
+      <td>23.3%</td>
+    </tr>
+    <tr>
+      <td>Total</td>
+      <td>84470</td>
+      <td>–%</td>
+      <td>100%</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Removed experiments are those that specify fitting the BRT model with 10,000 training examples, which takes too long to be practical.  Instead, these were replaced with the <em>nSensitivity</em> experiment series, which tests the computing time sensitivity to different numbers of input points.</p>
+
+<p><img src="/assets/configs.png" alt="Image" /></p>
+
+<h3 id="inspection-of-results">Inspection of Results</h3>
+<p>One of the main problems I’m having in interpreting the results is that there are four separate experimental variables, which makes it difficult to properly interpret the influence of only one variable.  Of course, I want to isolate the effect of the computing memory and virtual cores.</p>
+
+<h4 id="influence-of-additional-cores">Influence of Additional Cores</h4>
+<p><img src="/assets/cores_totalTime.png" alt="Cores" />
+If we plot vCPU vs. total time, there is no clear relationship.  The major spike at cores = 4 is due to the fact that I used a four core virtual machine to test the effect of different numbers of training examples.  These tests are not part of the experiments that I’m doing on every machine. If we remove these extraneous points, and treat them separately later, we can fit a linear model that shows a very slightly decreasing slope:</p>
+
+<script type="math/tex; mode=display">y=136.103 - 4.548Cores</script>
+
+<h4 id="influence-of-additional-memory">Influence of Additional Memory</h4>
+<p><img src="/assets/mem_totalTime.png" alt="Memory" />
+The effect of adding additional memory is slightly more clearly linear and decreasing than the effect of adding addition CPU cores, although it is still not particularly steep.  The linear model here takes the form:</p>
+
+<script type="math/tex; mode=display">y = 134.87 - 1.26GB</script>
+
+<h4 id="influence-of-spatial-resolution">Influence of Spatial Resolution</h4>
+<p>As expected, higher resolution outputs take longer to process than their lower resolution counterparts. Because increasing spatial resolution results in an exponential number of cells, a linear model is not particularly well suited to this application.  An exponentially decreasing relationship can be seen in the prediction time.</p>
+
+<p><img src="/assets/spatial_resolution.png" alt="Spatial Resolution" /></p>
+
+<p>The relationship between spatial resolution takes the form:</p>
+
+<script type="math/tex; mode=display">y = 145.27 - 52.78degree</script>
+
+<h4 id="influence-of-training-examples">Influence of Training Examples</h4>
+<p>The clearest relationship in all of the experimental variables is between total model time and number of training examples.  This relationship is clearly monotonically increasing, perhaps at a rate slightly more than linear.  The linear fit for these two variables is:</p>
+
+<script type="math/tex; mode=display">y = -180.5674 + 0.3348trainingExample</script>
+
+<p>Nearly all of this additional time per training example comes from the time taken to fit the model.</p>
+
+<p><img src="/assets/training_examples_totalTime.png" alt="Training Examples" /></p>
+
+<h3 id="fitting-a-generalized-linear-model">Fitting a Generalized Linear Model</h3>
+<p>Using the <code class="highlighter-rouge">glm</code> function in R, I fitted a generalized linear model to the data, using all four predictors.  Using all the predictors, the model takes the form:</p>
+
+<script type="math/tex; mode=display">y = -176.0644 + 0.3343trainingExamples - 2.2136Cores + 2.2905GBMemory - 50.6004degree</script>
+
+<p>Using the Akaike Information Criterion (AIC) to evaluate the best model, I tried using different combinations of predictors. Using all four predictors, however, gives us the minimum AIC, so can be considered the best model out of all of the candidates.</p>
+
+<script type="math/tex; mode=display">AIC = 66800</script>
+
+<h3 id="evaluating-the-accuracy-of-the-glm">Evaluating the Accuracy of the GLM</h3>
+<p>Using an independent testing set of 200 random experiments, I used the glm above to predict the total time.</p>
+
+<p><img src="/assets/obs_pred.png" alt="Prediction" /></p>
+
+<p>Unfortunately, our GLM doesn’t do a great job at predicting the testing set to the observed values.  Perhaps I’m forgetting a variable…</p>
+
+<p>We can also plot out the errors between observed (‘true’) values and predicted values.  Looking at the summary statistics, it appears my model will slightly under predict the total execution time.</p>
+
+<p><img src="/assets/summary.png" alt="SummaryStats" /></p>
+
+<h3 id="variance-within-cells">Variance Within Cells</h3>
+<p>One of the things I was most worried about when starting this project was the within-cell variance that I would encounter due to internal computer variations and other concurrent processes.  Looking at the preliminary data, it appears that the variance within the cells does increase as the total experiment time increases.</p>
+
+<p><img src="/assets/sd_mean.png" alt="SD_Mean" /></p>
+
+<p>The linear model for standard deviation as a function of cell mean takes the form:</p>
+
+<script type="math/tex; mode=display">y = 15.7146 + 0.05261x</script>
+
+<p>Where x is the cell mean.  Note: A cell is combination of cores, memory, training examples, and spatial resolution, and each cell is computed ten times.</p>
+
+<h3 id="computed-configurations">Computed Configurations</h3>
+
+<p>At this time I’ve computed:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>vCPU</th>
+      <th>Number Completed</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1</td>
+      <td>1015</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>925</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td>1435</td>
+    </tr>
+    <tr>
+      <td>6</td>
+      <td>1455</td>
+    </tr>
+  </tbody>
+</table>
+
+<table>
+  <thead>
+    <tr>
+      <th>GB Memory</th>
+      <th>Number Completed</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1</td>
+      <td>148</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>300</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>305</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td>690</td>
+    </tr>
+    <tr>
+      <td>6</td>
+      <td>617</td>
+    </tr>
+    <tr>
+      <td>8</td>
+      <td>40</td>
+    </tr>
+    <tr>
+      <td>9</td>
+      <td>446</td>
+    </tr>
+    <tr>
+      <td>12</td>
+      <td>446</td>
+    </tr>
+    <tr>
+      <td>15</td>
+      <td>336</td>
+    </tr>
+    <tr>
+      <td>16</td>
+      <td>202</td>
+    </tr>
+    <tr>
+      <td>18</td>
+      <td>295</td>
+    </tr>
+    <tr>
+      <td>21</td>
+      <td>294</td>
+    </tr>
+    <tr>
+      <td>24</td>
+      <td>301</td>
+    </tr>
+    <tr>
+      <td>27</td>
+      <td>115</td>
+    </tr>
+    <tr>
+      <td>30</td>
+      <td>116</td>
+    </tr>
+    <tr>
+      <td>36</td>
+      <td>91</td>
+    </tr>
+    <tr>
+      <td>39</td>
+      <td>88</td>
+    </tr>
+  </tbody>
+</table>
+
+  </div>
+
+</article>
+<script type="text/javascript"
+    src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+      </div>
+    </div>
+
+    <footer >
+  <ul class='list-inline'>
+      <li class='no-bullet'><span class='glyphicon glyphicon-earphone text-muted'></span><strong class='contact-detail small'>  <a href='tel:626-264-0741'>626.264.0741</a></strong></li>
+      <li class='no-bullet'><span class='glyphicon glyphicon-envelope text-muted'></span><strong class='contact-detail small'>  <a href="mailto:sfarley2@wisc.edu">sfarley@wisc.edu</a></strong></li>
+      <li class='no-bullet'><span class='glyphicon glyphicon-menu-right text-muted'></span><strong class='contact-detail small'><a href='http://twitter.com/scottsfarley93'> @scottsfarley93</a></strong></li>
+      <li class='no-bullet'><span class='glyphicon glyphicon-menu-right text-muted'></span><strong class='contact-detail small'><a href='http://github.com/scottsfarley93'>  GitHub</a></strong></li>
+      <li class='no-bullet'><span class='glyphicon glyphicon-menu-right text-muted'></span><strong class='contact-detail small'><a href='https://www.linkedin.com/in/scott-farley-25902581'>  LinkedIn</a></strong></li>
+</ul>
+</footer>
+
+
+  </body>
+
+</html>

@@ -1,0 +1,24 @@
+# Welcome to Jekyll!
+#
+# This config file is meant for settings that affect your whole blog, values
+# which you are expected to set up once and rarely need to edit after that.
+# For technical reasons, this file is *NOT* reloaded automatically when you use
+# 'jekyll serve'. If you change this file, please restart the server process.
+
+# Site settings
+title: Scott's Blog
+email: sfarley2@wisc.edu
+description: > # this means to ignore newlines until "baseurl:"
+  I am a graduate student at UW Madison studying computing applications to
+  physical geography and paleoecological change.
+baseurl: "" # the subpath of your site, e.g. /blog
+url: "" # the base hostname & protocol for your site
+twitter_username: scottsfarley93
+github_username:  scottsfarley93
+LIS: true
+production_url : http://scottsfarley93.github.io.com/
+BASE_PATH : http://scottsfarley93.com/
+
+
+# Build settings
+markdown: kramdown

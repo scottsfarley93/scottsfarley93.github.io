@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+  <title>Startup and Shutdown Scripts in Google Cloud Compute Engine</title>
+  <meta name="description" content="In continuing my meditations on beginning to use the Google Cloud Computing platform, this post will describe the use of startup and shutdown scripts. If you...">
+
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="canonical" href="/research/cloudcomputing/2016/06/05/Startup-and-Shutdown-Scripts-GCE.html">
+  <link rel="alternate" type="application/rss+xml" title="Scott's Blog" href="/feed.xml">
+
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name='viewport' content='width=device-width, initial-scale=1'/>
+    <meta name='keywords' content="maps, cartography"/>
+    <!---Links--->
+    <!-- Latest compiled and minified CSS -->
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+<!-- Optional theme -->
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+    <link rel="stylesheet" href='/css/cv.css'>
+    <link rel="stylesheet" href='/css/style.css'>
+    <style>
+    	footer{
+    		text-align:center;
+    	}
+    </style>
+    <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-83006302-2', 'auto');
+    ga('send', 'pageview');
+
+  </script>
+
+</head>
+
+
+  <body>
+
+    
+
+
+<nav class="navbar navbar-default navbar-static-top">
+<div class="container">
+<div class="navbar-header">
+  <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+    <span class="sr-only">Toggle navigation</span>
+    <span class="icon-bar"></span>
+    <span class="icon-bar"></span>
+    <span class="icon-bar"></span>
+  </button>
+  <a class="navbar-brand" href="index.html">Scott Farley</a>
+</div>
+<div id="navbar" class="navbar-collapse collapse">
+  <ul class="nav navbar-nav navbar-right">
+    <li><a href="/index.html">Home</a></li>
+    <li><a href="/cv.html">CV</a></li>
+    <li><a href="/index.html#blog">Blog</a></li>
+</div><!--/.nav-collapse -->
+</div>
+</nav>
+
+
+    <div class="page-content">
+      <div class="wrapper">
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title" itemprop="name headline">Startup and Shutdown Scripts in Google Cloud Compute Engine</h1>
+    <p class="post-meta"><time datetime="2016-06-05T11:22:52-05:00" itemprop="datePublished">Jun 5, 2016</time></p>
+  </header>
+
+  <div class="post-content" itemprop="articleBody">
+    <p>In continuing my meditations on beginning to use the Google Cloud Computing platform, this post will describe the use of startup and shutdown scripts. If you want to start multiple instances that are all the same in terms of programs, data, etc (but perhaps of different size), you have two options. First, you could save your fully configured machine as an image, or more likely, as a snapshot.  Booting with this configuration is easy, just select the option from the menu when starting the new instance. Proceeding in this way has several potential drawbacks, however.  Most notably, it is very difficult to keep everything updated with this method.  Unless you manually update the snapshot pretty often, your software is going to be out of date.  Moreover, if you decide to make a small change in the scripts or programs you’re running on the instance, you will need to make an update to the snapshot.</p>
+
+<p>Instead of using a pre-configured snapshot, you can make use of Google Cloud’s ability to automatically run a script at boot time.  Using this script allows us to automatically install the latest version our programs using the <code>apt-get</code> or other linux package manager, and if using version control software like git, download the latest working version of the scripts.  Google provides fairly easy-to-follow documentation about startup scripts <a href="https://cloud.google.com/compute/docs/startupscript">here</a>.  In the same vein, Google provides a beta feature to run a script on machine termination, so you can save your work, etc.  There are a variety of limitations described in the <a href="https://cloud.google.com/compute/docs/shutdownscript">shutdown-script documentation</a>, but they can be handy to run short cleanup jobs.</p>
+
+<p>As noted in the documentation, you can write the script in a number of languages by changing the shebang line at the top of the script.  To run a bash script, the first line of the script should be <code>#! /bin/bash</code>.  A python script could be run by changing this line to <code>#!/usr/bin/python</code>.</p>
+
+<h3 id="adding-a-script-to-a-single-instance">Adding a script to a single instance</h3>
+<p>If you want to add a startup script to a single instance that is currently running:</p>
+
+<ol>
+  <li>Click on the instance properties in the Console</li>
+  <li>Click on edit, at the top</li>
+  <li>Scroll to the ‘Custom Metadata’ section</li>
+  <li>For key, enter <code>startup-script</code></li>
+  <li>In the value field, write your script</li>
+  <li>Click save at the bottom and restart the instance.</li>
+</ol>
+
+<h3 id="adding-a-script-to-all-instances-in-your-project">Adding a script to all instances in your project:</h3>
+<p>These items will be applied to all <em>new</em> instances in your project.</p>
+
+<ol>
+  <li>Open the Cloud Computing Console</li>
+  <li>Click ‘Metadata’ in the lefthand navigation bar</li>
+  <li>Click ‘Edit’ at the top</li>
+  <li>Click ‘Add item’ to add a new key value pair</li>
+  <li>As above, for key enter <code>startup-script</code>, and for value write your script</li>
+  <li>Save and close.</li>
+</ol>
+
+<p>It can be confusing sometimes because the metadata added here in this panel is automatically applied to all of your new instances.  You cannot see these key-value pairs in the metadata section of instance, so just remember it’s there.</p>
+
+<h4 id="adding-a-shutdown-script">Adding a shutdown script</h4>
+<p>Follow the same steps as to run a startup script, but instead of the <code>startup-script</code> key, put <code>shutdown-script</code>.  Super easy.  Be warned, though, that shutdown scripts are not guaranteed to run, Google completes them on a ‘best effort basis.’</p>
+
+<h3 id="my-startup-script">My Startup Script</h3>
+<p>I’ll describe my startup script and what I choose to do for each instance to set them up to run the experiments I am working with.  In general, I download, install, and update a bunch of software, I configure the google cloud proxy, and then I clone my github repository which contains all of my working files.  Then, when all is complete, I automatically start my experiments to run through an <code>Rscript</code> and then terminate the machine when they’re complete.  The script is automatically run as root, from the root directory, so all of the <code>sudo</code>’s are repetitive.</p>
+
+<pre>#! /bin/bash
+
+--&gt;Tell the computer I'm working in a bash script
+
+</pre>
+
+<pre>sudo apt-get update
+
+--&gt;Update the base packages that are installed on the instance
+</pre>
+
+<pre>sudo apt-get -y install git
+--&gt;Install Git version control.  
+</pre>
+
+<p>The <code>-y</code> flag automatically answers <code>y</code> to any queries presented by the download manager (i.e., are you sure you want to download this package? y/n).</p>
+
+<pre>sudo apt-get -y install r-base
+--&gt;Install R
+</pre>
+
+<pre>sudo apt-get install -y gdebi-core
+--&gt;Install a utility dependency for use in installing RStudio
+</pre>
+
+<pre>sudo apt-get install -y aptitude
+--&gt; Install the aptitude package manager
+</pre>
+
+<p>Aptitude is a <a href="http://askubuntu.com/questions/1743/is-aptitude-still-considered-superior-to-apt-get">different</a> package manager for linux systems.  This is the only one I could find that has a gdal package.</p>
+
+<pre>sudo aptitude install -y libgdal-dev
+sudo aptitude install -y libproj-dev
+
+--&gt;Install gdal and proj4 libraries.
+</pre>
+
+<pre>sudo apt-get install -y  libmariadb-client-lgpl-dev
+
+--&gt;Install a database dependency necessary for installing RMySQL
+</pre>
+
+<pre>
+wget https://download2.rstudio.org/rstudio-server-0.99.902-amd64.deb
+sudo gdebi -y rstudio-server-0.99.902-amd64.deb
+
+--&gt; Download and install RStudio
+</pre>
+
+<pre>
+wget https://dl.google.com/cloudsql/cloud_sql_proxy.linux.amd64
+mv cloud_sql_proxy.linux.amd64 cloud_sql_proxy
+chmod +x cloud_sql_proxy
+
+--&gt;Download the cloud proxy script into your root directory and make it an executable.
+</pre>
+
+<pre>
+sudo mkdir cloudsql; sudo chmod 777 cloudsql
+
+--&gt;Make a directory for your cloudsql proxy sockets
+</pre>
+
+<pre>
+rm -rf /home/rstudio/thesis-scripts
+
+--&gt;Remove any old version of the script directory I'll be using.
+</pre>
+
+<pre>git clone http://github.com/scottsfarley93/thesis-scripts /home/rstudio/thesis-scripts
+
+--&gt;Clone the latest and greatest version of my repo into my instance.
+</pre>
+
+<pre>sudo ./cloud_sql_proxy  -dir=/cloudsql -instances=thesis-1329:us-central1:sdm-database-3 &amp;
+
+--&gt;Start the cloudsql proxy so we can make database connections.
+</pre>
+
+<pre>Rscript /home/rstudio/thesis-scripts/R/time_sdm.R 50 TRUE
+
+--&gt;Start the experiment script to run 50 iterations and then shutdown the machine.
+</pre>
+
+  </div>
+
+</article>
+<script type="text/javascript"
+    src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+      </div>
+    </div>
+
+    <footer >
+  <ul class='list-inline'>
+      <li class='no-bullet'><span class='glyphicon glyphicon-earphone text-muted'></span><strong class='contact-detail small'>  <a href='tel:626-264-0741'>626.264.0741</a></strong></li>
+      <li class='no-bullet'><span class='glyphicon glyphicon-envelope text-muted'></span><strong class='contact-detail small'>  <a href="mailto:sfarley2@wisc.edu">sfarley@wisc.edu</a></strong></li>
+      <li class='no-bullet'><span class='glyphicon glyphicon-menu-right text-muted'></span><strong class='contact-detail small'><a href='http://twitter.com/scottsfarley93'> @scottsfarley93</a></strong></li>
+      <li class='no-bullet'><span class='glyphicon glyphicon-menu-right text-muted'></span><strong class='contact-detail small'><a href='http://github.com/scottsfarley93'>  GitHub</a></strong></li>
+      <li class='no-bullet'><span class='glyphicon glyphicon-menu-right text-muted'></span><strong class='contact-detail small'><a href='https://www.linkedin.com/in/scott-farley-25902581'>  LinkedIn</a></strong></li>
+</ul>
+</footer>
+
+
+  </body>
+
+</html>

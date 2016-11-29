@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+
+  {% include head.html %}
+
+  <body>
+
+    {% include nav.html %}
+
+    <!---Main landing--->
+    <div class='jumbotron' id='landing-main'>
+      <div class='container-fliud col-xs-12' id='landing-container'>
+          <h1 class='shadow'>Scott Sherwin Farley</h1>
+          <p class='shadow'>Geospatial Modeling  &middot; Analysis &middot; Visualization</p>
+        </div>
+    </div>
+
+    <div class="page-content row col-xs-12" id='blog'>
+      <div class="wrapper">
+        {{ content }}
+      </div>
+    </div>
+
+    {% include footer.html %}
+
+  </body>
+
+</html>

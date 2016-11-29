@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+  <title>Connecting to Google Cloud SQL</title>
+  <meta name="description" content="Part of the reason that I am keeping this blog is to keep a record of the things I’ve doneand my thought process in doing them so that when it comes time to ...">
+
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="canonical" href="/research/cloudcomputing/2016/06/02/adventures-in-google-cloud-I.html">
+  <link rel="alternate" type="application/rss+xml" title="Scott's Blog" href="/feed.xml">
+
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name='viewport' content='width=device-width, initial-scale=1'/>
+    <meta name='keywords' content="maps, cartography"/>
+    <!---Links--->
+    <!-- Latest compiled and minified CSS -->
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+<!-- Optional theme -->
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+    <link rel="stylesheet" href='/css/cv.css'>
+    <link rel="stylesheet" href='/css/style.css'>
+    <style>
+    	footer{
+    		text-align:center;
+    	}
+    </style>
+    <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-83006302-2', 'auto');
+    ga('send', 'pageview');
+
+  </script>
+
+</head>
+
+
+  <body>
+
+    
+
+
+<nav class="navbar navbar-default navbar-static-top">
+<div class="container">
+<div class="navbar-header">
+  <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+    <span class="sr-only">Toggle navigation</span>
+    <span class="icon-bar"></span>
+    <span class="icon-bar"></span>
+    <span class="icon-bar"></span>
+  </button>
+  <a class="navbar-brand" href="index.html">Scott Farley</a>
+</div>
+<div id="navbar" class="navbar-collapse collapse">
+  <ul class="nav navbar-nav navbar-right">
+    <li><a href="/index.html">Home</a></li>
+    <li><a href="/cv.html">CV</a></li>
+    <li><a href="/index.html#blog">Blog</a></li>
+</div><!--/.nav-collapse -->
+</div>
+</nav>
+
+
+    <div class="page-content">
+      <div class="wrapper">
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title" itemprop="name headline">Connecting to Google Cloud SQL</h1>
+    <p class="post-meta"><time datetime="2016-06-02T11:22:52-05:00" itemprop="datePublished">Jun 2, 2016</time></p>
+  </header>
+
+  <div class="post-content" itemprop="articleBody">
+    <p>Part of the reason that I am keeping this blog is to keep a record of the things I’ve done
+and my thought process in doing them so that when it comes time to write up my thesis,
+I will have a better recollection of what was going through my head. The other reason
+is to perhaps help someone out there struggling similar problems that I went through.
+I think that my adventures in the Google Cloud Platform are a good example of this –
+Google’s Cloud Platform is acknowledged to be slightly less mature than some of its competitors, like AWS.
+Because of this, there are fewer stackexchange questions, blogs posts, etc that can help guide
+basic setup.  I do think that Google’s documentation and tutorials are better than Amazon’s –
+more accessible, better written – but it can be hard to figure out what you need to
+be doing if you’re not a cloud professional.  So I’ll document some of the hard steps
+I encountered in this ongoing set of posts.</p>
+
+<h3 id="setting-up-cloud-sql-with-mysql-workbench">Setting up Cloud SQL with MySQL Workbench</h3>
+<p>In this post, I discuss the process of setting up Google’s Cloud SQL and getting it
+to work with MySQL Workbench (the challenging part).  The tutorials on most of these
+steps are pretty good, so I won’t try to completely recreate those.</p>
+
+<h4 id="set-up-cloudsql">Set up CloudSQL</h4>
+<ol>
+  <li>Go to your Cloud Console</li>
+  <li>Click on SQL –&gt; Go To SQL Dashboard</li>
+  <li>Click the Blue Plus button to start a new SQL Instance</li>
+  <li>Click the option to choose the second generation of SQL Servers.<br />
+These virtual machines are still in beta and Google hasn’t updated all of its documentation
+about them yet, so some of the screenshots and instructions in the tutorials do not apply to the second generation
+instances.</li>
+  <li>Walk through the wizard to create a new virtual machine instance for your database.</li>
+  <li>When you’re done with the wizard, click to create the VM and then wait for it to spin up.</li>
+  <li>Open the VM preferences, go to the Access Control tab, and then go to Users.
+Change the root password to the password you want to use for logging into the server from a MySQL client.</li>
+  <li>Your database server should be set up and ready to go now.  You can access a SQL console and check its installation by clicking the button that looks like a terminal prompt in the upper righthand corner of the page.  Clicking that should open a command prompt.  Start the built-in MySQL client with:</li>
+</ol>
+<pre>gcloud beta sql connect myinstance --user=root</pre>
+<p>If your server is up and running, you should see the terminal change to a <code>mysql&gt;</code> prompt.  If not, refer to <a href="https://cloud.google.com/sql/docs/quickstart">this walkthrough</a>.</p>
+
+<h4 id="set-up-the-mysql-workbench">Set up the MySQL Workbench</h4>
+<p>If you’re doing any time of analysis on the data stored within your database, you might be interested in working with an external tool like <a href="https://www.mysql.com/products/workbench/">MySQL Workbench</a>.  I’m sure there are a variety of other good admin tools for MySQL, but this is the one I use and its okay.  This was a complicated part with the google cloud installation, and it took be the better part of a morning to work through the various tutorials to make it come together.  The real challenge is getting the CloudSQL Proxy set up. Because we’re using a second generation instance, the ip management is handled by Google Cloud and its CloudSQL Proxy directly, rather than manually by us.  Here we will assume you are using a Mac running OSX.</p>
+
+<ol>
+  <li>Get the Dependencies.  First, you need to get <a href="http://rudix.org/packages/wget.html">wget</a> for your operating system.  Wget is a client for downloading files that is available on linux operating systems, but can be installed for windows and mac from third-parties.  Second, you need FUSE.  Not really sure what it does, but you need it and you can get it <a href="https://sourceforge.net/projects/osxfuse/files/">here</a>.  I downloaded version <code>osxfuse-2.8.3 </code> because it had 11,000 more downloads than any other version.</li>
+  <li>Download and configure your proxy script.  First <code>cd</code> into your project root.
+    <pre>
+wget https://dl.google.com/cloudsql/cloud_sql_proxy.linux.amd64
+mv cloud_sql_proxy.linux.amd64 cloud_sql_proxy
+chmod +x cloud_sql_proxy
+</pre>
+  </li>
+  <li>Configure your service account.
+    <ol>
+      <li>Go to the Cloud Console and select your projects</li>
+      <li>Click the button to Create Credentials</li>
+      <li>Choose Service Account Key</li>
+      <li>Choose to create a new Service Account</li>
+      <li>Proceed through the wizard and make sure that the key type is JSON</li>
+      <li>Create the key and store the automatically downloaded file somewhere safe on your computer.</li>
+    </ol>
+  </li>
+  <li>Setup a directory for the Proxy
+    <pre>
+sudo mkdir /cloudsql; sudo chmod 777 /cloudsql
+</pre>
+  </li>
+  <li>Run the proxy by referencing the key file that your downloaded
+    <pre>
+sudo ./cloud_sql_proxy -dir=/cloudsql -fuse -credential_file=path/to/keyfile &amp;
+</pre>
+  </li>
+  <li>Start up MySQL Workbench
+    <ol>
+      <li>Find the Static IP address for your database server from the SQL instances console page on the Google Platform and copy it</li>
+      <li>Name the connection</li>
+      <li>Input the IP address but leave port 3306</li>
+      <li>Unless you changed the SQL, stick with root and be ready to enter the root password</li>
+      <li>Click test connection, enter your password, and you should be able to connect!!</li>
+    </ol>
+  </li>
+</ol>
+
+<h3 id="repeated-use">Repeated Use</h3>
+<p>I am sometimes able to reconnect with a stored connection in MySQL Workbench, but sometimes I get a <code>Refused to Connect</code> error.  When this happened I just restarted the proxy with</p>
+<pre>sudo ./cloud_sql_proxy -dir=/cloudsql -fuse -credential_file=path/to/keyfile &amp;</pre>
+<p>making sure I was in the same directory that I downloaded the cloudSQL proxy into originally.  After entering this command in the terminal, you should be able to connect to the database instance.</p>
+
+<h3 id="on-the-compute-engine-server">On the Compute Engine Server</h3>
+<p>If you’re also using the compute engine instances, you must go through a similar process of setting up the proxy on each one of your virtual machines before you can connect to the database server.</p>
+
+<ol>
+  <li>
+    <p>Before your create an instance that you plan to connect to the database server with, make sure that when you’re setting it up you give it  Full API access (or at least selectively enable the Cloud SQL API).  You can’t do this step later, you need to create a new virtual machine instance if you forget.</p>
+  </li>
+  <li>
+    <p>SSH into your new computing instance.</p>
+  </li>
+  <li>Install mysql.  I always do my calls from python or R, but can’t hurt to install the mysql client on the new machine.  Its easier to test if things are going right too.
+    <pre>
+sudo apt-get update
+sudo apt-get install mysql-client
+</pre>
+  </li>
+  <li>Install the proxy like you did on your local computer.
+    <pre>
+wget https://dl.google.com/cloudsql/cloud_sql_proxy.linux.amd64
+mv cloud_sql_proxy.linux.amd64 cloud_sql_proxy
+chmod +x cloud_sql_proxy
+</pre>
+  </li>
+  <li>
+    <p>Find out what your database server’s connection name is.  It is listed on the sql instances page, and is something like [projectid]:[zone]:[instanceName].  It is not the compute engine instance name (tried that, didn’t work).</p>
+  </li>
+  <li>Start the proxy.  Probably want to be in a root directory for this.
+    <pre>
+sudo mkdir /cloudsql; sudo chmod 777 /cloudsql
+sudo ./cloud_sql_proxy -dir=/cloudsql -instances=[INSTANCE_CONNECTION_NAME] &amp;
+</pre>
+    <p>with the [INSTANCE_CONNECTION_NAME] set to the connection name of your database server.</p>
+  </li>
+  <li>Start the MySQL
+    <pre>
+mysql -u root -p -S /cloudsql/[INSTANCE_CONNECTION_NAME]
+</pre>
+    <p>Assuming everything worked as planned, you should now be able to see a <code>mysql</code> prompt, and be able to play with your databases.</p>
+  </li>
+</ol>
+
+<h3 id="connecting-from-code">Connecting from Code</h3>
+<p>If you installed the proxy on your compute engine instance, you probably are also interested in doing some database manipulation from scripts.  For me, I was not able to connect via the <code class="highlighter-rouge">host</code> parameter in the database connection functions, and instead needed to use a unix socket.</p>
+
+<p>These steps are done on your virtual machine.  SSH into it.  For you can use <code class="highlighter-rouge">nano</code> or <code class="highlighter-rouge">vim</code> or other text editor to do the steps in your script.  For R, you could use the rStudio server page.</p>
+
+<h4 id="python">Python</h4>
+<ol>
+  <li>Install your favorite mysql connector module.
+    <pre>
+  sudo apt-get install mysqldb-python
+</pre>
+  </li>
+  <li>In your script:</li>
+</ol>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="kn">import</span> <span class="nn">MySQLdb</span>
+<span class="n">con</span> <span class="o">=</span> <span class="n">MySQLdb</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">unix_socket</span><span class="o">=</span><span class="s">'/cloudsql/'</span> <span class="o">+</span> <span class="s">'[INSTANCE_CONNECTION_NAME]'</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="s">'root'</span><span class="p">,</span> <span class="n">db</span><span class="o">=</span><span class="s">'[your_database]'</span><span class="p">,</span> <span class="n">passwd</span><span class="o">=</span><span class="s">'[your_password]'</span><span class="p">)</span>
+<span class="k">print</span> <span class="s">"Connected to the database!"</span></code></pre></figure>
+
+<p>Proceed with scripting.</p>
+
+<h4 id="r">R</h4>
+<ol>
+  <li>Install your favorite mysql connector package with the R package manager.
+    <pre>
+install.packages("RMySQL")
+</pre>
+  </li>
+  <li>In your script, make the connection.</li>
+</ol>
+
+<figure class="highlight"><pre><code class="language-r" data-lang="r"><span class="n">library</span><span class="p">(</span><span class="n">RMySQL</span><span class="p">)</span> <span class="c1">## for database communication
+</span><span class="n">drv</span> <span class="o">&lt;-</span> <span class="n">dbDriver</span><span class="p">(</span><span class="s2">"MySQL"</span><span class="p">)</span>
+<span class="n">con</span> <span class="o">&lt;-</span> <span class="n">dbConnect</span><span class="p">(</span><span class="n">drv</span><span class="p">,</span> <span class="n">unix.socket</span><span class="o">=</span><span class="s1">'/cloudsql/[INSTANCE_CONNECTION_NAME]'</span><span class="p">,</span> <span class="n">username</span><span class="o">=</span><span class="s1">'root'</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s1">'[your_password]'</span><span class="p">,</span> <span class="n">dbname</span><span class="o">=</span><span class="s1">'[your_database]'</span><span class="p">)</span></code></pre></figure>
+
+<p>Proceed with scripting.</p>
+
+<h3 id="conclusion">Conclusion</h3>
+<p>It’s definitely not easy, but after spending several hours at it, it sometimes works.</p>
+
+  </div>
+
+</article>
+<script type="text/javascript"
+    src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+      </div>
+    </div>
+
+    <footer >
+  <ul class='list-inline'>
+      <li class='no-bullet'><span class='glyphicon glyphicon-earphone text-muted'></span><strong class='contact-detail small'>  <a href='tel:626-264-0741'>626.264.0741</a></strong></li>
+      <li class='no-bullet'><span class='glyphicon glyphicon-envelope text-muted'></span><strong class='contact-detail small'>  <a href="mailto:sfarley2@wisc.edu">sfarley@wisc.edu</a></strong></li>
+      <li class='no-bullet'><span class='glyphicon glyphicon-menu-right text-muted'></span><strong class='contact-detail small'><a href='http://twitter.com/scottsfarley93'> @scottsfarley93</a></strong></li>
+      <li class='no-bullet'><span class='glyphicon glyphicon-menu-right text-muted'></span><strong class='contact-detail small'><a href='http://github.com/scottsfarley93'>  GitHub</a></strong></li>
+      <li class='no-bullet'><span class='glyphicon glyphicon-menu-right text-muted'></span><strong class='contact-detail small'><a href='https://www.linkedin.com/in/scott-farley-25902581'>  LinkedIn</a></strong></li>
+</ul>
+</footer>
+
+
+  </body>
+
+</html>

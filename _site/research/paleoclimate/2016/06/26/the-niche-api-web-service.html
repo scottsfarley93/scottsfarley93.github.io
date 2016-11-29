@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+  <title>Building the Niche Database and Web Services</title>
+  <meta name="description" content="I’ve spent some time over the past couple of weeks building out the Niche API, a set of web services that enable you to get global climate model (GCM) simula...">
+
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="canonical" href="/research/paleoclimate/2016/06/26/the-niche-api-web-service.html">
+  <link rel="alternate" type="application/rss+xml" title="Scott's Blog" href="/feed.xml">
+
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name='viewport' content='width=device-width, initial-scale=1'/>
+    <meta name='keywords' content="maps, cartography"/>
+    <!---Links--->
+    <!-- Latest compiled and minified CSS -->
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+<!-- Optional theme -->
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+    <link rel="stylesheet" href='/css/cv.css'>
+    <link rel="stylesheet" href='/css/style.css'>
+    <style>
+    	footer{
+    		text-align:center;
+    	}
+    </style>
+    <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-83006302-2', 'auto');
+    ga('send', 'pageview');
+
+  </script>
+
+</head>
+
+
+  <body>
+
+    
+
+
+<nav class="navbar navbar-default navbar-static-top">
+<div class="container">
+<div class="navbar-header">
+  <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+    <span class="sr-only">Toggle navigation</span>
+    <span class="icon-bar"></span>
+    <span class="icon-bar"></span>
+    <span class="icon-bar"></span>
+  </button>
+  <a class="navbar-brand" href="index.html">Scott Farley</a>
+</div>
+<div id="navbar" class="navbar-collapse collapse">
+  <ul class="nav navbar-nav navbar-right">
+    <li><a href="/index.html">Home</a></li>
+    <li><a href="/cv.html">CV</a></li>
+    <li><a href="/index.html#blog">Blog</a></li>
+</div><!--/.nav-collapse -->
+</div>
+</nav>
+
+
+    <div class="page-content">
+      <div class="wrapper">
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title" itemprop="name headline">Building the Niche Database and Web Services</h1>
+    <p class="post-meta"><time datetime="2016-06-26T08:22:52-05:00" itemprop="datePublished">Jun 26, 2016</time></p>
+  </header>
+
+  <div class="post-content" itemprop="articleBody">
+    <p>I’ve spent some time over the past couple of weeks building out the Niche API, a set of web services that enable you to get global climate model (GCM) simulated climate data for specific points in space and time.  For this project I’ve been mixing database design, backend web programming, and a bit of cloud computing.  It’s been a fun process, and is turning into what I think will be a very useful tool.  In this post, I put down a few thoughts about the decisions I made, the techniques I used, and the problems I faced.</p>
+
+<h3 id="the-challenge">The Challenge</h3>
+<p>Working with GCM output and other gridded climate products is always challenging. The data is large.  It’s usually in a format that is designed for its transportation rather than its communication (NetCDF). It may be in the wrong projection for the work you need to do.  You might need to resample the spatial resolution of the grid to fit with the other layers in your project.  If you’ve ever done work with these datasets, you’re probably familiar with these obstacles.  An additional challenge that we face in paleoclimate/paleoecological projects is the many different time periods that are included in each dataset. In a NetCDF, the different timestamps are typically shipped as different layers.  However, if you start to unpack these layers, you’ll quickly end up with a tangled mess of rasters describing different time periods.</p>
+
+<p>In many cases, we don’t need the whole gridded raster dataset for our work.  Maybe we need a small subset representing a study site, or very often, we just want to know the value of a variable at a discrete point in space and time.  In my work with species distribution models, I want to be able to ask the question: What was the precipitation (or maximum temperature, or annual mean temperature, etc) at the coordinates of a sample in the Neotoma database at the time when the sample was dated to.  Traditionally, I would need to manage all sorts of datasets, and use ArcMap or some other utility to get the datapoint I need.</p>
+
+<h3 id="the-goal">The Goal</h3>
+<p>My goal with this project is to build a web service that does the management and extraction of climate datasets automatically. My objects include:</p>
+
+<ol>
+  <li>Store and manage gridded climate datasets in a way that preserves their metadata and makes them available via the internet</li>
+  <li>Be able to pass geographic coordinates and a calendar year and return an interpolated age for that space-time location</li>
+  <li>Be able to access the program scripts remotely through a web service</li>
+  <li>Make the platform generic enough to enable other users with other gridded datasets to contribute to the database</li>
+  <li>Maintain metadata on each dataset so that users can query for data by its attributes</li>
+</ol>
+
+<p>My primary use case that I’m designing for is the <a href="http://paleo.geography.wisc.edu">NicheViewer</a>, which plots samples in Neotoma on environmental axes.  This requires that the program be relatively fast (I’m still working on this) and return in a web-digestable format (JSON).  I’ve made some decision along the way that really reflect having NicheViewer as my target user, but at the <a href="http://github.com/cyber4paleo">C4P Hackathon</a> in Boulder, CO this weekend, people showed significant enthusiasm for the project, and I’ll try to keep these other users in mind going forward.</p>
+
+<h3 id="the-database">The Database</h3>
+<p>Climate datasets are typically stored at NetCDF objects, a format which has been optimized for the sharing and storage of gridded data.  These files are self describing, with all the metadata needed to use them included in a header.  However, they’re difficult to extract data subsets from. Instead of relying on the NetCDF file type, I am going to the store the climate data as tables in a relational database.<br />
+Postgres is a relational database management system that has a great collection of spatial types included in the PostGIS extension.  With this extension, postgres has the ability to store large gridded datasets and to query them spatially.  It also includes the ability to store lines, polygons, multipolygons, and many other types of geometry if you want. Spatial queries are perfect for my task, because I can ask for the value of the raster at a latitude/longitude point.  I could also ask things like which cells are crossed by a line, or included in a polygon, but we’ll stick with points for now.</p>
+
+<h4 id="raster-input-to-database">Raster Input to Database</h4>
+<p>Getting rasters into the database is pretty easy, if you have them in a supported format (which NetCDF is not).  The workflow here was to first convert each band of the NetCDF (they’re not really bands, in this case they’re the discrete time/month/variable combinations) to a tiff file.  Then, using the <code class="highlighter-rouge">raster2pgsql</code> tool included with postgres, I’ll then convert each image file to a SQL table of the Binary Large Object (BLOb) type.  Finally, using the <code class="highlighter-rouge">psql</code> command shell, I can create a new table for this dataset in my dataset. I’ll typically do this in a python script that loops over all files in a directory.  Once I have a directory of tif files, I can do something like:</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">subprocess</span>
+<span class="kn">import</span> <span class="nn">psycopg2</span>
+<span class="c"># connect to the database</span>
+<span class="n">connectString</span> <span class="o">=</span> <span class="s">"dbname='"</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">database</span><span class="p">)</span> <span class="o">+</span> <span class="s">"' user='"</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">username</span><span class="p">)</span> <span class="o">+</span> <span class="s">"' host='"</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">host</span><span class="p">)</span> <span class="o">+</span> <span class="s">"' password='"</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">password</span><span class="p">)</span> <span class="o">+</span> <span class="s">"'"</span>
+<span class="n">conn</span> <span class="o">=</span> <span class="n">psycopg2</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">connectString</span><span class="p">)</span>
+<span class="n">cursor</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+<span class="c"># look through my local directory</span>
+<span class="n">basePath</span> <span class="o">=</span> <span class="s">"/my/dir/of/files"</span>
+<span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="s">"/my/dir/of/files"</span><span class="p">):</span>
+    <span class="c"># get the file name</span>
+    <span class="n">fullName</span> <span class="o">=</span> <span class="n">f</span> <span class="o">+</span> <span class="s">"/"</span> <span class="o">+</span> <span class="n">basePath</span>
+    <span class="n">tableName</span> <span class="o">=</span> <span class="s">"RandomStringOfLettersAndNumbers"</span>
+    <span class="c"># build the command</span>
+    <span class="n">command</span> <span class="o">=</span> <span class="s">"raster2pgsql "</span>
+    <span class="n">command</span> <span class="o">+=</span> <span class="s">" -s 4326"</span> <span class="c">##wgs 1984 coordinate system</span>
+    <span class="n">command</span> <span class="o">+=</span> <span class="s">" -d"</span> <span class="c">## overwrite this table name if it already exits</span>
+    <span class="n">command</span> <span class="o">+=</span> <span class="s">" -I"</span> <span class="c">##spatial index</span>
+    <span class="n">command</span> <span class="o">+=</span> <span class="s">" -C "</span> <span class="c">##enforce constraints</span>
+    <span class="c">#command += " -M " ##vaccuum analyze</span>
+    <span class="n">command</span> <span class="o">+=</span> <span class="n">rasterOnDisk</span>
+    <span class="n">command</span> <span class="o">+=</span> <span class="s">" -t 5x5 "</span> <span class="c">##pixels per tile, the smaller the better</span>
+    <span class="n">command</span> <span class="o">+=</span> <span class="n">tableName</span> <span class="c">##</span>
+    <span class="c"># run the command we've just built</span>
+    <span class="n">process</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span><span class="n">command</span><span class="p">,</span> <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="p">(</span><span class="n">sql</span><span class="p">,</span> <span class="n">err</span><span class="p">)</span> <span class="o">=</span> <span class="n">process</span><span class="o">.</span><span class="n">communicate</span><span class="p">()</span>
+    <span class="c"># run the SQL through the database connection</span>
+    <span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">sql</span><span class="p">)</span> <span class="c"># now the table is in the database</span></code></pre></figure>
+
+<h4 id="table-metadata">Table Metadata</h4>
+<p>The only way a database like this can succeed is if there is sufficient metadata to allow users to search and filter based on a layer’s metadata: <em>who produced this layer? what are its units? what variable does it represent?</em></p>
+
+<p>My database keeps track of raster layer metadata in a set of postgres tables. These tables are divided into two types: those describing the model and/or entity that produced the dataset and those describing the variable described by the dataset.  I think this is a natural basis for the data model, because GCM models can produce multiple variable types, but each raster layer can have only one variable and one model source.  Similarly, each the details of each variable (units, measurement type, etc) can be the same for different time stamps, and for different climate model sources.</p>
+
+<p>The metadata is tracked using foreign keys from a central index table.  The index table stores a pointer to the actual data layer table, which is identified by a 64-bit unique identifier.  The random string is used as a table name to ensure that table names will be uniquely mapped to their metadata, even if a lot of tables get added to the database.  The index table also stores layer-specific metadata, such as the spatial resolution of the raster and the time period being represented, which do not map on to sources or variables.  Finally, the table has columns for variables and sources that are further described in those respective tables.</p>
+
+<p><strong>Source Metadata</strong></p>
+
+<p>The <em>sources</em> metadata table keeps track of the model and entity that produced the data layer in the first place. The sources table includes:</p>
+
+<ul>
+  <li><em>Producer:</em> The name of the modeling entity or research group that produced the layer set, (e.g. National Center for Atmospheric Research [NCAR])</li>
+  <li><em>Model:</em> The name of the model that produced the layer set, (e.g. Community System Climate Model [CCSM])</li>
+  <li><em>ModelVersion:</em> The version of the model that produced the layer set (e.g. 3.0),</li>
+  <li><em>Scenario:</em> The forcing scenario under which the model was run (e.g., UN IPCC RCP8.5),</li>
+  <li><em>ProductURL:</em> The web address of the citation of the model, ideally a permanent <a href="https://www.doi.org/">doi</a></li>
+</ul>
+
+<p><strong>Variables Metadata</strong></p>
+
+<p>The <em>variables</em> tables keep track of the thing that is being modeled.</p>
+
+<ul>
+  <li><em>variableType:</em> The climate variable being modeled, (e.g. Precipitation)</li>
+  <li><em>variableUnits:</em> The units in which the variable is measured (e.g. centimeters [cm])</li>
+  <li><em>variablePeriod:</em> The time frame over which the variable was measured, as represented by the layer (e.g., January [1])</li>
+  <li><em>variablePeriodType:</em> The type of measuring time frame (e.g. Month, Quarter, Annual)</li>
+  <li><em>averagingPeriod:</em>  The length of time over which the variable has been averaged, (e.g. 10)</li>
+  <li><em>averagingPeriodType:</em>  A description of the units of time describing the averaging period (e.g. Years)</li>
+</ul>
+
+<p>These properties can be combined together such that there are many combinations, and detailed metadata can still be kept track of.  The structure is such that a SQL query can enable a machine API to query and search the variables layers.  Each layer must have all properties specified.</p>
+
+<p>One of the things I am looking at implementing is coming closer to the <a href="http://cfconventions.org/cf-conventions/v1.6.0/cf-conventions.html">cf metadata standard</a> that describes NetCDF files and already has a controlled vocabulary for climate layers.  I also want to change the variablePeriod implementation to reflect finer variations in represented time period, such as the difference between DJF and JFM.</p>
+
+<h3 id="the-api">The API</h3>
+<p>Once the database is in place, and has some data in it, we can enable programmatic access to its contents using an API. I have the both the database and the API running on a Google Compute Engine server running Debian Linux in the cloud.  This has proved really useful.  The API currently has way too many endpoints – you can add, modify, or delete nearly anything in the database – but that makes it really scalable if others want to start using it later on.  It’s been pretty RESTfully designed, and makes full use of the HTTP verbs.  The API is public, and the latest version of the documentation is <a href="http://paleo.geography.wisc.edu/docs/">here</a>.  The full YAML declarations file is <a href="http://paleo.geography.wisc.edu/docs/api_version_1_swagger.yaml">here</a>.  The API is <a href="http://130.211.157.239:8080/">served from here</a>.</p>
+
+<h4 id="modeling-the-api">Modeling the API</h4>
+<p>I wanted to be very methodical and document my progress in the development of this project, so I decided to use a modeling language that records the input and output properties of each endpoint.  I used the <a href="http://editor.swagger.io/#/">swagger</a> modeling language and editor, which let me produce documentation and really think through my decisions before I started coding the application.  It’s designed to produce good documentation and is capable of generating client side code stubs for different languages which is kind of nifty.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>HTTP request</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>DELETE</strong> /averagingTypes/{averagingTypeID}</td>
+      <td>Delete an averaging type using its averagingTypeID</td>
+    </tr>
+    <tr>
+      <td><strong>GET</strong> /averagingTypes/{averagingTypeID}</td>
+      <td>Get details about a specific averaging type using its averagingTypeID</td>
+    </tr>
+    <tr>
+      <td><strong>PUT</strong> /averagingTypes/{averagingTypeID}</td>
+      <td>Update details of a specific averaging type using its averagingTypeID</td>
+    </tr>
+    <tr>
+      <td><strong>GET</strong> /averagingTypes</td>
+      <td>Get a list of the averaging types in the database</td>
+    </tr>
+    <tr>
+      <td><strong>POST</strong> /averagingTypes</td>
+      <td>Add a new averaging period to the database</td>
+    </tr>
+    <tr>
+      <td><strong>GET</strong> /data</td>
+      <td>Get the value of one or more layers at a space-time location</td>
+    </tr>
+    <tr>
+      <td><strong>GET</strong> /layers</td>
+      <td>Get a list of the layers in the database</td>
+    </tr>
+    <tr>
+      <td><strong>DELETE</strong> /layers/{layerID}</td>
+      <td>Delete a layer and its raster table using its layerID</td>
+    </tr>
+    <tr>
+      <td><strong>GET</strong> /layers/{layerID}</td>
+      <td>Get details about a specific layer using its layerID</td>
+    </tr>
+    <tr>
+      <td><strong>PUT</strong> /layers/{layerID}</td>
+      <td>Update a layer's details using its layerID</td>
+    </tr>
+    <tr>
+      <td><strong>POST</strong> /layers</td>
+      <td>Add a layer to the databases</td>
+    </tr>
+    <tr>
+      <td><strong>GET</strong> /sources</td>
+      <td>Get a list of the data sources and models in the database</td>
+    </tr>
+    <tr>
+      <td><strong>POST</strong> /sources</td>
+      <td>Add a new source to the database.</td>
+    </tr>
+    <tr>
+      <td><strong>DELETE</strong> /sources/{sourceID}</td>
+      <td>Delete a source using its souce id</td>
+    </tr>
+    <tr>
+      <td><strong>GET</strong> /sources/{sourceID}</td>
+      <td>Get details about an specific source using its sourceID</td>
+    </tr>
+    <tr>
+      <td><strong>PUT</strong> /sources/{sourceID}</td>
+      <td>Update details about a specific source using its sourceID</td>
+    </tr>
+    <tr>
+      <td><strong>GET</strong> /variableUnits</td>
+      <td>Get a list of variable units in the database</td>
+    </tr>
+    <tr>
+      <td><strong>POST</strong> /variableUnits</td>
+      <td>Add a new variable unit to the database</td>
+    </tr>
+    <tr>
+      <td><strong>DELETE</strong> /variableUnits/{variableUnitID}</td>
+      <td>Delete a variable unit using its database id</td>
+    </tr>
+    <tr>
+      <td><strong>GET</strong> /variableUnits/{variableUnitID}</td>
+      <td>Get details about a specific variable unit instance</td>
+    </tr>
+    <tr>
+      <td><strong>PUT</strong> /variableUnits/{variableUnitID}</td>
+      <td> </td>
+    </tr>
+    <tr>
+      <td><strong>GET</strong> /variablePeriodTypes</td>
+      <td>Get a list of the variable period types in the database.</td>
+    </tr>
+    <tr>
+      <td><strong>POST</strong> /variablePeriodTypes</td>
+      <td>Add a new variable period type to the database</td>
+    </tr>
+    <tr>
+      <td><strong>DELETE</strong> /variablePeriodTypes/{variablePeriodTypeID}</td>
+      <td>Delete an variable period instance using its variablePeriodTypeID</td>
+    </tr>
+    <tr>
+      <td><strong>GET</strong> /variablePeriodTypes/{variablePeriodTypeID}</td>
+      <td>Get a details about a specific variable period type using its variablePeriodTypeID.</td>
+    </tr>
+    <tr>
+      <td><strong>PUT</strong> /variablePeriodTypes/{variablePeriodTypeID}</td>
+      <td>Update the details of a specific variable period using its variablePeriodTypeID</td>
+    </tr>
+    <tr>
+      <td><strong>GET</strong> /variableTypes</td>
+      <td>Get a list of variable types in the database.</td>
+    </tr>
+    <tr>
+      <td><strong>POST</strong> /variableTypes</td>
+      <td>Add a new variable type to the database</td>
+    </tr>
+    <tr>
+      <td><strong>DELETE</strong> /variableTypes/{variableTypeID}</td>
+      <td>Delete a variable type instance using its variableID</td>
+    </tr>
+    <tr>
+      <td><strong>GET</strong> /variableTypes/{variableTypeID}</td>
+      <td>Get details about a specific variable type</td>
+    </tr>
+    <tr>
+      <td><strong>PUT</strong> /variableTypes/{variableTypeID}</td>
+      <td>Update details about a specific variable type in the database</td>
+    </tr>
+    <tr>
+      <td><strong>GET</strong> /variables</td>
+      <td>List Niche Variables</td>
+    </tr>
+    <tr>
+      <td><strong>POST</strong> /variables</td>
+      <td>Add a new niche variable</td>
+    </tr>
+    <tr>
+      <td><strong>DELETE</strong> /variables/{variableID}</td>
+      <td> </td>
+    </tr>
+    <tr>
+      <td><strong>GET</strong> /variables/{variableID}</td>
+      <td>Get details about a specific variable</td>
+    </tr>
+    <tr>
+      <td><strong>PUT</strong> /variables/{variableID}</td>
+      <td> </td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="writing-the-api">Writing the API</h4>
+<p>Once modeled, the API script was written in python using the <a href="http://bottlepy.org/docs/dev/index.html">bottle</a> web framework and a paste python-based web server.  Eventually it will be migrated to a windows server housed in our lab, and run behind an apache web server as a CGI module.  Basically, all the API does is receive HTTP requests, route them to functions, then the functions make SQL queries, and return the results as JSON. Pretty simple.  As you can see, there are a lot of endpoints included on the API right now, but the most important one is the <em>data</em> endpoint, where you can actually get data from the database.</p>
+
+<p>The server runs forever using the <code class="highlighter-rouge">supervisor</code> linux module (see my post on long running linux programs).</p>
+
+<p><strong>Making a request</strong>:</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="kn">from</span> <span class="nn">bottle</span> <span class="kn">import</span> <span class="n">route</span><span class="p">,</span> <span class="n">run</span><span class="p">,</span> <span class="n">template</span><span class="p">,</span> <span class="n">response</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">get</span><span class="p">,</span> <span class="n">post</span><span class="p">,</span> <span class="n">delete</span><span class="p">,</span> <span class="n">put</span><span class="p">,</span> <span class="n">hook</span>
+<span class="kn">import</span> <span class="nn">psycopg2</span> <span class="c">## database connector</span>
+<span class="kn">import</span> <span class="nn">datetime</span> <span class="c">## for timestamp formatting</span>
+<span class="kn">import</span> <span class="nn">json</span>
+
+
+<span class="k">class</span> <span class="nc">JSONResponse</span><span class="p">():</span> <span class="c">## base response class that returns the json fields I want</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span> <span class="o">=</span> <span class="p">(),</span> <span class="n">success</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">message</span> <span class="o">=</span> <span class="s">""</span><span class="p">,</span> <span class="n">status</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span> <span class="n">timestamp</span><span class="o">=</span><span class="s">'auto'</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">data</span> <span class="o">!=</span> <span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sucess</span> <span class="o">=</span> <span class="n">success</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">message</span> <span class="o">=</span> <span class="n">message</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">status</span>
+        <span class="k">if</span> <span class="n">timestamp</span> <span class="o">==</span> <span class="s">'auto'</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">timestamp</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s">"</span><span class="si">%</span><span class="s">Y-</span><span class="si">%</span><span class="s">m-</span><span class="si">%</span><span class="s">d </span><span class="si">%</span><span class="s">H:</span><span class="si">%</span><span class="s">M:</span><span class="si">%</span><span class="s">S"</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">timestamp</span> <span class="o">=</span> <span class="n">timestamp</span>
+    <span class="k">def</span> <span class="nf">toJSON</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="c">## just report the class's fields as a dictionary that will get converted to real json when bottle returns it</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span>
+
+<span class="k">def</span> <span class="nf">connectToDefaultDatabase</span><span class="p">():</span>
+    <span class="s">'''Connect to the database using the settings configured in conf.txt'''</span>
+    <span class="c">## read from the conf.txt file</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s">"conf.txt"</span><span class="p">,</span> <span class="s">'r'</span><span class="p">)</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">header</span> <span class="o">=</span> <span class="p">[</span><span class="s">'hostname'</span><span class="p">,</span> <span class="s">'password'</span><span class="p">,</span> <span class="s">'user'</span><span class="p">,</span> <span class="s">'dbname'</span><span class="p">]</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">fieldname</span> <span class="o">=</span> <span class="n">header</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="s">""</span><span class="p">)</span>
+        <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">"'"</span><span class="p">,</span> <span class="s">""</span><span class="p">)</span>
+        <span class="n">d</span><span class="p">[</span><span class="n">fieldname</span><span class="p">]</span> <span class="o">=</span> <span class="n">line</span>
+        <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="n">hostname</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="s">'hostname'</span><span class="p">]</span>
+    <span class="n">db</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="s">'dbname'</span><span class="p">]</span>
+    <span class="n">pw</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="s">'password'</span><span class="p">]</span>
+    <span class="n">user</span> <span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s">'user'</span><span class="p">]</span>
+    <span class="n">conn</span> <span class="o">=</span> <span class="n">psycopg2</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="n">hostname</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="n">user</span><span class="p">,</span> <span class="n">database</span><span class="o">=</span><span class="n">db</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="n">pw</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">conn</span>
+
+<span class="c"># now we can start making requests</span>
+<span class="nd">@get</span><span class="p">(</span><span class="s">"/someroute"</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">doGetStuff</span><span class="p">():</span>
+    <span class="c"># do some get stuff here!</span>
+    <span class="c"># the query parameters are stored in request.query</span>
+    <span class="n">params</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">query</span>
+    <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">()</span>
+
+<span class="c">#  make it serve</span>
+<span class="n">run</span><span class="p">(</span><span class="n">server</span><span class="o">=</span><span class="s">'paste'</span><span class="p">,</span> <span class="n">host</span><span class="o">=</span><span class="s">'0.0.0.0'</span><span class="p">,</span>  <span class="n">port</span><span class="o">=</span><span class="mi">8080</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span></code></pre></figure>
+
+<p><strong>Logging</strong></p>
+
+<p>I want to be able to see who calls the API, which endpoints they call, and what kind of tech they’re using to call it.  I set up request logging on every request into a table called <code class="highlighter-rouge">call_log</code>.  I accomplish this using a <code class="highlighter-rouge">hook</code> which is fired before every request is passed on to its respective routing function, and basically just creates an apache style server log.</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="c"># this is the route that happens every time a request to anything is made</span>
+<span class="nd">@hook</span><span class="p">(</span><span class="s">'before_request'</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">log_this_request</span><span class="p">():</span>
+    <span class="n">logRequest</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+
+<span class="c">## this function deconstructs the request and puts it into a table</span>
+<span class="k">def</span> <span class="nf">logRequest</span><span class="p">(</span><span class="n">req</span><span class="p">):</span>
+    <span class="n">con</span> <span class="o">=</span> <span class="n">connectToDefaultDatabase</span><span class="p">()</span>
+    <span class="n">cursor</span> <span class="o">=</span> <span class="n">con</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+    <span class="n">reqEnv</span> <span class="o">=</span> <span class="n">req</span><span class="o">.</span><span class="n">environ</span>
+    <span class="n">method</span> <span class="o">=</span> <span class="n">reqEnv</span><span class="p">[</span><span class="s">'REQUEST_METHOD'</span><span class="p">]</span>
+    <span class="n">server_protocol</span> <span class="o">=</span> <span class="n">reqEnv</span><span class="p">[</span><span class="s">'SERVER_PROTOCOL'</span><span class="p">]</span>
+    <span class="n">user_agent</span> <span class="o">=</span> <span class="n">reqEnv</span><span class="p">[</span><span class="s">'HTTP_USER_AGENT'</span><span class="p">]</span>
+    <span class="n">remote_ip</span> <span class="o">=</span> <span class="n">reqEnv</span><span class="p">[</span><span class="s">'REMOTE_ADDR'</span><span class="p">]</span>
+    <span class="n">path</span> <span class="o">=</span>  <span class="n">req</span><span class="o">.</span><span class="n">path</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="n">req</span><span class="o">.</span><span class="n">query_string</span>
+    <span class="n">sql</span> <span class="o">=</span> <span class="s">'''INSERT INTO call_log VALUES(default, </span><span class="si">%(resource)</span><span class="s">s, </span><span class="si">%(method)</span><span class="s">s, </span><span class="si">%(server_protocol)</span><span class="s">s, </span><span class="si">%(user_agent)</span><span class="s">s, </span><span class="si">%(remote_ip)</span><span class="s">s, </span><span class="si">%(args)</span><span class="s">s, default);'''</span>
+    <span class="n">params</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s">'method'</span> <span class="p">:</span> <span class="n">method</span><span class="p">,</span>
+        <span class="s">'server_protocol'</span> <span class="p">:</span> <span class="n">server_protocol</span><span class="p">,</span>
+        <span class="s">'user_agent'</span> <span class="p">:</span> <span class="n">user_agent</span><span class="p">,</span>
+        <span class="s">'remote_ip'</span> <span class="p">:</span> <span class="n">remote_ip</span><span class="p">,</span>
+        <span class="s">'resource'</span> <span class="p">:</span> <span class="n">path</span><span class="p">,</span>
+        <span class="s">'args'</span> <span class="p">:</span> <span class="n">args</span>
+    <span class="p">}</span>
+    <span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">sql</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
+    <span class="n">con</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+    <span class="n">cursor</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="n">con</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></code></pre></figure>
+
+<p><strong>CORS</strong></p>
+
+<p>To make post requests from the server where NicheViewer lives, I also needed to enable CORS.  CORS is always a pain in the ass, but its handled in the API like this:</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="c"># define the headers</span>
+<span class="n">_allow_origin</span> <span class="o">=</span> <span class="s">'*'</span>
+<span class="n">_allow_methods</span> <span class="o">=</span> <span class="s">'PUT, GET, POST, DELETE, OPTIONS'</span>
+<span class="n">_allow_headers</span> <span class="o">=</span> <span class="s">'Authorization, Origin, Accept, Content-Type, X-Requested-With'</span>
+
+<span class="c"># attach them after every response</span>
+<span class="nd">@hook</span><span class="p">(</span><span class="s">'after_request'</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">enable_cors</span><span class="p">():</span>
+    <span class="s">'''Add headers to enable CORS'''</span>
+
+    <span class="n">response</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s">'Access-Control-Allow-Origin'</span><span class="p">]</span> <span class="o">=</span> <span class="n">_allow_origin</span>
+    <span class="n">response</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s">'Access-Control-Allow-Methods'</span><span class="p">]</span> <span class="o">=</span> <span class="n">_allow_methods</span>
+    <span class="n">response</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s">'Access-Control-Allow-Headers'</span><span class="p">]</span> <span class="o">=</span> <span class="n">_allow_headers</span>
+
+<span class="c"># if the browser sends an Options request, let it know that it's safe to send over a post request</span>
+<span class="nd">@route</span><span class="p">(</span><span class="s">"/data"</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="p">[</span><span class="s">'OPTIONS'</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">returnOptions</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">bottle</span><span class="o">.</span><span class="n">HTTPResponse</span><span class="p">(</span><span class="n">status</span><span class="o">=</span><span class="mi">200</span><span class="p">)</span>
+
+<span class="n">__</span></code></pre></figure>
+
+<p><strong>Interpolating the Ages</strong></p>
+
+<p>One of the biggest challenges for me was getting the correct query to interpolate variables between ages.  The code ended up looking like this (yes, it is convoluted):</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="c">#...import stuff and set up the connections</span>
+
+<span class="nd">@get</span><span class="p">(</span><span class="s">"/data"</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">getData</span><span class="p">():</span>
+  <span class="c">#...collect query parameters</span>
+  <span class="c">#...get a new DB cursor</span>
+  <span class="c">## fetch the table names that match our query</span>
+  <span class="c"># this query gets the tables and associated metadata that meet the user's query that have an age OLDER than the query year.</span>
+   <span class="n">greaterThanQuery</span> <span class="o">=</span> <span class="s">'''
+       SELECT
+           "tableName", rasterIndex.yearsBP, sources.sourceID, sources.model, sources.producer, sources.productVersion, variables.variableID,
+           variables.variabledescription, variableTypes.variableType, variableUnits.variableUnitAbbreviation, variables.variablePeriod,
+           variablePeriodTypes.variablePeriodType, variables.variableAveraging, averagingPeriodTypes.averagingPeriodType, sources.producturl
+       from rasterIndex
+       INNER JOIN variables on rasterIndex.variableID=variables.variableID
+       INNER JOIN    sources on rasterIndex.sourceID = sources.sourceID
+       INNER JOIN    variableTypes on variables.variableType = variableTypes.variableTypeID
+       INNER JOIN    variableUnits on variables.variableUnits = variableUnits.variableUnitID
+       INNER JOIN    averagingPeriodTypes on variables.variableAveragingType = averagingPeriodTypes.averagingPeriodTypeID
+       INNER JOIN    variablePeriodTypes on variables.variablePeriodType = variablePeriodTypes.variablePeriodTypeID
+       WHERE rasterIndex.recordID IN
+           (SELECT MIN(recordID) FROM rasterIndex
+                       WHERE 1 = 1
+                       AND (</span><span class="si">%(variableType)</span><span class="s">s is NULL or </span><span class="si">%(variableType)</span><span class="s">s LIKE lower(variableTypes.variableTypeAbbreviation) )
+                       AND (</span><span class="si">%(variablePeriod)</span><span class="s">s is NULL or </span><span class="si">%(variablePeriod)</span><span class="s">s = variables.variablePeriod )
+                       AND (</span><span class="si">%(variablePeriodType)</span><span class="s">s is NULL or </span><span class="si">%(variablePeriodType)</span><span class="s">s LIKE lower(variablePeriodTypes.variablePeriodType) )
+                       AND (</span><span class="si">%(averagingPeriod)</span><span class="s">s is NULL or </span><span class="si">%(averagingPeriod)</span><span class="s">s = variableAveraging )
+                       AND (</span><span class="si">%(averagingPeriodType)</span><span class="s">s is NULL or </span><span class="si">%(averagingPeriodType)</span><span class="s">s LIKE lower(averagingPeriodTypes.averagingPeriodType) )
+                       AND (</span><span class="si">%(variableUnits)</span><span class="s">s is NULL or </span><span class="si">%(variableUnits)</span><span class="s">s LIKE lower(variableUnits.variableUnitAbbreviation))
+                       AND (</span><span class="si">%(variableID)</span><span class="s">s is NULL or </span><span class="si">%(variableID)</span><span class="s">s = variables.variableID)
+                       AND (</span><span class="si">%(sourceID)</span><span class="s">s is NULL or </span><span class="si">%(sourceID)</span><span class="s">s = sources.sourceID)
+                       AND (</span><span class="si">%(resolution)</span><span class="s">s is NULL or </span><span class="si">%(resolution)</span><span class="s">s = resolution)
+                       AND (</span><span class="si">%(modelName)</span><span class="s">s is NULL or </span><span class="si">%(modelName)</span><span class="s">s LIKE lower(sources.model) )
+                       AND (</span><span class="si">%(sourceProducer)</span><span class="s">s is NULL or </span><span class="si">%(sourceProducer)</span><span class="s">s LIKE lower(sources.producer) )
+                       AND (</span><span class="si">%(modelVersion)</span><span class="s">s is NULL or </span><span class="si">%(modelVersion)</span><span class="s">s = sources.productVersion )
+                       AND (</span><span class="si">%(modelScenario)</span><span class="s">s is NULL or </span><span class="si">%(modelScenario)</span><span class="s">s LIKE lower(scenario) )
+                       AND (yearsBP &gt;= </span><span class="si">%(yearsBP)</span><span class="s">s)
+                       GROUP BY variableID
+           )
+       ORDER BY sourceID, variableID;
+       '''</span>
+   <span class="n">params</span> <span class="o">=</span> <span class="p">{</span>
+       <span class="s">'variableType'</span> <span class="p">:</span> <span class="n">variableType</span><span class="p">,</span>
+       <span class="s">'variablePeriod'</span><span class="p">:</span><span class="n">variablePeriod</span><span class="p">,</span>
+       <span class="s">'variablePeriodType'</span> <span class="p">:</span><span class="n">variablePeriodType</span><span class="p">,</span>
+       <span class="s">'variableUnits'</span> <span class="p">:</span> <span class="n">variableUnits</span><span class="p">,</span>
+       <span class="s">'variableID'</span> <span class="p">:</span> <span class="n">variableID</span><span class="p">,</span>
+       <span class="s">'averagingPeriod'</span> <span class="p">:</span> <span class="n">averagingPeriod</span><span class="p">,</span>
+       <span class="s">'averagingPeriodType'</span> <span class="p">:</span> <span class="n">averagingPeriodType</span><span class="p">,</span>
+       <span class="s">'sourceID'</span><span class="p">:</span> <span class="n">sourceID</span><span class="p">,</span>
+       <span class="s">'sourceProducer'</span><span class="p">:</span><span class="n">sourceProducer</span><span class="p">,</span>
+       <span class="s">'modelName'</span> <span class="p">:</span><span class="n">modelName</span><span class="p">,</span>
+       <span class="s">'modelVersion'</span> <span class="p">:</span> <span class="n">modelVersion</span><span class="p">,</span>
+       <span class="s">'resolution'</span><span class="p">:</span> <span class="n">resolution</span><span class="p">,</span>
+       <span class="s">'modelScenario'</span> <span class="p">:</span> <span class="n">modelScenario</span><span class="p">,</span>
+       <span class="s">'yearsBP'</span> <span class="p">:</span> <span class="n">yearsBP</span>
+   <span class="p">}</span>
+   <span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">greaterThanQuery</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span> <span class="c">## execute this query</span>
+   <span class="n">greaterThanRows</span> <span class="o">=</span> <span class="n">cursor</span><span class="o">.</span><span class="n">fetchall</span><span class="p">()</span> <span class="c">## get and store the request</span>
+
+   <span class="c">## THIS IS THE LESS THAN query</span>
+   <span class="c">##This is the same query, but gets tables YOUNGER than the query age.</span>
+   <span class="n">lessThanQuery</span> <span class="o">=</span> <span class="s">'''
+           SELECT
+               "tableName", rasterIndex.yearsBP, sources.sourceID, sources.model, sources.producer, sources.productVersion, variables.variableID,
+               variables.variabledescription, variableTypes.variableType, variableUnits.variableUnitAbbreviation, variables.variablePeriod,
+               variablePeriodTypes.variablePeriodType, variables.variableAveraging, averagingPeriodTypes.averagingPeriodType, sources.producturl
+           from rasterIndex
+           INNER JOIN variables on rasterIndex.variableID=variables.variableID
+           INNER JOIN    sources on rasterIndex.sourceID = sources.sourceID
+           INNER JOIN    variableTypes on variables.variableType = variableTypes.variableTypeID
+           INNER JOIN    variableUnits on variables.variableUnits = variableUnits.variableUnitID
+           INNER JOIN    averagingPeriodTypes on variables.variableAveragingType = averagingPeriodTypes.averagingPeriodTypeID
+           INNER JOIN    variablePeriodTypes on variables.variablePeriodType = variablePeriodTypes.variablePeriodTypeID
+           WHERE rasterIndex.recordID IN
+               (SELECT MIN(recordID) FROM rasterIndex
+                           WHERE 1 = 1
+                           AND (</span><span class="si">%(variableType)</span><span class="s">s is NULL or </span><span class="si">%(variableType)</span><span class="s">s LIKE lower(variableTypes.variableTypeAbbreviation) )
+                           AND (</span><span class="si">%(variablePeriod)</span><span class="s">s is NULL or </span><span class="si">%(variablePeriod)</span><span class="s">s = variables.variablePeriod )
+                           AND (</span><span class="si">%(variablePeriodType)</span><span class="s">s is NULL or </span><span class="si">%(variablePeriodType)</span><span class="s">s LIKE lower(variablePeriodTypes.variablePeriodType) )
+                           AND (</span><span class="si">%(averagingPeriod)</span><span class="s">s is NULL or </span><span class="si">%(averagingPeriod)</span><span class="s">s = variableAveraging )
+                           AND (</span><span class="si">%(averagingPeriodType)</span><span class="s">s is NULL or </span><span class="si">%(averagingPeriodType)</span><span class="s">s LIKE lower(averagingPeriodTypes.averagingPeriodType) )
+                           AND (</span><span class="si">%(variableUnits)</span><span class="s">s is NULL or </span><span class="si">%(variableUnits)</span><span class="s">s LIKE lower(variableUnits.variableUnitAbbreviation))
+                           AND (</span><span class="si">%(variableID)</span><span class="s">s is NULL or </span><span class="si">%(variableID)</span><span class="s">s = variables.variableID)
+                           AND (</span><span class="si">%(sourceID)</span><span class="s">s is NULL or </span><span class="si">%(sourceID)</span><span class="s">s = sources.sourceID)
+                           AND (</span><span class="si">%(resolution)</span><span class="s">s is NULL or </span><span class="si">%(resolution)</span><span class="s">s = resolution)
+                           AND (</span><span class="si">%(modelName)</span><span class="s">s is NULL or </span><span class="si">%(modelName)</span><span class="s">s LIKE lower(sources.model) )
+                           AND (</span><span class="si">%(sourceProducer)</span><span class="s">s is NULL or </span><span class="si">%(sourceProducer)</span><span class="s">s LIKE lower(sources.producer) )
+                           AND (</span><span class="si">%(modelVersion)</span><span class="s">s is NULL or </span><span class="si">%(modelVersion)</span><span class="s">s = sources.productVersion )
+                           AND (</span><span class="si">%(modelScenario)</span><span class="s">s is NULL or </span><span class="si">%(modelScenario)</span><span class="s">s LIKE lower(scenario) )
+                           AND (yearsBP &lt;= </span><span class="si">%(yearsBP)</span><span class="s">s)
+                           GROUP BY variableID
+               )
+           ORDER BY sourceID, variableID;
+           '''</span>
+
+   <span class="n">params</span> <span class="o">=</span> <span class="p">{</span>
+       <span class="s">'variableType'</span> <span class="p">:</span> <span class="n">variableType</span><span class="p">,</span>
+       <span class="s">'variablePeriod'</span><span class="p">:</span><span class="n">variablePeriod</span><span class="p">,</span>
+       <span class="s">'variablePeriodType'</span> <span class="p">:</span><span class="n">variablePeriodType</span><span class="p">,</span>
+       <span class="s">'variableUnits'</span> <span class="p">:</span> <span class="n">variableUnits</span><span class="p">,</span>
+       <span class="s">'variableID'</span> <span class="p">:</span> <span class="n">variableID</span><span class="p">,</span>
+       <span class="s">'averagingPeriod'</span> <span class="p">:</span> <span class="n">averagingPeriod</span><span class="p">,</span>
+       <span class="s">'averagingPeriodType'</span> <span class="p">:</span> <span class="n">averagingPeriodType</span><span class="p">,</span>
+       <span class="s">'sourceID'</span><span class="p">:</span> <span class="n">sourceID</span><span class="p">,</span>
+       <span class="s">'sourceProducer'</span><span class="p">:</span><span class="n">sourceProducer</span><span class="p">,</span>
+       <span class="s">'modelName'</span> <span class="p">:</span><span class="n">modelName</span><span class="p">,</span>
+       <span class="s">'modelVersion'</span> <span class="p">:</span> <span class="n">modelVersion</span><span class="p">,</span>
+       <span class="s">'resolution'</span><span class="p">:</span> <span class="n">resolution</span><span class="p">,</span>
+       <span class="s">'modelScenario'</span> <span class="p">:</span> <span class="n">modelScenario</span><span class="p">,</span>
+       <span class="s">'yearsBP'</span> <span class="p">:</span> <span class="n">yearsBP</span>
+   <span class="p">}</span>
+   <span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">lessThanQuery</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span> <span class="c">## execute</span>
+   <span class="n">lessThanRows</span> <span class="o">=</span> <span class="n">cursor</span><span class="o">.</span><span class="n">fetchall</span><span class="p">()</span>
+
+   <span class="c">## these are the fields that will be returned with the response</span>
+   <span class="n">header</span> <span class="o">=</span> <span class="p">[</span> <span class="s">"tableName"</span><span class="p">,</span> <span class="s">"yearsBP"</span><span class="p">,</span> <span class="s">"sourceID"</span><span class="p">,</span> <span class="s">"Model"</span><span class="p">,</span> <span class="s">"Producer"</span><span class="p">,</span> <span class="s">"ModelVersion"</span><span class="p">,</span> <span class="s">"variableID"</span><span class="p">,</span>
+   <span class="s">"VariableDescription"</span><span class="p">,</span> <span class="s">"VariableType"</span><span class="p">,</span> <span class="s">"variableUnits"</span><span class="p">,</span> <span class="s">"variablePeriod"</span><span class="p">,</span> <span class="s">"variablePeriodType"</span><span class="p">,</span> <span class="s">"averagingPeriod"</span><span class="p">,</span> <span class="s">"averagingPeriodType"</span><span class="p">,</span> <span class="s">"dataCitation"</span><span class="p">]</span>
+
+   <span class="c">## start building the response</span>
+   <span class="n">out</span> <span class="o">=</span> <span class="p">[]</span>
+   <span class="c">## fetch the actual point data from each of the returned tables</span>
+   <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+   <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">greaterThanRows</span><span class="p">):</span>
+       <span class="c">## the row order should match so we can interpolate between the sets of values</span>
+       <span class="n">greaterRow</span> <span class="o">=</span> <span class="n">greaterThanRows</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+       <span class="n">lesserRow</span> <span class="o">=</span> <span class="n">lessThanRows</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+       <span class="k">try</span><span class="p">:</span>
+           <span class="c">## go get the actual values from the raster  </span>
+           <span class="n">greaterTable</span> <span class="o">=</span> <span class="n">greaterRow</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+           <span class="n">greaterYear</span> <span class="o">=</span> <span class="n">greaterRow</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+           <span class="c">## for the higher value</span>
+           <span class="n">greaterQuery</span> <span class="o">=</span> <span class="s">'''SELECT ST_Value(rast,ST_SetSRID(ST_MakePoint(</span><span class="si">%(longitude)</span><span class="s">s, </span><span class="si">%(latitude)</span><span class="s">s), 4326)) FROM public.'''</span> <span class="o">+</span> <span class="n">greaterTable</span> <span class="o">+</span> <span class="s">'''
+               WHERE ST_Intersects(rast, ST_SetSRID(ST_MakePoint(</span><span class="si">%(longitude)</span><span class="s">s, </span><span class="si">%(latitude)</span><span class="s">s), 4326));
+           '''</span>
+           <span class="n">params</span> <span class="o">=</span> <span class="p">{</span> <span class="s">'latitude'</span> <span class="p">:</span> <span class="n">latitude</span><span class="p">,</span> <span class="s">'longitude'</span> <span class="p">:</span> <span class="n">longitude</span><span class="p">}</span>
+           <span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">greaterQuery</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
+           <span class="n">greaterValue</span> <span class="o">=</span> <span class="n">cursor</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()</span>
+           <span class="c">## for the lesser value</span>
+           <span class="n">lesserTable</span> <span class="o">=</span> <span class="n">lesserRow</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+           <span class="n">lesserYear</span> <span class="o">=</span> <span class="n">lesserRow</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+           <span class="n">lesserQuery</span> <span class="o">=</span> <span class="s">'''SELECT ST_Value(rast,ST_SetSRID(ST_MakePoint(</span><span class="si">%(longitude)</span><span class="s">s, </span><span class="si">%(latitude)</span><span class="s">s), 4326)) FROM public.'''</span> <span class="o">+</span> <span class="n">lesserTable</span> <span class="o">+</span> <span class="s">'''
+               WHERE ST_Intersects(rast, ST_SetSRID(ST_MakePoint(</span><span class="si">%(longitude)</span><span class="s">s, </span><span class="si">%(latitude)</span><span class="s">s), 4326));
+           '''</span>
+           <span class="n">params</span> <span class="o">=</span> <span class="p">{</span> <span class="s">'latitude'</span> <span class="p">:</span> <span class="n">latitude</span><span class="p">,</span> <span class="s">'longitude'</span> <span class="p">:</span> <span class="n">longitude</span><span class="p">}</span>
+           <span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">lesserQuery</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
+           <span class="n">lesserValue</span> <span class="o">=</span> <span class="n">cursor</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()</span>
+           <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">greaterValue</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span> <span class="c">## no results were returned, likely because point was outside of north america</span>
+               <span class="n">greaterValue</span> <span class="o">=</span> <span class="mi">0</span>
+           <span class="k">else</span><span class="p">:</span>
+               <span class="n">greaterValue</span> <span class="o">=</span> <span class="n">greaterValue</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+           <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">lesserValue</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span> <span class="c">## no results were returned, likely because point was outside of north america</span>
+               <span class="n">lesserValue</span> <span class="o">=</span> <span class="mi">0</span>
+           <span class="k">else</span><span class="p">:</span>
+               <span class="n">lesserValue</span> <span class="o">=</span> <span class="n">lesserValue</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+           <span class="c">## now do the Interpolation</span>
+           <span class="n">x</span> <span class="o">=</span> <span class="p">(</span><span class="n">lesserYear</span><span class="p">,</span> <span class="n">greaterYear</span><span class="p">)</span>
+           <span class="n">y</span> <span class="o">=</span> <span class="p">(</span><span class="n">lesserValue</span><span class="p">,</span> <span class="n">greaterValue</span><span class="p">)</span>
+           <span class="n">predPoint</span> <span class="o">=</span> <span class="n">yearsBP</span>
+           <span class="k">print</span> <span class="s">"Prediction point is "</span><span class="p">,</span> <span class="n">predPoint</span>
+           <span class="n">f</span> <span class="o">=</span> <span class="n">interpolate</span><span class="o">.</span><span class="n">interp1d</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+           <span class="n">val</span> <span class="o">=</span> <span class="n">f</span><span class="p">(</span><span class="n">predPoint</span><span class="p">)</span>
+           <span class="n">val</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+           <span class="k">if</span> <span class="n">numpy</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">val</span><span class="p">):</span>
+               <span class="n">val</span> <span class="o">=</span> <span class="bp">None</span>
+           <span class="n">p</span> <span class="o">=</span> <span class="mi">0</span>
+           <span class="n">d</span> <span class="o">=</span> <span class="p">{}</span>
+          <span class="c">## add metadata about the table</span>
+           <span class="k">while</span> <span class="n">p</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">header</span><span class="p">):</span>
+               <span class="n">col</span> <span class="o">=</span> <span class="n">header</span><span class="p">[</span><span class="n">p</span><span class="p">]</span>
+               <span class="n">d</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">greaterRow</span><span class="p">[</span><span class="n">p</span><span class="p">]</span>
+               <span class="n">p</span> <span class="o">+=</span> <span class="mi">1</span>
+           <span class="n">d</span><span class="p">[</span><span class="s">'value'</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span> <span class="c">## this is the actual point value</span>
+           <span class="n">d</span><span class="p">[</span><span class="s">'latitude'</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">latitude</span><span class="p">)</span>
+           <span class="n">d</span><span class="p">[</span><span class="s">'longitude'</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">longitude</span><span class="p">)</span>
+           <span class="n">d</span><span class="p">[</span><span class="s">'siteName'</span><span class="p">]</span> <span class="o">=</span> <span class="n">siteName</span>
+           <span class="n">d</span><span class="p">[</span><span class="s">'sampleID'</span><span class="p">]</span> <span class="o">=</span> <span class="n">sampleID</span>
+           <span class="n">d</span><span class="p">[</span><span class="s">'siteID'</span><span class="p">]</span> <span class="o">=</span> <span class="n">siteID</span>
+           <span class="n">d</span><span class="p">[</span><span class="s">'yearsBP'</span><span class="p">]</span> <span class="o">=</span> <span class="n">yearsBP</span>
+           <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+       <span class="k">except</span> <span class="nb">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span> <span class="c">## table doesn't exist, but record for table does exist --&gt; oops</span>
+           <span class="k">print</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+           <span class="n">conn</span><span class="o">.</span><span class="n">rollback</span><span class="p">()</span>
+       <span class="k">finally</span><span class="p">:</span>
+           <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+   <span class="c">## return the response</span>
+   <span class="n">r</span> <span class="o">=</span> <span class="n">JSONResponse</span><span class="p">(</span><span class="n">data</span> <span class="o">=</span> <span class="n">out</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="s">"Linear interpolation between two nearest neighbors."</span><span class="p">,</span> <span class="n">status</span><span class="o">=</span><span class="mi">200</span><span class="p">)</span>
+   <span class="k">return</span> <span class="n">bottle</span><span class="o">.</span><span class="n">HTTPResponse</span><span class="p">(</span><span class="n">status</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span> <span class="n">body</span><span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">toJSON</span><span class="p">())</span></code></pre></figure>
+
+<h4 id="api-responses">API responses</h4>
+
+<p>The base response from the API includes these fields:</p>
+
+<ul>
+  <li><em>status:</em> HTTP status code, also included in the response header</li>
+  <li><em>timestamp:</em> Time at which the response was minted by the server</li>
+  <li><em>message:</em> A string produced by the server to specify an error, or note something of importance</li>
+  <li><em>success:</em>  Boolean flag to indicate whether the API call was successful.  If success is <code class="highlighter-rouge">true</code> and <code class="highlighter-rouge">data</code> is empty, then the user can be sure that the call happened correctly, there just was no matching data found in the database.</li>
+  <li><em>data:</em>  An array of objects that meet the search criteria</li>
+</ul>
+
+<p><strong>Status Code</strong></p>
+
+<ul>
+  <li><em>200:</em> Success!</li>
+  <li><em>201:</em> The requested object already exists, so the script didn’t create a new one</li>
+  <li><em>404:</em> Object not found (resource doesn’t exist)</li>
+  <li><em>400:</em> Required parameters for the method were not set</li>
+  <li><em>204:</em> Object deleted</li>
+</ul>
+
+<h3 id="conclusion">Conclusion</h3>
+<p>I believe the current solution described here meets all of the goals I set out to accomplish.  It’s a little hacky in places, and could be more robust, but for the most part it does everything it has to without error.  It currently supports two front ends: the NicheViewer and an R package.</p>
+
+<p><strong>Goals, evaluated</strong></p>
+
+<ol>
+  <li>
+    <p><em>Store and manage gridded climate datasets in a way that preserves their metadata and makes them available via the internet</em>: Storing the raster layers in a postgres database makes it available over the internet.  While the metadata becomes divorced from the actual data, storing it in other tables keeps it close by, so we can refer to it if we need it.</p>
+  </li>
+  <li><em>Be able to pass geographic coordinates and a calendar year and return an interpolated age for that space-time location</em>:  The API supports a SQL query that returns interpolated ages for spatial locations at a spatial location.</li>
+  <li>
+    <p><em>Be able to access the program scripts remotely through a web service:</em>  The API supports RESTful querying of the data layers, so that user’s can get the data without installing software or downloading datasets.</p>
+  </li>
+  <li>
+    <p><em>Make the platform generic enough to enable other users with other gridded datasets to contribute to the database:</em>  The table structure is generic enough to support (I think) any 2-dimensional gridded climate model output.  3-dimensional (height) datasets will not fit well into the data model, nor will datasets that are not gridded.  Datasets that are not modeled, but perhaps show real observations, should be able to fit into the database, though it hasn’t been tested.  The API needs a little work to support direct data ingestion, but version 1 supports public curation of metadata.</p>
+  </li>
+  <li><em>Maintain metadata on each dataset so that users can query for data by its attributes:</em> The table structure maintains sufficient metadata on the model and the variable that is represented.  It is stored in several tables which allows it to be included in a structured query.  Version 1 of the API allows clients to query on all facets of what makes up a layer.</li>
+</ol>
+
+<p><strong>Future Work</strong></p>
+
+<p>I have several things I would like to continue adding to this application.</p>
+
+<ol>
+  <li>Add more data layers, datasets, and models.</li>
+  <li>Improve API speed and robustness.</li>
+  <li>Let users query for other geometry types (lines, polygons, etc)</li>
+  <li>Improve metadata representations of time periods and variable types.</li>
+</ol>
+
+  </div>
+
+</article>
+<script type="text/javascript"
+    src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+      </div>
+    </div>
+
+    <footer >
+  <ul class='list-inline'>
+      <li class='no-bullet'><span class='glyphicon glyphicon-earphone text-muted'></span><strong class='contact-detail small'>  <a href='tel:626-264-0741'>626.264.0741</a></strong></li>
+      <li class='no-bullet'><span class='glyphicon glyphicon-envelope text-muted'></span><strong class='contact-detail small'>  <a href="mailto:sfarley2@wisc.edu">sfarley@wisc.edu</a></strong></li>
+      <li class='no-bullet'><span class='glyphicon glyphicon-menu-right text-muted'></span><strong class='contact-detail small'><a href='http://twitter.com/scottsfarley93'> @scottsfarley93</a></strong></li>
+      <li class='no-bullet'><span class='glyphicon glyphicon-menu-right text-muted'></span><strong class='contact-detail small'><a href='http://github.com/scottsfarley93'>  GitHub</a></strong></li>
+      <li class='no-bullet'><span class='glyphicon glyphicon-menu-right text-muted'></span><strong class='contact-detail small'><a href='https://www.linkedin.com/in/scott-farley-25902581'>  LinkedIn</a></strong></li>
+</ul>
+</footer>
+
+
+  </body>
+
+</html>

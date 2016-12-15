@@ -1,6 +1,6 @@
 ---
 title: Ice Age Mapper
-thumb: "assets/IceAgeMapperThumb.png"
+thumb: "assets/iceAgeMapperThumb.png"
 layout: project
 order: 2
 ---

@@ -21,7 +21,7 @@ layout: index-layout
 <div id='content'>
 <h2 class='page-header ph-center'>Portfolio</h3>
 <div class='row col-xs-12' id='portfolio'>
-    {% for project in site.projects | sort: 'order' %}
+    {% for project in site.projects | sort: project.order %}
     <div class='col-xs-6 portfolio-content'>
       <a href="{{project.url | prepend: site.baseurl}}">
         <img class='img img-responsive portfolio-teaser' src="{{project.thumb | prepend: site.baseurl}}" />

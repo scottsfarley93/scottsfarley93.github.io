@@ -1,0 +1,65 @@
+html {
+    height: 100%;
+}
+body {
+    margin: 0;
+    padding: 0;
+    background: #000000 center center no-repeat;
+    color: #ffffff;
+    font-family: sans-serif;
+    font-size: 13px;
+    line-height: 20px;
+    height: 100%;
+}
+
+#currentInfo span:hover {
+    color: #CFB649;
+    -webkit-transition: color 0.5s ease-in;
+    -moz-transition: color 0.5s ease-in;
+    -o-transition: color 0.5s ease-in;
+    -ms-transition: color 0.5s ease-in;
+    transition: color 0.5s ease-in;
+}
+
+#currentInfo span {
+    font-family: 'sackers_gothic_lightlight';
+    font-size: 14px;
+    text-transform: capitalize;
+    cursor: pointer;
+}
+
+.ui-slider-horizontal {
+    height: 2px;
+    background: #1C252B;
+    border: 0;  
+}
+
+ button {
+    background: none;
+    border: 0;    
+    color: #fff;
+    cursor: pointer;
+    font-size: 18px;
+    position: relative; 
+
+}
+
+button.first {
+    left: -50px;
+    top: 14px;
+}
+
+button.last {
+    right: -210px;
+    top: -15px;
+}
+
+.ui-slider-horizontal .ui-slider-handle {
+    background: url(../img/on-dial.png) no-repeat;
+    border: 0;
+    cursor: pointer;
+    width: 18px;
+    height: 17px;
+    top: -6px;
+    outline: 0;
+}

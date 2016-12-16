@@ -2,7 +2,7 @@
 title: Ice Age Mapper
 thumb: "assets/iceAgeMapperThumb.png"
 layout: project
-order: 2
+order: '2'
 ---
 
 <div class="container">

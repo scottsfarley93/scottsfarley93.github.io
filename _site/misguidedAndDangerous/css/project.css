@@ -1,0 +1,300 @@
+body, html{
+	padding:0px;
+	margin:0px;
+	position: relative;
+	font: 12px sans-serif;
+}
+p{
+	font: 12px "Times New Roman";
+}
+
+.row{
+	top:0px;
+	width:100%;
+	margin: 0px;
+}
+
+
+
+.contentContainer{
+	background-color:rgba(255, 255, 255, 0.8);
+	border-radius: 25px;
+	position: absolute;
+	z-index:10;
+	font-family: "Times New Roman";
+		max-height:100%;
+	overflow:auto;
+}
+
+.italic{
+	font-style: italic;
+}
+.bold{
+	font-style: bold;
+}
+
+#mediaTitleContainer{
+	background-color:rgba(255, 255, 255, 0.9);
+	bottom: 2%;
+	box-shadow: 10px 10px 5px #888888;
+	background-color: white;
+	border:#000000 solid 2px;
+	
+}
+#westTitleContainer{
+	bottom:2%;
+}
+#balkansTitleContainer{
+	right:5%;
+	max-height: 50%;
+}
+
+#hungaryInset{
+	position: absolute;
+	z-index:10;
+	bottom:0%;
+	border-radius: 10px;
+	padding:0px;
+	margin:2%;
+}
+
+#hungaryTitleContainer{
+	top: 0%;
+	border-radius: 10px;
+	margin-left: 2%;
+	left:0%;
+	max-height: 50%;
+}
+
+#balkansTitleContainer2{
+	padding-top: 5%;
+	right:5%;
+	text-align: right;
+	top: 0%;
+}
+
+#startButton{
+	text-align: right;
+}
+
+#titleSlide{
+	padding:0%;
+	margin:0%;
+	background-image: url("../assets/final/overview.png");
+	background-repeat:no-repeat;
+	background-position: center bottom;
+	background-size:cover;
+}
+
+#flowSlide{
+		padding:0%;
+	margin:0%;
+	background-image: url("../assets/final/flows.png");
+	background-repeat:no-repeat;
+	background-position: center bottom;
+	background-size:cover;
+}
+
+#mediaSlide{
+	padding:0%;
+	margin:0%;
+	background-image: url("../assets/final/newspaper.png");
+	background-repeat:no-repeat;
+	background-position: center bottom;
+	background-size:cover;
+}
+
+#photoSlide{
+	padding:0%;
+	margin:0%;
+	background-image: url("../assets/final/bus.gif");
+	background-repeat:no-repeat;
+	background-position: center bottom;
+	background-size:cover;
+}
+#midEastContainer{
+	
+		padding:0%;
+	margin:0%;
+	background-image: url("../assets/middle_east.svg");
+	background-repeat:no-repeat;
+	background-position: center bottom;
+	background-size:cover;
+}
+
+#photoContainer2{
+	padding:0%;
+	margin:0%;
+	background-image: url("../assets/ukdm1.jpg");
+	background-repeat:no-repeat;
+	background-position: center bottom;
+	background-size:cover;
+}
+
+body {
+  font: 12px sans-serif;
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.dot {
+  stroke: #000;
+}
+
+#westScatterHolder, #westScatter{
+	padding:0%;
+	margin:0%;
+}
+.advance{
+	cursor: pointer; 
+	cursor: hand;
+	font-style: bold;
+	font-family: "Times New Roman";
+	text-align: right !important;
+	right:0% !important;
+}
+.img{
+	padding-right: 0%;
+	margin-right: 0%;
+}
+#hungaryContainer{
+	background-image: url("../assets/ukdm2.jpg");
+	background-repeat:no-repeat;
+	background-position: right bottom;
+	height: 100% !important;
+	width: 100% !important;
+	background-size: cover;
+}
+#midEast2{
+	background-image: url("../assets/unhcr2.jpg");
+	background-position: right bottom;
+	background-size: cover;
+	padding-top:10%;
+}
+
+#summarySlide{
+	background-image: url("../assets/final/avg_summary.png");
+	background-repeat:no-repeat;
+	background-position: right bottom;
+	height: 100% !important;
+	width: 100% !important;
+	background-size: cover
+}
+
+
+#summaryContainer2{
+	left: 5%;
+	bottom: 5%;
+}
+
+#MidEastContainer2{
+	top:0%;
+	height:100%;
+	background-color:rgba(255, 255, 255, 0.85)
+}
+
+div.tooltip {	
+    position: absolute;			
+    text-align: center;			
+    width: 200px;									
+    padding: 2px;				
+    font: 12px sans-serif;		
+    background: lightsteelblue;	
+    border: 0px;		
+    border-radius: 8px;			
+    pointer-events: none;	
+    	cursor: pointer; 
+	cursor: hand;
+}
+
+.large{
+	font-size:14px;
+    font-weight:700;
+}
+#westTitleText{
+	margin-top: 1%;
+}
+
+#westTitle{
+	margin-bottom:0%;
+	padding-bottom:0%;
+}
+#photoTitleContainer{
+	bottom: 5%;
+	padding-top:1%;
+}
+blockquote{
+	font: 12px "Times New Roman";
+}
+#flowTitleContainer{
+	top: 0%;
+	right: 0%;
+}
+
+#refCampLocs{
+	border-radius: 10px;
+	padding-top: 25px;
+}
+#refCampCaption{
+	padding-left: 25px;
+	padding-top: 25px;
+}
+#summaryContainer{
+	top: 0%;
+	padding-top: 2%;
+}
+
+#summaryHolder{
+	top:0%;
+	height: 100%;
+}
+h1, h2, h3, h4, h5, h6{
+	font-family: "Times New Roman"
+}
+#summaryR2, #summaryP{
+	padding-top: 10px;;
+}
+#summaryHolder2{
+	width:100%;
+}
+#titleContainer{
+	bottom: 5%;
+}
+#midEastTitleContainer{
+	bottom: 3%;
+}
+#concTitle{
+	padding-top: 3%;
+	top:0%;
+	margin: 0%;
+}
+.citation{
+	bottom: 1%;
+	color: #CCCCCC;
+	right: 1%; 
+	position: absolute;
+}
+
+#jordanCitation{
+	top: 0.5% !important;
+	color: black;
+}
+#titleText{
+	font-size: 16px;
+}
+#westTitle{
+	margin-top: 0px;
+	padding-top: 10px;
+}
+#photoTitleText2{
+	bottom: 5%;
+}
+#summarySlide2, #summaryHolder{
+	max-height: 100%;
+	overflow: auto;
+}

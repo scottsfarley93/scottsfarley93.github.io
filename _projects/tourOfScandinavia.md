@@ -2,7 +2,7 @@
 title: Tour of Scandinavia Promotional Poster
 thumb: "assets/scandinaviaThumb.png"
 layout: project
-order: 3
+order: '3'
 ---
 
 <div class="container">
@@ -26,7 +26,7 @@ order: 3
                 <li class='no-bullet'>Adobe Illustrator</li>
                 <li class='no-bullet'>Terrain Sculptor</li>
               </ul>
-              <h4 class='text-muted page-header'><a href='assets/ScottFarley_Lab2_final.pdf'>Finished Product</a> </h4>
+              <h4 class='text-muted page-header'><a href='../assets/ScottFarley_Lab2_final.pdf'>Finished Product</a> </h4>
             </div>
           </div>
 

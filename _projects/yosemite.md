@@ -2,7 +2,7 @@
 title: Yosemite National Park Map
 thumb: "assets/yosemiteThumb.png"
 layout: project
-order: 4
+order: '4'
 ---
 <div class="container">
     <div class="modal-content">
@@ -32,7 +32,7 @@ order: 4
                 <li class='no-bullet'>Adobe Illustrator</li>
                 <li class='no-bullet'>Blender</li>
               </ul>
-              <h4 class='text-muted page-header'><a href='assets/yosemite.pdf'>Finished Product</a> </h4>
+              <h4 class='text-muted page-header'><a href='../assets/yosemite.pdf'>Finished Product</a> </h4>
             </div>
           </div>
 </div>

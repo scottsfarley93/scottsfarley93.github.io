@@ -2,7 +2,7 @@
 title: Frank Lloyd Wright Inspired Tileset
 thumb: "assets/flwThumb.png"
 layout: project
-order: 5
+order: '5'
 ---
 <div class="container">
     <div class="modal-content">

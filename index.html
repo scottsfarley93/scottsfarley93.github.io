@@ -3,12 +3,7 @@ layout: index-layout
 ---
 
 <style>
-.portfolio-teaser{
-  max-height: 70%;
-}
-.portfolio-content{
-  height: 300px !important;
-}
+
 
 </style>
 <div class="home">
@@ -18,7 +13,7 @@ layout: index-layout
 <div class='row col-xs-12' id='portfolio'>
   {% assign sorted_projects = site.projects | sort: 'order' %}
     {% for project in sorted_projects %}
-    <div class='col-md-4 col-sm-6 col-xs-12 portfolio-content'>
+    <div class='col-md-4 col-sm-6 col-md-8 col-lg-4 portfolio-content'>
       <a href="{{project.url | prepend: site.baseurl}}">
         <img class='img img-responsive portfolio-teaser' src="{{project.thumb | prepend: site.baseurl}}" />
       <div class="carousel-caption">

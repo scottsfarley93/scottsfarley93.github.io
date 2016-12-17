@@ -20,6 +20,10 @@ html, body{
 	text-align: center;
 }*/
 
+
+.portfolio-content:hover{
+	background-color:	#F0F0F0  ;
+}
 #contact-div{
 	margin-bottom:0px;
 	padding-bottom: 0px;
@@ -117,11 +121,18 @@ nav{
 .overlay{
 	height: 40%!important;
 	width: 40%!important;
-	padding-bottom: 2.5%!important;
+	padding-bottom: 10%!important;
 }
 #portfolio{
 	padding-bottom: 250px!important;
 }
 .overlay-name{
-	padding-bottom: 10%;
+	padding-bottom: 20%;
+}
+
+.portfolio-teaser{
+  max-height: 70%;
+}
+.portfolio-content{
+  height: 300px !important;
 }

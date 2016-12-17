@@ -2,7 +2,7 @@
 title: Yosemite National Park Map
 thumb: "assets/yosemiteThumb.png"
 layout: project
-overlay: Barbara Bartz Petchenik Memorial Award Winner for Cartographic Design
+overlayName: Barbara Bartz Petchenik Memorial Award Winner for Cartographic Design
 order: '4'
 ---
 <div class="container">

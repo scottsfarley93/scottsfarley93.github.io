@@ -50,6 +50,8 @@ layout: index-layout
 </div>
 </div>
 
+
+
 <script>
 $(document).ready(function(){
   $(".portfolio-content").find(".carousel-caption").hide();
@@ -60,4 +62,21 @@ $(".portfolio-content").mouseleave(function(){
 		$(this).find(".carousel-caption").hide();
 	});
 })
+</script>
+
+<script>
+
+bgChoices = ["assets/bg.png", "assets/gb1.png", "assets/background.png"]
+
+function chooseRandom(choices) {
+  var index = Math.floor(Math.random() * choices.length);
+  return choices[index];
+}
+
+bgChoice = chooseRandom(bgChoices)
+
+$("#landing-main").css("background-image", "url(" + bgChoice + ")")
+
+
+console.log(bgChoice)
 </script>

@@ -6,8 +6,8 @@
 </description>
     <link>/</link>
     <atom:link href="/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Thu, 29 Dec 2016 13:40:14 -0800</pubDate>
-    <lastBuildDate>Thu, 29 Dec 2016 13:40:14 -0800</lastBuildDate>
+    <pubDate>Sat, 07 Jan 2017 10:02:44 -0600</pubDate>
+    <lastBuildDate>Sat, 07 Jan 2017 10:02:44 -0600</lastBuildDate>
     <generator>Jekyll v3.1.6</generator>
     
       <item>
@@ -50,7 +50,7 @@
 
 &lt;p&gt;If this sounds interesting to you, let me know! If you want to consume my data service, that’d be awesome. I’d be happy to modify the existing returns to fit your needs. Here are up-to-date &lt;a href=&quot;http://grad.geography.wisc.edu/cds/docs&quot;&gt;docs&lt;/a&gt; with examples. If you want to help develop, that’d be awesome too. I’m super excited about this project, but pushing the limits of what I know. Send me an &lt;a href=&quot;&amp;#109;&amp;#097;&amp;#105;&amp;#108;&amp;#116;&amp;#111;:&amp;#115;&amp;#102;&amp;#097;&amp;#114;&amp;#108;&amp;#101;&amp;#121;&amp;#050;&amp;#064;&amp;#119;&amp;#105;&amp;#115;&amp;#099;&amp;#046;&amp;#101;&amp;#100;&amp;#117;&quot;&gt;email&lt;/a&gt; – let’s talk.&lt;/p&gt;
 </description>
-        <pubDate>Fri, 16 Dec 2016 05:22:52 -0800</pubDate>
+        <pubDate>Fri, 16 Dec 2016 07:22:52 -0600</pubDate>
         <link>/research/data/2016/12/16/Climate-Data-Service.html</link>
         <guid isPermaLink="true">/research/data/2016/12/16/Climate-Data-Service.html</guid>
         
@@ -70,7 +70,7 @@
 &lt;iframe src=&quot;http://wooden-ships.github.io/&quot; style=&quot;height: 1000px; width:100%&quot; /&gt;
 
 </description>
-        <pubDate>Thu, 03 Nov 2016 07:22:52 -0700</pubDate>
+        <pubDate>Thu, 03 Nov 2016 09:22:52 -0500</pubDate>
         <link>/tutorial/2016/11/03/Nacis-Award.html</link>
         <guid isPermaLink="true">/tutorial/2016/11/03/Nacis-Award.html</guid>
         
@@ -89,7 +89,7 @@
 
 &lt;p&gt;&lt;img src=&quot;/assets/bigData/Neotoma_Occurrences.png&quot; alt=&quot;NeotomaOccurrenceRecords&quot; /&gt;&lt;/p&gt;
 </description>
-        <pubDate>Sat, 22 Oct 2016 07:22:52 -0700</pubDate>
+        <pubDate>Sat, 22 Oct 2016 09:22:52 -0500</pubDate>
         <link>/tutorial/2016/10/22/18-Million-Neotoma-Occurrences.html</link>
         <guid isPermaLink="true">/tutorial/2016/10/22/18-Million-Neotoma-Occurrences.html</guid>
         
@@ -122,7 +122,7 @@
 &lt;h4 id=&quot;importance&quot;&gt;Importance&lt;/h4&gt;
 &lt;p&gt;In addition to contributing to scientific understanding of human-induced change and faunal declines, the techniques and datasets produced in the course of this research are essential for improving the estimates of carbon sequestration and warming during the 21st century produced by ecosystem and global circulation climate models. The advantages of Bayesian hierarchical models for reconstructing past landscapes have been demonstrated, though they have yet to be applied to the continental scale and to the problem of land cover in North America, though other techniques have been applied to European land cover during the Holocene. Biogeophysical feedback cycles, particularly the carbon cycle, can have considerable effects, though their operational scale is too small to be effectively captured by the still relatively rough resolution of global earth system models, so independent reconstructions are of high priority to climate modelers. Additionally, hypotheses about carbon sequestration and climate change mitigation strategies cannot be validated without further understanding of past land cover dynamics.&lt;/p&gt;
 </description>
-        <pubDate>Mon, 19 Sep 2016 07:22:52 -0700</pubDate>
+        <pubDate>Mon, 19 Sep 2016 09:22:52 -0500</pubDate>
         <link>/research/2016/09/19/PHD-Preview.html</link>
         <guid isPermaLink="true">/research/2016/09/19/PHD-Preview.html</guid>
         
@@ -504,7 +504,7 @@
 
 &lt;p&gt;With slightly larger teams, the shared repository starts to break down.  This can be overcome somewhat by using separate branches, which are then merged together into a master branch.  This allows users to work on their own features and changes, while still contributing to a single repo.&lt;/p&gt;
 </description>
-        <pubDate>Sat, 10 Sep 2016 07:22:52 -0700</pubDate>
+        <pubDate>Sat, 10 Sep 2016 09:22:52 -0500</pubDate>
         <link>/tutorial/2016/09/10/Williams-Lab-Github-Lesson.html</link>
         <guid isPermaLink="true">/tutorial/2016/09/10/Williams-Lab-Github-Lesson.html</guid>
         
@@ -634,7 +634,7 @@
 
 &lt;p&gt;&lt;em&gt;Figure 10: GBIF holdings, Annual Change and Rate of Change of Annual Change&lt;/em&gt;&lt;/p&gt;
 </description>
-        <pubDate>Wed, 31 Aug 2016 06:22:52 -0700</pubDate>
+        <pubDate>Wed, 31 Aug 2016 08:22:52 -0500</pubDate>
         <link>/research/paleo/2016/08/31/Big-Data-In-Ecology.html</link>
         <guid isPermaLink="true">/research/paleo/2016/08/31/Big-Data-In-Ecology.html</guid>
         
@@ -762,7 +762,7 @@ While not social, you may wish to allow users to copy the link directly to their
 &lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-js&quot; data-lang=&quot;js&quot;&gt;&lt;span class=&quot;nx&quot;&gt;$&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;.g-plus&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;data&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&#39;href&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;shareURI&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 
 </description>
-        <pubDate>Sun, 21 Aug 2016 06:22:52 -0700</pubDate>
+        <pubDate>Sun, 21 Aug 2016 08:22:52 -0500</pubDate>
         <link>/research/paleo/2016/08/21/Adding-Shareable-URLs-To-IceAgeMapper.html</link>
         <guid isPermaLink="true">/research/paleo/2016/08/21/Adding-Shareable-URLs-To-IceAgeMapper.html</guid>
         
@@ -814,7 +814,7 @@ deb http://cran.rstudio.com/bin/linux/debian jessie-cran3/
 
 &lt;p&gt;If you have package install error, it’s definitely worth checking if an update in the r-base package could be responsible.&lt;/p&gt;
 </description>
-        <pubDate>Tue, 19 Jul 2016 07:22:52 -0700</pubDate>
+        <pubDate>Tue, 19 Jul 2016 09:22:52 -0500</pubDate>
         <link>/research/cloudcomputing/2016/07/19/Updating-R-on-Debian.html</link>
         <guid isPermaLink="true">/research/cloudcomputing/2016/07/19/Updating-R-on-Debian.html</guid>
         
@@ -1054,7 +1054,7 @@ The effect of adding additional memory is slightly more clearly linear and decre
   &lt;/tbody&gt;
 &lt;/table&gt;
 </description>
-        <pubDate>Sun, 26 Jun 2016 07:22:52 -0700</pubDate>
+        <pubDate>Sun, 26 Jun 2016 09:22:52 -0500</pubDate>
         <link>/research/visualization/2016/06/26/preliminary-thesis-results.html</link>
         <guid isPermaLink="true">/research/visualization/2016/06/26/preliminary-thesis-results.html</guid>
         
@@ -1683,7 +1683,7 @@ Postgres is a relational database management system that has a great collection 
   &lt;li&gt;Improve metadata representations of time periods and variable types.&lt;/li&gt;
 &lt;/ol&gt;
 </description>
-        <pubDate>Sun, 26 Jun 2016 06:22:52 -0700</pubDate>
+        <pubDate>Sun, 26 Jun 2016 08:22:52 -0500</pubDate>
         <link>/research/paleoclimate/2016/06/26/the-niche-api-web-service.html</link>
         <guid isPermaLink="true">/research/paleoclimate/2016/06/26/the-niche-api-web-service.html</guid>
         

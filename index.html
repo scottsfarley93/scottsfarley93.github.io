@@ -42,6 +42,9 @@ layout: index-layout
         <h2>
           <a class="post-link" href="{{ post.url | prepend: site.baseurl }}">{{ post.title }}</a>
         </h2>
+        <div class='container'>
+          {{ post.excerpt }}
+        </div>
       </li>
     {% endfor %}
   </ul>

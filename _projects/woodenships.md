@@ -37,6 +37,12 @@ order: '1'
 
                 <i>This project won first place in the Student Dynamic Mapping Competition at NACIS 2016 in the group division.</i>
 
+
+                <br>
+                <br>
+
+                <i>National Geographic included this project as one of their <a href="http://news.nationalgeographic.com/2016/12/best-maps-cartography-2016/">Best Maps of 2016</a></i>
+
                 </p>
 
               <h4 class='text-muted page-header' align='center'>Tools Used</h4>

@@ -201,6 +201,11 @@
         <h2>
           <a class="post-link" href="/research/data/2016/12/16/Climate-Data-Service.html">Climate Data Service Released (alpha)</a>
         </h2>
+        <div class='container'>
+          <p>Several months back, I wrote about the <a href="http://scottsfarley.com/research/paleoclimate/2016/06/26/the-niche-api-web-service.html">niche API</a> that I was putting together. I put that on hold for a hot minute while I was working on other projects, most notably, my thesis. Since the <a href="http://fc.umn.edu">Flyover Country</a> team came to Madison in November, I’ve been pretty psyched up about it again, and have been working on it consistently for several weeks.  I’m pretty confident in it’s current version, and I hope you head over to the <a href="http://grad.wisc.edu/cds">live demo</a> page or the <a href="http://github.com/scottsfarley93/niche-api">github</a> to check it out.</p>
+
+
+        </div>
       </li>
     
       <li>
@@ -209,6 +214,11 @@
         <h2>
           <a class="post-link" href="/tutorial/2016/11/03/Nacis-Award.html">2016 NACIS Dynamic Mapping Award Win!</a>
         </h2>
+        <div class='container'>
+          <p>I’m psyched to put out that a map that I worked on last spring won the North American Cartographic Society Best Dynamic Map award at their annual conference a couple weeks back.  It was a blast working with Starr and Meghan on this project and well worth the late nights. Looking forward to more interactive mapping coming up.  If you’ve got something you want to map – let me know!</p>
+
+
+        </div>
       </li>
     
       <li>
@@ -217,6 +227,11 @@
         <h2>
           <a class="post-link" href="/tutorial/2016/10/22/18-Million-Neotoma-Occurrences.html">Occurrences in Neotoma: 18,900,000 and counting...</a>
         </h2>
+        <div class='container'>
+          <p>A few weeks ago, I posted about Big Data in the field of ecology, specifically biodiversity informatics, where I looked at the holdings of the Neotoma Paleoecological Database and the Global Biodiversity Information Facility (GBIF). I made some comparisons between the two databases, though the units of scale were different. In Neotoma, I used the number of <em>datasets</em> that had been submitted, while for GBIF, I commented on the number of <em>occurrences</em>.  These are two fundamentally different units, so I set out to resolve the issue and find out how many occurrences there are in Neotoma.</p>
+
+
+        </div>
       </li>
     
       <li>
@@ -225,6 +240,11 @@
         <h2>
           <a class="post-link" href="/research/2016/09/19/PHD-Preview.html">PhD Preview</a>
         </h2>
+        <div class='container'>
+          <p>I’ve been thinking a lot about my PhD research, even as I’ve been working 12 hours a day to finish my master’s thesis. If you were recently thinking <em>“I wonder what Scott will be doing in Wisconsin for the next 3-6 years”</em>, wonder no more. This is the Cliff Notes version, expect a 150-200 page version in early 2021.</p>
+
+
+        </div>
       </li>
     
       <li>
@@ -233,6 +253,16 @@
         <h2>
           <a class="post-link" href="/tutorial/2016/09/10/Williams-Lab-Github-Lesson.html">William's Lab Github Practical</a>
         </h2>
+        <div class='container'>
+          <h3 id="objectives">Objectives</h3>
+<ol>
+  <li>Introduce Git and Github: what are they, what’s the difference, and how can they be useful to your work in the lab?</li>
+  <li>Create your first repository and practice the workflow of committing and pulling/pushing files.</li>
+  <li>Talk about some of the more advanced features of tools: why might you need to use them, particularly in terms of collaboration.</li>
+</ol>
+
+
+        </div>
       </li>
     
       <li>
@@ -241,6 +271,11 @@
         <h2>
           <a class="post-link" href="/research/paleo/2016/08/31/Big-Data-In-Ecology.html">Ecological Data: Is it 'Big Data'?</a>
         </h2>
+        <div class='container'>
+          <p>We’ve all heard the term ‘Big Data’, though it’s often thrown around as a techy buzzword, along with others, like ‘The Cloud’, without a clear meaning.  In the Williams Lab, we’re working with datasets that are sometimes called ‘Big Data’ in talks by <a href="https://twitter.com/iceageecologist">@iceageecolgist</a> and others, housed in databases like <a href="http://neotomadb.org">Neotoma</a>, <a href="http://gbif.org">the Global Biodiversity Information Facility</a>, and the <a href="http://paleobiodb.org">Paleobiology Database</a>.  Today, I ask, what characteristics of our data make it ‘Big Data’?</p>
+
+
+        </div>
       </li>
     
       <li>
@@ -249,6 +284,11 @@
         <h2>
           <a class="post-link" href="/research/paleo/2016/08/21/Adding-Shareable-URLs-To-IceAgeMapper.html">Adding Shareable URLs to IceAgeMapper</a>
         </h2>
+        <div class='container'>
+          <p>One of the features Rob suggested I add to Ice Age Mapper during our last meeting was a dynamic url that would record the current state of the application, and could thus be shared between users. I took a stab at that last week, and got it working pretty well.  I thought it would be a lot of re-coding from the ground up, but it turns out that most of what I had written previously could be easily converted to load a URL string.  My application only generates a shareable URL when the user clicks the ‘Share’ button, but in theory, the app could easily be modified to generate a new URL each time an action was taken.  I think this would actually <strong><em>Not</em></strong> be a good idea, because it would mean there would be an entry in the user’s web history for each action they took inside of the application, meaning they would have to click the back button like a million times if they messed up.  Good to know support exists for that though.</p>
+
+
+        </div>
       </li>
     
       <li>
@@ -257,6 +297,11 @@
         <h2>
           <a class="post-link" href="/research/cloudcomputing/2016/07/19/Updating-R-on-Debian.html">Updating R on Debian Linux</a>
         </h2>
+        <div class='container'>
+          <p>Why the <code class="highlighter-rouge">apt-get</code> package manager doesn’t contain the latest version of <code class="highlighter-rouge">R</code> automatically, I’m not sure. I recently realized I have been downloading a 2+ year old distribution for all of my SDM timing runs by running the standard <code class="highlighter-rouge">sudo apt-get install r-base</code> command at the shell.  For several weeks, this was fine, but today the package <code class="highlighter-rouge">Rcpp</code>, which wraps compiled C++ code in the R environment failed to compile.  I spent most of the afternoon trying to figure out what was going on.  I didn’t even occur to me that the  <code class="highlighter-rouge">r-base</code> package I was using was the root cause.</p>
+
+
+        </div>
       </li>
     
       <li>
@@ -265,6 +310,11 @@
         <h2>
           <a class="post-link" href="/research/visualization/2016/06/26/preliminary-thesis-results.html">Preliminary Thesis Results: Update 6/26</a>
         </h2>
+        <div class='container'>
+          <p>I’ve made it through 4,830 of the experiments I want to run for my thesis, so I’m taking this opportunity to reflect on the preliminary results that I have so far, visually check what I have so far, and make any necessary changes before doing the more expensive portion of the experiments.  So far, the results look okay, but definitely not what I expected.  The effect of the computing configuration on computing time seems to be minimal.  On the other hand, the effect of different experimental parameters is pretty significant.</p>
+
+
+        </div>
       </li>
     
       <li>
@@ -273,6 +323,11 @@
         <h2>
           <a class="post-link" href="/research/paleoclimate/2016/06/26/the-niche-api-web-service.html">Building the Niche Database and Web Services</a>
         </h2>
+        <div class='container'>
+          <p>I’ve spent some time over the past couple of weeks building out the Niche API, a set of web services that enable you to get global climate model (GCM) simulated climate data for specific points in space and time.  For this project I’ve been mixing database design, backend web programming, and a bit of cloud computing.  It’s been a fun process, and is turning into what I think will be a very useful tool.  In this post, I put down a few thoughts about the decisions I made, the techniques I used, and the problems I faced.</p>
+
+
+        </div>
       </li>
     
       <li>
@@ -281,6 +336,11 @@
         <h2>
           <a class="post-link" href="/research/cloudcomputing/2016/06/16/Computing-Configuration-Update.html">Automating my workflow: Building a (somewhat) distributed and (moderately) fault-tolerant system</a>
         </h2>
+        <div class='container'>
+          <p>I’ve made significant progress in getting a couple of Google’s computers to do my bidding (aka my thesis), in an automated way, so I thought I would share my experience setting up my cluster, and, specifically, the configuration of computing nodes and database/control nodes.  My setup draws on a bit on the design of larger systems like Hadoop, which create frameworks for massively large and distributed fault-tolerant systems.  In short, I have one Master Node that hosts a database and a control script, and a pool of compute nodes that are fault-tolerant and designed only for computing.  The compute nodes don’t have to know anything about the progress of the entire project and can handle being shut down mid-run, and the control node doesn’t have to know anything about the simulations being computed.</p>
+
+
+        </div>
       </li>
     
       <li>
@@ -289,6 +349,11 @@
         <h2>
           <a class="post-link" href="/research/cloudcomputing/2016/06/12/managing-long-running-linux-processes.html">Managing Long-Running Processes on Linux</a>
         </h2>
+        <div class='container'>
+          <p>In my work, I have several times encountered the need to run a script for an extended period of time, or as a daemon (always running as a service).  Whether you’re on your own personal computer or SSHed into a virtual machine in the cloud, managing processes that take a long time can be annoying. If you finish your work day and close your laptop, you’re going to stop your script.  In the cloud (or I guess on a desktop/personal server too) you can take a couple steps to run scripts as services that will not stop when you end your work day.  There are a couple of ways of doing it that I’ve found.  Here are two that matched my needs.</p>
+
+
+        </div>
       </li>
     
       <li>
@@ -297,6 +362,11 @@
         <h2>
           <a class="post-link" href="/research/cloudcomputing/2016/06/05/Startup-and-Shutdown-Scripts-GCE.html">Startup and Shutdown Scripts in Google Cloud Compute Engine</a>
         </h2>
+        <div class='container'>
+          <p>In continuing my meditations on beginning to use the Google Cloud Computing platform, this post will describe the use of startup and shutdown scripts. If you want to start multiple instances that are all the same in terms of programs, data, etc (but perhaps of different size), you have two options. First, you could save your fully configured machine as an image, or more likely, as a snapshot.  Booting with this configuration is easy, just select the option from the menu when starting the new instance. Proceeding in this way has several potential drawbacks, however.  Most notably, it is very difficult to keep everything updated with this method.  Unless you manually update the snapshot pretty often, your software is going to be out of date.  Moreover, if you decide to make a small change in the scripts or programs you’re running on the instance, you will need to make an update to the snapshot.</p>
+
+
+        </div>
       </li>
     
       <li>
@@ -305,6 +375,21 @@
         <h2>
           <a class="post-link" href="/research/cloudcomputing/2016/06/02/adventures-in-google-cloud-I.html">Connecting to Google Cloud SQL</a>
         </h2>
+        <div class='container'>
+          <p>Part of the reason that I am keeping this blog is to keep a record of the things I’ve done
+and my thought process in doing them so that when it comes time to write up my thesis,
+I will have a better recollection of what was going through my head. The other reason
+is to perhaps help someone out there struggling similar problems that I went through.
+I think that my adventures in the Google Cloud Platform are a good example of this –
+Google’s Cloud Platform is acknowledged to be slightly less mature than some of its competitors, like AWS.
+Because of this, there are fewer stackexchange questions, blogs posts, etc that can help guide
+basic setup.  I do think that Google’s documentation and tutorials are better than Amazon’s –
+more accessible, better written – but it can be hard to figure out what you need to
+be doing if you’re not a cloud professional.  So I’ll document some of the hard steps
+I encountered in this ongoing set of posts.</p>
+
+
+        </div>
       </li>
     
       <li>
@@ -313,6 +398,14 @@
         <h2>
           <a class="post-link" href="/cartography/2016/05/31/Find-Data-For_Cartography-Projects-II.html">On Finding Data for Cartography Projects, Part II: Spatial Data Services and APIs</a>
         </h2>
+        <div class='container'>
+          <h3>Using APIs and Data Services</h3>
+<p>This is the second installment in my series about finding data from new and different sources for use in your cartography or GIS projects.  Last time I discussed looking through existing source code to find hidden datasets that might be useful. Today, I will walk through using an API service to tap into an organization’s database.  As a simple google search will reveal, there are other resources, blogs, and tutorials out there that talk about how to use an API as a data source, but I will focus particularly on converting data from an API into a useful spatial data format that can be used in mapping and analysis.  Tons of APIs have spatial data (usually latitude and longitude) attached to their responses, its just a matter of finding the data service and massaging it into the right format.</p>
+<h4>What is an API?</h4>
+<p>An API, which stands for Application Programming Interface, is a set of protocols and methods that define how two computers should talk to each other.  An API is a documented set of building blocks (of code) that define how an existing application works.  A programmer can put these blocks together to extend the existing program, or create a new app that uses portions of the existing program.  Consider <a href="http://twitter.com">Twitter</a>.  Twitter is super popular, and a lot of people use it for various things – documenting every facet of their daily lives, reporting news, <a href="http://chrisscheele.com/">observing disasters and severe weather</a>, etc.  To build the platform, Twitter needed to make a whole bunch of computers talk to each other. When a user writes a tweet, it is sent to twitter’s central database, where it is stored, and then pushed back out to other clients.  Multiply this by Twitter’s &gt;310 million users, both reading and writing tweets, and you have a lot of clients that need to communicate with minimal friction.</p>
+
+
+        </div>
       </li>
     
       <li>
@@ -321,6 +414,13 @@
         <h2>
           <a class="post-link" href="/research/2016/05/22/My-Thesis-Proposal-In-A-Nutshell.html">My Thesis Proposal in A Nutshell</a>
         </h2>
+        <div class='container'>
+          <p>I was recently tasked with writing a formal proposal for my thesis as the final paper in one of my courses.  The final draft of the proposal was 21 single spaced pages.  I figured I would write a shorter and perhaps more accessible summary of the work I am starting on so those of you out there that are curious what I’m working on don’t have to wade through that.  If you do want to see the real thing, references, equations, and all, you can find it <a href="http://scottsfarley.com/assets/Farley_Thesis_Proposal_final.pdf">here</a>.</p>
+<h4>In One Sentence:</h4>
+<p>I am attempting to develop a well-performing predictive model that, given a species distribution model user’s goals and requirements, determines the optimal computing configuration for that modeling routine by balancing the time spent modeling with the cost of the computing equipment used.</p>
+
+
+        </div>
       </li>
     
       <li>
@@ -329,6 +429,11 @@
         <h2>
           <a class="post-link" href="/research/sdm/2016/05/20/Selecting-Variables-for-SDM.html">Selecting Variables for Species Distribution Models</a>
         </h2>
+        <div class='container'>
+          <p>When running statistical models, like multiple linear regression or generalized linear models, it is typically not a good idea to use multiple predictor variables that are highly correlated with one another, as it may result in an unstable final model. This guideline also applies to many of various flavors of species distribution models (SDMs), which take in two or more (usually climatic) predictor variables to model a species response to environmental gradients.  Given modeled climate output, the SDM models can be used to estimate the probability of a species occurring in a different time period, say at the last glacial maximum – 22,000 years ago–, or in 2100, once humans have contributed several degrees to the earth’s temperature.  While these models differ in their statistical techniques, most behave a little like multiple regression, where a set of predict variables are combined in some parametric or non-parametric way to estimate the response as a function of these inputs.  Thus, just like in a standard regression, using highly correlated climatic predictor variables can  contribute to instability in the modeled response.  This post describes the methods I chose to identify correlated variables and choose the ones I wanted to remain in my study.</p>
+
+
+        </div>
       </li>
     
       <li>
@@ -337,6 +442,11 @@
         <h2>
           <a class="post-link" href="/cartography/2016/05/08/on-finding-data-for-cartography-projects-I.html">On Finding Data for Cartography Projects, Part I: Reading Existing Source Code</a>
         </h2>
+        <div class='container'>
+          <p>Sometimes, it can be hard to find the data we want.  We spend hours looking in all our normal places.  We cruise the census bureau, hit the EPA’s data portal, and browse UW’s collection of geospatial resources. If you have a topic or a storyline in mind, it can be really frustrating to find that you can’t find the right data.  In most cases, the data you seek is actually out there, it might just be a little harder to find that you might hope.  I’ll discuss a couple of techniques I use from time to time when I find myself in this situation.  This is my first blog post, so stay with me.</p>
+
+
+        </div>
       </li>
     
   </ul>

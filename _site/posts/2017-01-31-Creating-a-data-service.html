@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+  <title>A Whirlwind Tour to Creating Your Own Data Service Using Postgres and Javascript</title>
+  <meta name="description" content="I am a graduate student at UW Madison studying computing applications to physical geography and paleoecological change.
+">
+
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="canonical" href="/posts/2017-01-31-Creating-a-data-service.html">
+  <link rel="alternate" type="application/rss+xml" title="Scott's Blog" href="/feed.xml">
+
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name='viewport' content='width=device-width, initial-scale=1'/>
+    <meta name='keywords' content="maps, cartography"/>
+    <!---Links--->
+    <!-- Latest compiled and minified CSS -->
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+<!-- Optional theme -->
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+    <link rel="stylesheet" href='/css/cv.css'>
+    <link rel="stylesheet" href='/css/style.css'>
+    <style>
+    	footer{
+    		text-align:center;
+    	}
+    </style>
+    <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-83006302-2', 'auto');
+    ga('send', 'pageview');
+  </script>
+
+  <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha256-/SIrNqv8h6QGKDuNoLGA4iret+kyesCkHGzVUUV0shc=" crossorigin="anonymous"></script>
+<!-- Latest compiled and minified JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+
+</head>
+
+
+  <body>
+
+    
+
+
+<nav class="navbar navbar-default navbar-static-top">
+<div class="container">
+<div class="navbar-header">
+  <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+    <span class="sr-only">Toggle navigation</span>
+    <span class="icon-bar"></span>
+    <span class="icon-bar"></span>
+    <span class="icon-bar"></span>
+  </button>
+  <a class="navbar-brand" href="/index.html">Scott Farley</a>
+</div>
+<div id="navbar" class="navbar-collapse collapse">
+  <ul class="nav navbar-nav navbar-right">
+    <li><a href="/index.html">Home</a></li>
+    <li><a href="/cv.html">CV</a></li>
+    <li><a href="/index.html#blog">Blog</a></li>
+</div><!--/.nav-collapse -->
+</div>
+</nav>
+
+
+    <div class="page-content">
+      <div class="wrapper">
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title" itemprop="name headline">A Whirlwind Tour to Creating Your Own Data Service Using Postgres and Javascript</h1>
+    <p class="post-meta"><time datetime="2017-01-31T11:00:00-06:00" itemprop="datePublished">Jan 31, 2017</time></p>
+  </header>
+
+  <div class="post-content" itemprop="articleBody">
+    <p>I led this week’s edition of the <a href="http://www.geography.wisc.edu/cartography/">Cart Lab Education Series</a> with a quick tutorial on how to go about creating an application backend (or Data Service or API, depending on your terminology) using JavaScript (Node.js) and Postgres. It was a lot to cover in less than half an hour, so I wanted to write up a quick blog post about it too. To lead the discussion, I created this infographic that outlines the components of a data service, and how they might relate to one another.</p>
+
+<p>As a hands on demo, I created a database with some example data from the <a href="http://www.transtats.bts.gov/DL_SelectFields.asp?Table_ID=236&amp;DB_Short_Name=On-Time">Flight Delay Dataset</a>, and wrote up a couple annotated code examples.  The code examples are on <a href="https://github.com/scottsfarley93">my GitHub</a>, as well as a SQL dump of the database, if you want to follow along at home.  If you’re at the University of Wisconsin, you can query the database I am hosting on the Geography Department’s server.</p>
+
+<h3 id="setting-up-the-database">Setting up the Database</h3>
+
+<p>To have a data service, you need a data base.  The database can use any RMDBS you want (MySQL, PostGres, SQLite, MongoDB).  You should think about the system you want to use and the schema you want to implement before you start.  That’s a theme for another CLES, or Qunying’s Geography 576.</p>
+
+<ol>
+  <li>Install the Database Management System</li>
+  <li>Create user roles and privileges</li>
+  <li>Think about a relational table structure that makes sense for your data</li>
+  <li>Implement the schema</li>
+  <li>Add data (may require massaging your data, and often requires a script)</li>
+</ol>
+
+<h3 id="setting-up-the-bridge">Setting up the Bridge</h3>
+<p>The second component of the data service is the ‘bridge’, or what other people might call an API or application backend. I like the term bridge, because it makes clear its role as linking the database and the application client.  Call it what you like. I like to use Node.js for my bridge programs, here are some reasons: it’s fast, it’s popular, and it’s JavaScript. I find it a lot easier to write the full stack in a single language than going back and forth between different scripting languages. That being said, there are lots of other choices for language: Python, ASP, .NET, PHP.  I’ve written similar programs in both python and PHP and it’s not that different. Choose what you’re comfortable with.</p>
+
+<p>If you do go with node, here are the major steps (detailed below) that lead to a finished data service:</p>
+
+<ol>
+  <li>Install Node (https://nodejs.org/en/)</li>
+  <li>Create a new application using <code class="highlighter-rouge">npm init</code> (or clone my repo)</li>
+  <li>Set up the application in <code class="highlighter-rouge">app.js</code></li>
+  <li>Write controllers for each endpoint</li>
+</ol>
+
+<h3 id="creating-a-new-node-application">Creating a new Node Application</h3>
+<p>All Node programs are also node packages, which are managed by the node package manager (<code class="highlighter-rouge">npm</code>).  There’s a handy wizard that will guide you through the creation of a new package in <code class="highlighter-rouge">npm init</code>.  Our program (and yours probably, if it does anything interesting) uses other people’s libraries.  There are node libraries for everything: compression, password hashing, file system access, you name it.  When in doubt, use a module, don’t try to write it yourself.  Once we’ve created the new package, we tell it about the libraries we require (these are called dependencies), by adding a section in <code class="highlighter-rouge">package.json</code>.</p>
+
+<ol>
+  <li>Initialize new project with <code class="highlighter-rouge">npm init</code></li>
+  <li>Follow prompts on terminal screen to initialize new application</li>
+  <li>Open <code class="highlighter-rouge">package.json</code> with your favorite text editor.</li>
+  <li>Add the following to include dependencies:</li>
+</ol>
+
+<p><code class="highlighter-rouge">
+  "dependencies": {
+    "express": "latest",
+    "body-parser": "latest",
+    "pg": "latest",
+    "pg-promise": "latest",
+  }
+ </code></p>
+
+<p>This installs the following libraries:</p>
+
+<ul>
+  <li><code class="highlighter-rouge">express</code>: Web framework</li>
+  <li><code class="highlighter-rouge">body-parser</code>: For getting query data</li>
+  <li><code class="highlighter-rouge">pg</code>: Postgres bindings</li>
+  <li><code class="highlighter-rouge">pg-promise</code>: Postgres bindings with better syntax</li>
+</ul>
+
+<ol>
+  <li>Run the command <code class="highlighter-rouge">npm install</code></li>
+  <li>You’re now able to run your application. If you (at any time) need to add more dependencies, add them to the section you just created.</li>
+</ol>
+
+<h3 id="set-up-the-application">Set up the application</h3>
+<p>The bridge application will do the actual work on parsing user input values, writing SQL, executing queries, receiving database output, and packaging it up for the client.  Everything will be done in JavaScript functions, and will live in <code class="highlighter-rouge">app.js</code>. (If you write a complex service, or use a tool like <a href="http://swagger.io/">Swagger</a>, you may put pieces of your code into different files.  Not now.) Key parts of this file include importing libraries, connecting to the database using your credentials, and writing function for each service endpoint (next section).</p>
+
+<ol>
+  <li>Create a file called <code class="highlighter-rouge">app.js</code></li>
+  <li>Import the required modules (this part is a lot like python) by creating a new variable with its name:
+  <code class="highlighter-rouge">
+  var express = require('express')
+</code></li>
+  <li>Create a connection to the database.
+    <ul>
+      <li>For this, I like to use a function, so it can be reused. For example:</li>
+    </ul>
+  </li>
+</ol>
+
+<p><code class="highlighter-rouge">
+  createDBConnection(){
+    //returns a database connection
+      var cn = {
+      host: yourHost,
+      port: 5432, //default
+      database: yourDBName,
+      user: yourUsername,
+      password: yourPassword
+  };
+  var db = pgp(cn); //do the connection using pg-promise library
+  return db
+  }
+ </code>
+4. Write endpoint functions.
+5. Start your application. Tell the server to listen for incoming client requests. I like to develop on ports 8000 and 8080.  Apache (web server) uses 80 (default in web browsers).
+  <code class="highlighter-rouge">
+  app.listen(8080, function () {
+    console.log('Started application.')
+})
+</code></p>
+
+<h3 id="writing-endpoint-functions">Writing endpoint functions</h3>
+<ol>
+  <li>In the body of your <code class="highlighter-rouge">app.js</code> file, write a function for each endpoint you want to support. For now, we’ll just focus on <code class="highlighter-rouge">GET</code> requests, but you can do other verbs as well (most importantly, you can add data to the database with <code class="highlighter-rouge">POST</code> requests). Also, for now we’ll look at getting data from the query string, but you can also get data passed in via the body of the request if you want that too…</li>
+</ol>
+
+<p>If we want to give a user a lost of the flights (day, time, departure city, arrival city, delay amount, we might want to have an endpoint called <code class="highlighter-rouge">flights</code> that a user would access by going to <code class="highlighter-rouge">https://my.website.com/api/flights</code>.  That way the user knows for sure she’s getting the flights.  It’s a good idea to organize your endpoints into logical groups of what they return.</p>
+
+<p>However, our user might not want all the flights, rather she wants to query for those from or to a particular city, or to limit the number of results coming back from the database.</p>
+
+<ol>
+  <li>Start of by writing a function like this, for a <code class="highlighter-rouge">GET</code> request to the <code class="highlighter-rouge">/flights</code> service.</li>
+</ol>
+
+<p>```
+  app.get(‘/flights’, function (req, res) {
+    //this function is the endpoint for the flight data</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>//do step two here
+//do step three here
+//do step four here
+//do step five here   })   ``` 2.  Inside of the function body, parse the user input -- how are they searching or filtering:   ```   //get query parameters   var originCity = req.query.originCity || null   ```   Include one variable for each filter/query parameter/argument you want in your endpoint. This gives you the value of that parameter, if it's in the query string, otherwise, you get a ```null```.
+</code></pre>
+</div>
+
+<ol>
+  <li>Write a SQL query, using the value other the parameter(s) given by the user. The SQL here is arbitrary – you can do anything you might want to do in PGAdmin or psql.  Joins, views, selects, deletes – it’s all on the table. Pass user parameter values in via the <code class="highlighter-rouge">${variableName}</code> syntax, or see the <a href="https://github.com/vitaly-t/pg-promise">pg-promise</a> library docs.</li>
+</ol>
+
+<p><code class="highlighter-rouge">
+  sql = "SELECT * FROM flightdelays \
+    WHERE 1=1
+    AND (${origin} IS NULL or flightdelays.origin = ${origin})"
+ </code></p>
+
+<p>This syntax ensures that all results will be given back to the user in the case that no origin city is specified, and is extremely helpful for API building.</p>
+
+<ol>
+  <li>Execute the query, using the pg-promise functions. This happens asynchronously, so be prepared. You can make an object with the query values first, if that helps you think through what you’re passing to the query.</li>
+</ol>
+
+<p><code class="highlighter-rouge">
+  db.any(sql, {origin: originCity})
+    .then(function(data){
+      //happens on success
+      })
+    .catch(function(err){
+      //happens on error
+      })
+   </code></p>
+
+<ol>
+  <li>Do any data conversions or other stuff you want. Then return the result as JSON. I like to include a timestamp, and a message that says the call succeeded.</li>
+</ol>
+
+<p><code class="highlighter-rouge">
+  //return response to user
+  var ts = new Date().toJSON()
+  var resOut = {
+    "success" : true,
+    "timestamp" : ts,
+    data: data
+  }
+  res.json(resOut) //finish request by sending data back to the user
+ </code></p>
+
+<h3 id="start-the-service">Start the Service</h3>
+<p>Now that you’ve built your awesome data service, you’ll need to start it. Here’s how:</p>
+
+<ol>
+  <li>Open a new terminal/command line window</li>
+  <li>Run the command <code class="highlighter-rouge">node app.js</code></li>
+  <li>The server is running.</li>
+</ol>
+
+<h2 id="setting-up-the-client">Setting up the Client</h2>
+<p>The client can be set up as you would for any AJAX call. No special modifications are needed, you just need to know the names and data types of the values being passed in via the query string.</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>$.ajax("localhost:8080", {
+    data: {
+      origin: 'PHX',
+    },
+    success: function(data){
+      console.log("Got data!")
+      console.log(data)
+    },
+    error: function(status, xhr, error){
+      console.log(xhr.responseText)
+    }
+  })
+</code></pre>
+</div>
+
+<h2 id="next-steps">Next Steps:</h2>
+<p>If you’ve made it this far, you might want to try some more challenging tasks, such as:</p>
+
+<ol>
+  <li>Check out the annotated source in <code class="highlighter-rouge">app.js</code>.</li>
+  <li>Add a new query parameter to filter destination city.</li>
+  <li>Add a new query parameter to include only those results that have more than a certain delay (in minutes).</li>
+  <li>Add a new endpoint that lists the airports in the dataset and their states and cities.</li>
+  <li>Add a new endpoint that summarizes the delays by airport.</li>
+</ol>
+
+  </div>
+
+</article>
+<script type="text/javascript"
+    src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+      </div>
+    </div>
+
+    <footer  >
+  <ul class='list-inline'>
+      <li class='no-bullet'><span class='glyphicon glyphicon-earphone text-muted'></span><strong class='contact-detail small'>  <a href='tel:626-264-0741'>626.264.0741</a></strong></li>
+      <li class='no-bullet'><span class='glyphicon glyphicon-envelope text-muted'></span><strong class='contact-detail small'>  <a href="mailto:sfarley2@wisc.edu">sfarley@wisc.edu</a></strong></li>
+      <li class='no-bullet'><span class='glyphicon glyphicon-menu-right text-muted'></span><strong class='contact-detail small'><a href='http://twitter.com/scottsfarley93'> @scottsfarley93</a></strong></li>
+      <li class='no-bullet'><span class='glyphicon glyphicon-menu-right text-muted'></span><strong class='contact-detail small'><a href='http://github.com/scottsfarley93'>  GitHub</a></strong></li>
+      <li class='no-bullet'><span class='glyphicon glyphicon-menu-right text-muted'></span><strong class='contact-detail small'><a href='https://www.linkedin.com/in/scott-farley-25902581'>  LinkedIn</a></strong></li>
+</ul>
+</footer>
+
+
+  </body>
+
+</html>

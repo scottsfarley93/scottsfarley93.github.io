@@ -6,9 +6,37 @@
 </description>
     <link>/</link>
     <atom:link href="/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Wed, 01 Feb 2017 19:47:44 -0600</pubDate>
-    <lastBuildDate>Wed, 01 Feb 2017 19:47:44 -0600</lastBuildDate>
+    <pubDate>Mon, 06 Feb 2017 19:20:28 -0600</pubDate>
+    <lastBuildDate>Mon, 06 Feb 2017 19:20:28 -0600</lastBuildDate>
     <generator>Jekyll v3.1.6</generator>
+    
+      <item>
+        <title>Converting NetCDF to Raster</title>
+        <description>&lt;p&gt;Sometimes, especially when working with climate data, it is necessary to work with NetCDFs (Network Common Data Format – standard data packaging for scientific data).  While NetCDF is good for data distribution, storage, and provenance, it is less good for working into standard raster data processing workflows. If you’re used to working with Tiffs or JPEGs, the following command might be helpful, assuming you have gdal installed on your machine.&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;c&quot;&gt;# convert the specified dimension to Raster&lt;/span&gt;
+gdal_translate NETCDF:[PATH_TO_NC_FILE]:[DIMENSION_OF_INTEREST] -of &lt;span class=&quot;s2&quot;&gt;&quot;[FORMAT_DESIRED]&quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;OUTPUT_FILE_NAME]&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;This will create an N-banded raster with one band for each time dimension related in your dataset.&lt;/p&gt;
+
+&lt;p&gt;For example, to convert a netcdf file called &lt;code class=&quot;highlighter-rouge&quot;&gt;trace.01-36.22000BP.csim.aice.22000BP_decavg_400BCE.nc&lt;/code&gt; (climate data from the SynTrace paleoclimate experiment) using the dimension &lt;code class=&quot;highlighter-rouge&quot;&gt;aice&lt;/code&gt; (area of gridcell covered in glacier) to a tiff (&lt;code class=&quot;highlighter-rouge&quot;&gt;GTiff&lt;/code&gt;), I might enter:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;gdal_translate NETCDF:trace.01-36.22000BP.csim.aice.22000BP_decavg_400BCE.nc:aice -of &lt;span class=&quot;s2&quot;&gt;&quot;GTiff&quot;&lt;/span&gt; aice.tif&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;This creates a 2204 band raster representing ice area in the tiff format. Super handy for then converting into a format to be digested by a web application.&lt;/p&gt;
+</description>
+        <pubDate>Sun, 05 Feb 2017 11:00:00 -0600</pubDate>
+        <link>/research/data/cartography/2017/02/05/Converting-Netcdf-To-Raster.html</link>
+        <guid isPermaLink="true">/research/data/cartography/2017/02/05/Converting-Netcdf-To-Raster.html</guid>
+        
+        
+        <category>Research</category>
+        
+        <category>Data</category>
+        
+        <category>Cartography</category>
+        
+      </item>
     
       <item>
         <title>A Whirlwind Tour to Creating Your Own Data Service Using Postgres and Javascript</title>
@@ -1049,246 +1077,6 @@ deb http://cran.rstudio.com/bin/linux/debian jessie-cran3/
         <category>Research</category>
         
         <category>CloudComputing</category>
-        
-      </item>
-    
-      <item>
-        <title>Preliminary Thesis Results: Update 6/26</title>
-        <description>&lt;p&gt;I’ve made it through 4,830 of the experiments I want to run for my thesis, so I’m taking this opportunity to reflect on the preliminary results that I have so far, visually check what I have so far, and make any necessary changes before doing the more expensive portion of the experiments.  So far, the results look okay, but definitely not what I expected.  The effect of the computing configuration on computing time seems to be minimal.  On the other hand, the effect of different experimental parameters is pretty significant.&lt;/p&gt;
-
-&lt;h3 id=&quot;status&quot;&gt;Status&lt;/h3&gt;
-
-&lt;h4 id=&quot;completion-statistics&quot;&gt;Completion Statistics&lt;/h4&gt;
-
-&lt;table&gt;
-  &lt;thead&gt;
-    &lt;tr&gt;
-      &lt;th&gt;Property&lt;/th&gt;
-      &lt;th&gt;Number Recored&lt;/th&gt;
-      &lt;th&gt;Percentage of Completed&lt;/th&gt;
-      &lt;th&gt;Percentage of Total&lt;/th&gt;
-    &lt;/tr&gt;
-  &lt;/thead&gt;
-  &lt;tbody&gt;
-    &lt;tr&gt;
-      &lt;td&gt;Completed&lt;/td&gt;
-      &lt;td&gt;4830&lt;/td&gt;
-      &lt;td&gt;92.18%&lt;/td&gt;
-      &lt;td&gt;5.72%&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;Error&lt;/td&gt;
-      &lt;td&gt;410&lt;/td&gt;
-      &lt;td&gt;7.82%&lt;/td&gt;
-      &lt;td&gt;0.05%&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;Not Started&lt;/td&gt;
-      &lt;td&gt;59550&lt;/td&gt;
-      &lt;td&gt;0%&lt;/td&gt;
-      &lt;td&gt;70.5 %&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;Removed*&lt;/td&gt;
-      &lt;td&gt;19680&lt;/td&gt;
-      &lt;td&gt;0%&lt;/td&gt;
-      &lt;td&gt;23.3%&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;Total&lt;/td&gt;
-      &lt;td&gt;84470&lt;/td&gt;
-      &lt;td&gt;–%&lt;/td&gt;
-      &lt;td&gt;100%&lt;/td&gt;
-    &lt;/tr&gt;
-  &lt;/tbody&gt;
-&lt;/table&gt;
-
-&lt;p&gt;Removed experiments are those that specify fitting the BRT model with 10,000 training examples, which takes too long to be practical.  Instead, these were replaced with the &lt;em&gt;nSensitivity&lt;/em&gt; experiment series, which tests the computing time sensitivity to different numbers of input points.&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/assets/configs.png&quot; alt=&quot;Image&quot; /&gt;&lt;/p&gt;
-
-&lt;h3 id=&quot;inspection-of-results&quot;&gt;Inspection of Results&lt;/h3&gt;
-&lt;p&gt;One of the main problems I’m having in interpreting the results is that there are four separate experimental variables, which makes it difficult to properly interpret the influence of only one variable.  Of course, I want to isolate the effect of the computing memory and virtual cores.&lt;/p&gt;
-
-&lt;h4 id=&quot;influence-of-additional-cores&quot;&gt;Influence of Additional Cores&lt;/h4&gt;
-&lt;p&gt;&lt;img src=&quot;/assets/cores_totalTime.png&quot; alt=&quot;Cores&quot; /&gt;
-If we plot vCPU vs. total time, there is no clear relationship.  The major spike at cores = 4 is due to the fact that I used a four core virtual machine to test the effect of different numbers of training examples.  These tests are not part of the experiments that I’m doing on every machine. If we remove these extraneous points, and treat them separately later, we can fit a linear model that shows a very slightly decreasing slope:&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;y=136.103 - 4.548Cores&lt;/script&gt;
-
-&lt;h4 id=&quot;influence-of-additional-memory&quot;&gt;Influence of Additional Memory&lt;/h4&gt;
-&lt;p&gt;&lt;img src=&quot;/assets/mem_totalTime.png&quot; alt=&quot;Memory&quot; /&gt;
-The effect of adding additional memory is slightly more clearly linear and decreasing than the effect of adding addition CPU cores, although it is still not particularly steep.  The linear model here takes the form:&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;y = 134.87 - 1.26GB&lt;/script&gt;
-
-&lt;h4 id=&quot;influence-of-spatial-resolution&quot;&gt;Influence of Spatial Resolution&lt;/h4&gt;
-&lt;p&gt;As expected, higher resolution outputs take longer to process than their lower resolution counterparts. Because increasing spatial resolution results in an exponential number of cells, a linear model is not particularly well suited to this application.  An exponentially decreasing relationship can be seen in the prediction time.&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/assets/spatial_resolution.png&quot; alt=&quot;Spatial Resolution&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;The relationship between spatial resolution takes the form:&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;y = 145.27 - 52.78degree&lt;/script&gt;
-
-&lt;h4 id=&quot;influence-of-training-examples&quot;&gt;Influence of Training Examples&lt;/h4&gt;
-&lt;p&gt;The clearest relationship in all of the experimental variables is between total model time and number of training examples.  This relationship is clearly monotonically increasing, perhaps at a rate slightly more than linear.  The linear fit for these two variables is:&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;y = -180.5674 + 0.3348trainingExample&lt;/script&gt;
-
-&lt;p&gt;Nearly all of this additional time per training example comes from the time taken to fit the model.&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/assets/training_examples_totalTime.png&quot; alt=&quot;Training Examples&quot; /&gt;&lt;/p&gt;
-
-&lt;h3 id=&quot;fitting-a-generalized-linear-model&quot;&gt;Fitting a Generalized Linear Model&lt;/h3&gt;
-&lt;p&gt;Using the &lt;code class=&quot;highlighter-rouge&quot;&gt;glm&lt;/code&gt; function in R, I fitted a generalized linear model to the data, using all four predictors.  Using all the predictors, the model takes the form:&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;y = -176.0644 + 0.3343trainingExamples - 2.2136Cores + 2.2905GBMemory - 50.6004degree&lt;/script&gt;
-
-&lt;p&gt;Using the Akaike Information Criterion (AIC) to evaluate the best model, I tried using different combinations of predictors. Using all four predictors, however, gives us the minimum AIC, so can be considered the best model out of all of the candidates.&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;AIC = 66800&lt;/script&gt;
-
-&lt;h3 id=&quot;evaluating-the-accuracy-of-the-glm&quot;&gt;Evaluating the Accuracy of the GLM&lt;/h3&gt;
-&lt;p&gt;Using an independent testing set of 200 random experiments, I used the glm above to predict the total time.&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/assets/obs_pred.png&quot; alt=&quot;Prediction&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;Unfortunately, our GLM doesn’t do a great job at predicting the testing set to the observed values.  Perhaps I’m forgetting a variable…&lt;/p&gt;
-
-&lt;p&gt;We can also plot out the errors between observed (‘true’) values and predicted values.  Looking at the summary statistics, it appears my model will slightly under predict the total execution time.&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/assets/summary.png&quot; alt=&quot;SummaryStats&quot; /&gt;&lt;/p&gt;
-
-&lt;h3 id=&quot;variance-within-cells&quot;&gt;Variance Within Cells&lt;/h3&gt;
-&lt;p&gt;One of the things I was most worried about when starting this project was the within-cell variance that I would encounter due to internal computer variations and other concurrent processes.  Looking at the preliminary data, it appears that the variance within the cells does increase as the total experiment time increases.&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/assets/sd_mean.png&quot; alt=&quot;SD_Mean&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;The linear model for standard deviation as a function of cell mean takes the form:&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;y = 15.7146 + 0.05261x&lt;/script&gt;
-
-&lt;p&gt;Where x is the cell mean.  Note: A cell is combination of cores, memory, training examples, and spatial resolution, and each cell is computed ten times.&lt;/p&gt;
-
-&lt;h3 id=&quot;computed-configurations&quot;&gt;Computed Configurations&lt;/h3&gt;
-
-&lt;p&gt;At this time I’ve computed:&lt;/p&gt;
-
-&lt;table&gt;
-  &lt;thead&gt;
-    &lt;tr&gt;
-      &lt;th&gt;vCPU&lt;/th&gt;
-      &lt;th&gt;Number Completed&lt;/th&gt;
-    &lt;/tr&gt;
-  &lt;/thead&gt;
-  &lt;tbody&gt;
-    &lt;tr&gt;
-      &lt;td&gt;1&lt;/td&gt;
-      &lt;td&gt;1015&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;2&lt;/td&gt;
-      &lt;td&gt;925&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;4&lt;/td&gt;
-      &lt;td&gt;1435&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;6&lt;/td&gt;
-      &lt;td&gt;1455&lt;/td&gt;
-    &lt;/tr&gt;
-  &lt;/tbody&gt;
-&lt;/table&gt;
-
-&lt;table&gt;
-  &lt;thead&gt;
-    &lt;tr&gt;
-      &lt;th&gt;GB Memory&lt;/th&gt;
-      &lt;th&gt;Number Completed&lt;/th&gt;
-    &lt;/tr&gt;
-  &lt;/thead&gt;
-  &lt;tbody&gt;
-    &lt;tr&gt;
-      &lt;td&gt;1&lt;/td&gt;
-      &lt;td&gt;148&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;2&lt;/td&gt;
-      &lt;td&gt;300&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;3&lt;/td&gt;
-      &lt;td&gt;305&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;4&lt;/td&gt;
-      &lt;td&gt;690&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;6&lt;/td&gt;
-      &lt;td&gt;617&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;8&lt;/td&gt;
-      &lt;td&gt;40&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;9&lt;/td&gt;
-      &lt;td&gt;446&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;12&lt;/td&gt;
-      &lt;td&gt;446&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;15&lt;/td&gt;
-      &lt;td&gt;336&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;16&lt;/td&gt;
-      &lt;td&gt;202&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;18&lt;/td&gt;
-      &lt;td&gt;295&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;21&lt;/td&gt;
-      &lt;td&gt;294&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;24&lt;/td&gt;
-      &lt;td&gt;301&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;27&lt;/td&gt;
-      &lt;td&gt;115&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;30&lt;/td&gt;
-      &lt;td&gt;116&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;36&lt;/td&gt;
-      &lt;td&gt;91&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;39&lt;/td&gt;
-      &lt;td&gt;88&lt;/td&gt;
-    &lt;/tr&gt;
-  &lt;/tbody&gt;
-&lt;/table&gt;
-</description>
-        <pubDate>Sun, 26 Jun 2016 09:22:52 -0500</pubDate>
-        <link>/research/visualization/2016/06/26/preliminary-thesis-results.html</link>
-        <guid isPermaLink="true">/research/visualization/2016/06/26/preliminary-thesis-results.html</guid>
-        
-        
-        <category>Research</category>
-        
-        <category>Visualization</category>
         
       </item>
     

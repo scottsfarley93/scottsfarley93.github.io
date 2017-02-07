@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "William's Lab Github Practical"
+title:  "Williams' Lab Github Practical"
 date:   2016-09-10 9:22:52 -0500
 categories: Tutorial
 ---
@@ -14,7 +14,7 @@ categories: Tutorial
 ### Git and Github
 **Git** is a open source version control system, a tool that manages the changes of files in a project. Each revision is associated with a timestamp and the person making the change, making it easy to revert back to previous versions of the file if you make a mistake or accidentally break something.  Version control systems are most commonly used for source code management, most any type of files can be managed using a VCS. There are other version control systems on the market today (e.g., Mercurial, Subversion); Git is among the most popular today. Git operates by having distributed project 'repositories' that store your code.  Any server can be a Git server.  For example, the William's lab server could be a Git server if we set it up that way.
 
-**Github** is a company that provides web-based Git repository hosting.  Github manages the servers used to store your project repositories, supports all features of git like branches, merges, and commits, as well as adding additional tools that facilitate project development and collaboration like wiki hosting and issue tracking. Github is a private company valued at over $2 billion with about 20 million [users](https://www.quora.com/How-many-users-does-GitHub-have) and nearly 40 million different projects. Before you trust it completely remember (1) it is a company that has motives other than just backing up your code and (2) if you choose to use GitHub and they do something bad or there is a systemwide failure, there are going to be 20 million other people just, if not more, as upset as your are. There are other git hosting platforms as well: Bitbucket, Gitlab, etc.
+**Github** is a company that provides web-based Git repository hosting.  Github manages the servers used to store your project repositories, supports all features of git like branches, merges, and commits, as well as adding additional tools that facilitate project development and collaboration like wiki hosting and issue tracking. Github is a private company valued at over $2 billion with about 20 million [users](https://www.quora.com/How-many-users-does-GitHub-have) and nearly 40 million different projects. Before you trust it completely remember (1) it is a company that has motives other than just backing up your code and (2) if you choose to use GitHub and they do something bad or there is a systemwide failure, there are going to be 20 million other people just, if not more, as upset as your are. There are other git hosting platforms as well: [Bitbucket](https://bitbucket.org/), [Gitlab](https://about.gitlab.com/), [CodePlex](http://www.codeplex.com/) (Microsoft's offering) and Google's [Cloud Source Repositories](https://cloud.google.com/source-repositories/), etc.
 
 ### Getting Started
 
@@ -22,7 +22,7 @@ categories: Tutorial
 
   To use Github, you need to create an account.  The good news: basic accounts are free to everybody. People with a basic account can create an unlimited of public repositories (can bee seen by anyone). If you have an academic (.edu) email address, you can get an unlimited number of private repositories as well by signing up [here](https://education.github.com/pack). Private repositories let you control who sees your code -- it's hidden from the general public.  In both public and private repositories you can control who changes your code.
 
-  To create an account, go to [https://github.com/join](https://github.com/join) and fill out the fields.  Make sure to use you ```@wisc.edu``` email address.  Keep in mind that your user name will be your public name that identifies you on the platform and will be attached to everything you do there. Also, you'll need to type in your username from time to time, so don't make it *alongandannoyingtotypusername*.  
+  To create an account, go to [https://github.com/join](https://github.com/join) and fill out the fields.  Make sure to use your ```@wisc.edu``` email address.  Keep in mind that your user name will be your public name that identifies you on the platform and will be attached to everything you do there. Also, you'll need to type in your username from time to time, so don't make it *alongandannoyingtotypusername*.  
 
 #### Getting Git on Your Computer
   To use Git on your computer, you need to install it and configure it to work with Github servers. This content was borrowed from [the Git Docs](https://help.github.com/articles/set-up-git/).

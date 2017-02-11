@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+  <title>DC-Mapbox: A Library for Creating Geographically Enabled Dashboards with Mapbox-GL and DC.js</title>
+  <meta name="description" content="">
+
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="canonical" href="/cartography/coding/2017/02/11/DC-Mapbox-Plugin.html">
+  <link rel="alternate" type="application/rss+xml" title="Scott's Blog" href="/feed.xml">
+
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name='viewport' content='width=device-width, initial-scale=1'/>
+    <meta name='keywords' content="maps, cartography"/>
+    <!---Links--->
+    <!-- Latest compiled and minified CSS -->
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+<!-- Optional theme -->
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+    <link rel="stylesheet" href='/css/cv.css'>
+    <link rel="stylesheet" href='/css/style.css'>
+    <style>
+    	footer{
+    		text-align:center;
+    	}
+    </style>
+    <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-83006302-2', 'auto');
+    ga('send', 'pageview');
+  </script>
+
+  <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha256-/SIrNqv8h6QGKDuNoLGA4iret+kyesCkHGzVUUV0shc=" crossorigin="anonymous"></script>
+<!-- Latest compiled and minified JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+
+</head>
+
+
+  <body>
+
+    
+
+
+<nav class="navbar navbar-default navbar-static-top">
+<div class="container">
+<div class="navbar-header">
+  <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+    <span class="sr-only">Toggle navigation</span>
+    <span class="icon-bar"></span>
+    <span class="icon-bar"></span>
+    <span class="icon-bar"></span>
+  </button>
+  <a class="navbar-brand" href="/index.html">Scott Farley</a>
+</div>
+<div id="navbar" class="navbar-collapse collapse">
+  <ul class="nav navbar-nav navbar-right">
+    <li><a href="/index.html">Home</a></li>
+    <li><a href="/cv.html">CV</a></li>
+    <li><a href="/index.html#blog">Blog</a></li>
+</div><!--/.nav-collapse -->
+</div>
+</nav>
+
+
+    <div class="page-content">
+      <div class="wrapper">
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title" itemprop="name headline">DC-Mapbox: A Library for Creating Geographically Enabled Dashboards with Mapbox-GL and DC.js</h1>
+    <p class="post-meta"><time datetime="2017-02-11T11:00:00-06:00" itemprop="datePublished">Feb 11, 2017</time></p>
+  </header>
+
+  <div class="post-content" itemprop="articleBody">
+    <p><img src="/assets/dc-mapbox-thumb.png" alt="Screenshot" /></p>
+
+<p>I was recently chatting with Shane Loeffler – the brains behind <a href="http://fc.umn.edu/">Flyover Country</a> – who mentioned that they’re upgrading to some new frameworks, including Mapbox-GL. I didn’t want Ice Age Mapper to fall behind, so I figured I should see about integrating vector tiles. Vector tiles are really cool – easy to style, fast, fun to interact with. They also seem to be all the rage in most new mapping applications.</p>
+
+<p>The new Ice Age Mapper (v2.0 onwards) has hard dependencies on lots of things, including Crossfilter and DC.js. DC.js and Leaflet play nicely together via the <a href="https://github.com/dc-js/dc.leaflet.js">DC.leaflet</a> plugin, which enables dashboard with geographic information to have either a points layer or choropleth layer on a Leaflet map attached to the rest of the chart group. Unfortunately, the new Mapbox-GL library, which enables GPU-leveraged vector tiles, didn’t have nicely developed bindings to DC.js. I think I could have used the <a href="https://github.com/mapbox/mapbox-gl-leaflet">Mapbox-GL-Leaflet</a> bindings and then put the DC-Leaflet map on top, but this would have come at the price of some of the cool features of using Mapbox-GL in the first place.</p>
+
+<p>Since I wanted to maintain the look and feel of the existing version of Ice Age Mapper, while supporting things like pitch and rotation and fractional zoom, I decided the best course of action was to write the bindings myself. What resulted was this plugin here. While it’s far from perfect, it does the job of linking together a DC.js dashboard and a Mapbox-GL map.</p>
+
+<p>When the map is moved, an event is triggered to redraw all the other charts in the dashboard with only the points currently in the map view. Similarly, when another chart is brushed, the map is filtered and redrawn to include only points meeting the filter criteria. Filtering is all done via crossfilter, which is super efficient at handling large multidimensional datasets. Filter events are handled via DC, which enabled all of the charts at once to be updated and redrawn.</p>
+
+<p>There were a couple tricky parts to this project. The first was to filter the map using the <code class="highlighter-rouge">layer</code> on the map. Since, in Mapbox’s new gl tools, the data is not an overlay, but part of the map data, it’s not as simple as iterating through existing markers to see if they should be included in the current view. Instead, I had to first convert everything to geojson, add it as a map source, and render it as a map layer. Then, when a filter event was received, I used the <code class="highlighter-rouge">map.setFilter</code> method on the geojson layer to filter appropriately. Also tricky was adding popups. Since crossfilter reduces dimensions to groups, you loose the contextual information you might want to display in a popup. While it’s kind of hacky – and can cause performance issues – I used the crossfilter dimension instead of the crossfilter group to plot the points on the map, which lets use have popups with contextual information. Finally, the map events are now asynchronous, which means that settings are harder to apply using the getter/setter methods common in D3/DC, since they have to wait until after the map and layer are loaded to be applied. To overcome this, I used a <code class="highlighter-rouge">mapOptions</code> argument in the chart constructor, so properties can be set directly on map initialization.</p>
+
+<p>There’s a live demo <a href="http://scottsfarley.com/dc-mapbox/examples">here</a> and some annotated source and example code on my <a href="http://github.com/scottsfarley93/dc-mapbox">github</a>. Tell me what you think and feel free to contribute if you like what you see or think it could be better.</p>
+
+  </div>
+
+</article>
+<script type="text/javascript"
+    src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+      </div>
+    </div>
+
+    <footer  >
+  <ul class='list-inline'>
+      <li class='no-bullet'><span class='glyphicon glyphicon-earphone text-muted'></span><strong class='contact-detail small'>  <a href='tel:626-264-0741'>626.264.0741</a></strong></li>
+      <li class='no-bullet'><span class='glyphicon glyphicon-envelope text-muted'></span><strong class='contact-detail small'>  <a href="mailto:sfarley2@wisc.edu">sfarley@wisc.edu</a></strong></li>
+      <li class='no-bullet'><span class='glyphicon glyphicon-menu-right text-muted'></span><strong class='contact-detail small'><a href='http://twitter.com/scottsfarley93'> @scottsfarley93</a></strong></li>
+      <li class='no-bullet'><span class='glyphicon glyphicon-menu-right text-muted'></span><strong class='contact-detail small'><a href='http://github.com/scottsfarley93'>  GitHub</a></strong></li>
+      <li class='no-bullet'><span class='glyphicon glyphicon-menu-right text-muted'></span><strong class='contact-detail small'><a href='https://www.linkedin.com/in/scott-farley-25902581'>  LinkedIn</a></strong></li>
+</ul>
+</footer>
+
+
+  </body>
+
+</html>

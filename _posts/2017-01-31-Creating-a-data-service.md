@@ -5,6 +5,8 @@ date:   2017-01-31 12:00:00 -0500
 categories: Research Education Teaching
 ---
 
+<img height='100%' width='100%' src="../assets/"
+
 I led this week's edition of the [Cart Lab Education Series](http://www.geography.wisc.edu/cartography/) with a quick tutorial on how to go about creating an application backend (or Data Service or API, depending on your terminology) using JavaScript (Node.js) and Postgres. It was a lot to cover in less than half an hour, so I wanted to write up a quick blog post about it too. To lead the discussion, I created this infographic that outlines the components of a data service, and how they might relate to one another.
 
 As a hands on demo, I created a database with some example data from the [Flight Delay Dataset](http://www.transtats.bts.gov/DL_SelectFields.asp?Table_ID=236&DB_Short_Name=On-Time), and wrote up a couple annotated code examples.  The code examples are on [my GitHub](https://github.com/scottsfarley93), as well as a SQL dump of the database, if you want to follow along at home.  If you're at the University of Wisconsin, you can query the database I am hosting on the Geography Department's server.

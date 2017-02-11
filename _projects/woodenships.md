@@ -54,7 +54,7 @@ order: '1'
               <li class='no-bullet'>Postgres</li>
               <li class='no-bullet'>Python</li>
               </ul>
-              <h4 class='text-muted page-header'><a href='http://woodenships.github.io'>Finished Product</a> </h4>
+              <h4 class='text-muted page-header'><a href='http://wooden-ships.github.io'>Finished Product</a> </h4>
             </div>
           </div>
 </div>

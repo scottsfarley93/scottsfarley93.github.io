@@ -26,6 +26,7 @@ order: '2'
                 <li class='no-bullet'>Leaflet.js</li>
               </ul>
               <h4 class='text-muted page-header'><a href='http://paleo.geography.wisc.edu'>Latest Stable Version</a> </h4>
+              <h4 class='text-muted page-header'><a href='http://scottsfarley.com/IceAgeMapper'>Alpha Version</a> </h4>
             </div>
           </div>
         </div>

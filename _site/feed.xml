@@ -6,8 +6,8 @@
 </description>
     <link>/</link>
     <atom:link href="/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Mon, 06 Feb 2017 19:20:28 -0600</pubDate>
-    <lastBuildDate>Mon, 06 Feb 2017 19:20:28 -0600</lastBuildDate>
+    <pubDate>Sat, 11 Feb 2017 11:02:31 -0600</pubDate>
+    <lastBuildDate>Sat, 11 Feb 2017 11:02:31 -0600</lastBuildDate>
     <generator>Jekyll v3.1.6</generator>
     
       <item>
@@ -40,7 +40,9 @@ gdal_translate NETCDF:[PATH_TO_NC_FILE]:[DIMENSION_OF_INTEREST] -of &lt;span cla
     
       <item>
         <title>A Whirlwind Tour to Creating Your Own Data Service Using Postgres and Javascript</title>
-        <description>&lt;p&gt;I led this week’s edition of the &lt;a href=&quot;http://www.geography.wisc.edu/cartography/&quot;&gt;Cart Lab Education Series&lt;/a&gt; with a quick tutorial on how to go about creating an application backend (or Data Service or API, depending on your terminology) using JavaScript (Node.js) and Postgres. It was a lot to cover in less than half an hour, so I wanted to write up a quick blog post about it too. To lead the discussion, I created this infographic that outlines the components of a data service, and how they might relate to one another.&lt;/p&gt;
+        <description>&lt;p&gt;&amp;lt;img height=’100%’ width=’100%’ src=”../assets/”&lt;/p&gt;
+
+&lt;p&gt;I led this week’s edition of the &lt;a href=&quot;http://www.geography.wisc.edu/cartography/&quot;&gt;Cart Lab Education Series&lt;/a&gt; with a quick tutorial on how to go about creating an application backend (or Data Service or API, depending on your terminology) using JavaScript (Node.js) and Postgres. It was a lot to cover in less than half an hour, so I wanted to write up a quick blog post about it too. To lead the discussion, I created this infographic that outlines the components of a data service, and how they might relate to one another.&lt;/p&gt;
 
 &lt;p&gt;As a hands on demo, I created a database with some example data from the &lt;a href=&quot;http://www.transtats.bts.gov/DL_SelectFields.asp?Table_ID=236&amp;amp;DB_Short_Name=On-Time&quot;&gt;Flight Delay Dataset&lt;/a&gt;, and wrote up a couple annotated code examples.  The code examples are on &lt;a href=&quot;https://github.com/scottsfarley93&quot;&gt;my GitHub&lt;/a&gt;, as well as a SQL dump of the database, if you want to follow along at home.  If you’re at the University of Wisconsin, you can query the database I am hosting on the Geography Department’s server.&lt;/p&gt;
 
@@ -387,7 +389,7 @@ gdal_translate NETCDF:[PATH_TO_NC_FILE]:[DIMENSION_OF_INTEREST] -of &lt;span cla
       </item>
     
       <item>
-        <title>William&#39;s Lab Github Practical</title>
+        <title>Williams&#39; Lab Github Practical</title>
         <description>&lt;h3 id=&quot;objectives&quot;&gt;Objectives&lt;/h3&gt;
 &lt;ol&gt;
   &lt;li&gt;Introduce Git and Github: what are they, what’s the difference, and how can they be useful to your work in the lab?&lt;/li&gt;
@@ -398,7 +400,7 @@ gdal_translate NETCDF:[PATH_TO_NC_FILE]:[DIMENSION_OF_INTEREST] -of &lt;span cla
 &lt;h3 id=&quot;git-and-github&quot;&gt;Git and Github&lt;/h3&gt;
 &lt;p&gt;&lt;strong&gt;Git&lt;/strong&gt; is a open source version control system, a tool that manages the changes of files in a project. Each revision is associated with a timestamp and the person making the change, making it easy to revert back to previous versions of the file if you make a mistake or accidentally break something.  Version control systems are most commonly used for source code management, most any type of files can be managed using a VCS. There are other version control systems on the market today (e.g., Mercurial, Subversion); Git is among the most popular today. Git operates by having distributed project ‘repositories’ that store your code.  Any server can be a Git server.  For example, the William’s lab server could be a Git server if we set it up that way.&lt;/p&gt;
 
-&lt;p&gt;&lt;strong&gt;Github&lt;/strong&gt; is a company that provides web-based Git repository hosting.  Github manages the servers used to store your project repositories, supports all features of git like branches, merges, and commits, as well as adding additional tools that facilitate project development and collaboration like wiki hosting and issue tracking. Github is a private company valued at over $2 billion with about 20 million &lt;a href=&quot;https://www.quora.com/How-many-users-does-GitHub-have&quot;&gt;users&lt;/a&gt; and nearly 40 million different projects. Before you trust it completely remember (1) it is a company that has motives other than just backing up your code and (2) if you choose to use GitHub and they do something bad or there is a systemwide failure, there are going to be 20 million other people just, if not more, as upset as your are. There are other git hosting platforms as well: Bitbucket, Gitlab, etc.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Github&lt;/strong&gt; is a company that provides web-based Git repository hosting.  Github manages the servers used to store your project repositories, supports all features of git like branches, merges, and commits, as well as adding additional tools that facilitate project development and collaboration like wiki hosting and issue tracking. Github is a private company valued at over $2 billion with about 20 million &lt;a href=&quot;https://www.quora.com/How-many-users-does-GitHub-have&quot;&gt;users&lt;/a&gt; and nearly 40 million different projects. Before you trust it completely remember (1) it is a company that has motives other than just backing up your code and (2) if you choose to use GitHub and they do something bad or there is a systemwide failure, there are going to be 20 million other people just, if not more, as upset as your are. There are other git hosting platforms as well: &lt;a href=&quot;https://bitbucket.org/&quot;&gt;Bitbucket&lt;/a&gt;, &lt;a href=&quot;https://about.gitlab.com/&quot;&gt;Gitlab&lt;/a&gt;, &lt;a href=&quot;http://www.codeplex.com/&quot;&gt;CodePlex&lt;/a&gt; (Microsoft’s offering) and Google’s &lt;a href=&quot;https://cloud.google.com/source-repositories/&quot;&gt;Cloud Source Repositories&lt;/a&gt;, etc.&lt;/p&gt;
 
 &lt;h3 id=&quot;getting-started&quot;&gt;Getting Started&lt;/h3&gt;
 
@@ -406,7 +408,7 @@ gdal_translate NETCDF:[PATH_TO_NC_FILE]:[DIMENSION_OF_INTEREST] -of &lt;span cla
 
 &lt;p&gt;To use Github, you need to create an account.  The good news: basic accounts are free to everybody. People with a basic account can create an unlimited of public repositories (can bee seen by anyone). If you have an academic (.edu) email address, you can get an unlimited number of private repositories as well by signing up &lt;a href=&quot;https://education.github.com/pack&quot;&gt;here&lt;/a&gt;. Private repositories let you control who sees your code – it’s hidden from the general public.  In both public and private repositories you can control who changes your code.&lt;/p&gt;
 
-&lt;p&gt;To create an account, go to &lt;a href=&quot;https://github.com/join&quot;&gt;https://github.com/join&lt;/a&gt; and fill out the fields.  Make sure to use you &lt;code class=&quot;highlighter-rouge&quot;&gt;@wisc.edu&lt;/code&gt; email address.  Keep in mind that your user name will be your public name that identifies you on the platform and will be attached to everything you do there. Also, you’ll need to type in your username from time to time, so don’t make it &lt;em&gt;alongandannoyingtotypusername&lt;/em&gt;.&lt;/p&gt;
+&lt;p&gt;To create an account, go to &lt;a href=&quot;https://github.com/join&quot;&gt;https://github.com/join&lt;/a&gt; and fill out the fields.  Make sure to use your &lt;code class=&quot;highlighter-rouge&quot;&gt;@wisc.edu&lt;/code&gt; email address.  Keep in mind that your user name will be your public name that identifies you on the platform and will be attached to everything you do there. Also, you’ll need to type in your username from time to time, so don’t make it &lt;em&gt;alongandannoyingtotypusername&lt;/em&gt;.&lt;/p&gt;
 
 &lt;h4 id=&quot;getting-git-on-your-computer&quot;&gt;Getting Git on Your Computer&lt;/h4&gt;
 &lt;p&gt;To use Git on your computer, you need to install it and configure it to work with Github servers. This content was borrowed from &lt;a href=&quot;https://help.github.com/articles/set-up-git/&quot;&gt;the Git Docs&lt;/a&gt;.&lt;/p&gt;

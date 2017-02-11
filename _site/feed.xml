@@ -6,8 +6,8 @@
 </description>
     <link>/</link>
     <atom:link href="/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Sat, 11 Feb 2017 11:02:31 -0600</pubDate>
-    <lastBuildDate>Sat, 11 Feb 2017 11:02:31 -0600</lastBuildDate>
+    <pubDate>Sat, 11 Feb 2017 11:14:11 -0600</pubDate>
+    <lastBuildDate>Sat, 11 Feb 2017 11:14:11 -0600</lastBuildDate>
     <generator>Jekyll v3.1.6</generator>
     
       <item>
@@ -40,7 +40,7 @@ gdal_translate NETCDF:[PATH_TO_NC_FILE]:[DIMENSION_OF_INTEREST] -of &lt;span cla
     
       <item>
         <title>A Whirlwind Tour to Creating Your Own Data Service Using Postgres and Javascript</title>
-        <description>&lt;p&gt;&amp;lt;img height=’100%’ width=’100%’ src=”../assets/”&lt;/p&gt;
+        <description>&lt;embed height=&quot;800&quot; width=&quot;100%&quot; src=&quot;/assets/cles_Jan_30.pdf&quot; /&gt;
 
 &lt;p&gt;I led this week’s edition of the &lt;a href=&quot;http://www.geography.wisc.edu/cartography/&quot;&gt;Cart Lab Education Series&lt;/a&gt; with a quick tutorial on how to go about creating an application backend (or Data Service or API, depending on your terminology) using JavaScript (Node.js) and Postgres. It was a lot to cover in less than half an hour, so I wanted to write up a quick blog post about it too. To lead the discussion, I created this infographic that outlines the components of a data service, and how they might relate to one another.&lt;/p&gt;
 

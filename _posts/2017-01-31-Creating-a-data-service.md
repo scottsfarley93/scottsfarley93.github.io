@@ -5,7 +5,7 @@ date:   2017-01-31 12:00:00 -0500
 categories: Research Education Teaching
 ---
 
-<img height='100%' width='100%' src="../assets/"
+<embed height='800' width='100%' src="{{site.url}}/assets/cles_Jan_30.pdf" />
 
 I led this week's edition of the [Cart Lab Education Series](http://www.geography.wisc.edu/cartography/) with a quick tutorial on how to go about creating an application backend (or Data Service or API, depending on your terminology) using JavaScript (Node.js) and Postgres. It was a lot to cover in less than half an hour, so I wanted to write up a quick blog post about it too. To lead the discussion, I created this infographic that outlines the components of a data service, and how they might relate to one another.
 

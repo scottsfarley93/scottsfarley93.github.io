@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+  <title>On Finding Data for Cartography Projects, Part I: Reading Existing Source Code</title>
+  <meta name="description" content="Sometimes, it can be hard to find the data we want.  We spend hours looking in all our normal places.  We cruise the census bureau, hit the EPA’s data portal...">
+
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="canonical" href="/cartography/2017/02/11/on-finding-data-for-cartography-projects-I.html">
+  <link rel="alternate" type="application/rss+xml" title="Scott's Blog" href="/feed.xml">
+
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name='viewport' content='width=device-width, initial-scale=1'/>
+    <meta name='keywords' content="maps, cartography"/>
+    <!---Links--->
+    <!-- Latest compiled and minified CSS -->
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+<!-- Optional theme -->
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+    <link rel="stylesheet" href='/css/cv.css'>
+    <link rel="stylesheet" href='/css/style.css'>
+    <style>
+    	footer{
+    		text-align:center;
+    	}
+    </style>
+    <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-83006302-2', 'auto');
+    ga('send', 'pageview');
+  </script>
+
+  <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha256-/SIrNqv8h6QGKDuNoLGA4iret+kyesCkHGzVUUV0shc=" crossorigin="anonymous"></script>
+<!-- Latest compiled and minified JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+
+</head>
+
+
+  <body>
+
+    
+
+
+<nav class="navbar navbar-default navbar-static-top">
+<div class="container">
+<div class="navbar-header">
+  <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+    <span class="sr-only">Toggle navigation</span>
+    <span class="icon-bar"></span>
+    <span class="icon-bar"></span>
+    <span class="icon-bar"></span>
+  </button>
+  <a class="navbar-brand" href="/index.html">Scott Farley</a>
+</div>
+<div id="navbar" class="navbar-collapse collapse">
+  <ul class="nav navbar-nav navbar-right">
+    <li><a href="/index.html">Home</a></li>
+    <li><a href="/cv.html">CV</a></li>
+    <li><a href="/index.html#blog">Blog</a></li>
+</div><!--/.nav-collapse -->
+</div>
+</nav>
+
+
+    <div class="page-content">
+      <div class="wrapper">
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title" itemprop="name headline">On Finding Data for Cartography Projects, Part I: Reading Existing Source Code</h1>
+    <p class="post-meta"><time datetime="2017-02-11T10:22:52-06:00" itemprop="datePublished">Feb 11, 2017</time></p>
+  </header>
+
+  <div class="post-content" itemprop="articleBody">
+    <p>Sometimes, it can be hard to find the data we want.  We spend hours looking in all our normal places.  We cruise the census bureau, hit the EPA’s data portal, and browse UW’s collection of geospatial resources. If you have a topic or a storyline in mind, it can be really frustrating to find that you can’t find the right data.  In most cases, the data you seek is actually out there, it might just be a little harder to find that you might hope.  I’ll discuss a couple of techniques I use from time to time when I find myself in this situation.  This is my first blog post, so stay with me.</p>
+
+<h3 id="reverse-engineer-someone-elses-work">Reverse engineer someone else’s work</h3>
+<p>Chances are, if you’re exploring a topic, you’ve seen a map that shows some data that you’d like to use.  If you haven’t seen a map like this, either (a) you’re doing a topic that shouldn’t be mapped/isn’t spatial, (b) you already have your data in hand and don’t need to reverse engineer someone else work, or (c) you haven’t looked hard enough.  In many cases, these maps will show the <em>exact </em>data that you want to map with, just presented in a different way than what you’re thinking.  If the map you’ve found is made in-browser (slippy map, svg illustration, etc), chances are you can find the data that was used to create it.  If you find a pdf, png, or other more traditional desktop format, you’d be hard pressed to reverse engineer the data – I wouldn’t bother, since the spatial information has been lost.</p>
+
+<p>I recently wanted to make a map of Syrian refugee routes to Europe.  I found that UNHCR has a great data portal, which supports some nice visualizations. It’s hard, though, to pull the data out of the visualizations, since the specific numbers are only shown when elements are moused over.  I will use this case as an example, and walk through the steps I took before eventually finding an excel file that contained all the data I wanted and more! The data portal can be found (here)[ http://data.unhcr.org/mediterranean/regional.php].</p>
+
+<h4 id="view-source">View-Source:</h4>
+<p>So you’ve found a map to take a look at.  The first thing you want to do is to dig into the source code of the web page.  This can be overwhelming if you’re not familiar with html, css, and, particularly, javascript.  However, there’s a couple key things to look for that might lead to data discovery. They won’t work for every website, but some mixing and matching might yield good results for you. In any case, it’ll probably take some time, so be prepared to look at code for a hot minute. To look at a webpage’s source code, enter view-source: directly before the pages url.</p>
+<pre>view-source:http://data.unhcr.org/mediterranean/regional.php</pre>
+<p>Now I can see all of the html written on the page.</p>
+
+<p>Things to look for at this stage: javascript files and iframes. iframes: iframes are a somewhat outdated method of putting a whole external webpage inside of another page, they can be holders for visualizations.  Javascript files: Many (most?) modern interactive web maps are written in javascript, so they are what we eventually want to get to.  It can take some practice and some time to browse through the source and find things that look important.  HTML sources will link to external the js files, so click on these so you can look at them.  Also it can be helpful to open both the page source and the rendered HTML page at the same time in different tabs, so that you can keep track of what you’re looking at in the source.</p>
+
+<p>In the UNCHR page example, I see both a main.js file and an iframe. I see at lot more written in the page, but it’s all below the map in the rendered page.  I browse the main.js file, but its not quite what I’m looking for. I don’t see anything that looks like its drawing a visualization, so I skip it for now – may I’ll need to come back later.  Next, I examine the iframe, click the link, and see the map in its own web page, without the extra information provided in the portal entry point. One step closer!  Let’s take a look at the source of the iframe.  The iframe is the link:</p>
+<pre>http://data.unhcr.org/medportalviz/dist/index.html?year=2016&amp;cache=4</pre>
+
+<h4 id="unminify">Unminify:</h4>
+<p>When looking at the source of the iframe, things get a little more complicated.  Everything is much more condensed, and less readable.  But, its shorter, so there are less items to consider. There’s a couple of different links in the html part of the page, and I see two javascript &lt;script&gt; links.  Main.js usually contains custom written components, so its a good place to start.  I would recommend pursuing the main.js file over other, more generically named js files. When I click to look at the main.js script of the iframe, I see that its been minified.  Its totally impossible to read.  The solution: unminify!</p>
+
+<p>Minification is a way to reduce file size, and thus improve performance of the application, because less data has to be transferred across the network. Minification is done by removing extra characters, comments, and whitespace, resulting in a compact, but unreadable file.  One solution when looking at other people’s sources is to use a tool like <a href="'http://unminify.com'">http://unminify.com/</a>, which will expand the code, add whitespace, and make it much more readable.</p>
+
+<p>When I unminify the code, I finally see the javascript that is controlling the map.  There’s two benefits to reaching this point: (1) I can see how the original developer of the application wrote the code.  Often the code will contain a license clause showing ownership and reusability.  If there is no license, be careful about copying the code.  In any case, it is okay to look at the general coding strategy and use it as an example for developing your own applications in the future. In this case, we see that the authors use some D3 and some additional third part libraries.</p>
+
+<p>More importantly for our purposes right now, though, is (2): We can find the data that the javascript visualization is pulling from.  It will often be from an api, json file, or csv file.  In this case, we see several local files that are clearly the boundary and basemap files. Finally, I find the line:</p>
+<pre> dataSrc = "http://data.unhcr.org/data_sources/mediterranean/data.xls"</pre>
+<p>Seems promising! I copy and paste the link into my browser – Jackpot! an excel file containing all of the data that the original visualization was built on.  In fact, in this case, theres much more data than just what is shown in the UN visualization. I am free to build new and creative visualizations from the data, or just to look and inspect it.</p>
+
+<p>Lessons Learned:</p>
+<ol>
+ 	<li>Use view-source: to look at the webpage source</li>
+ 	<li> Look for iframes and javascript files</li>
+ 	<li>Make use of tools like unminify.com to make minified code more readable.</li>
+ 	<li>Prioritize main.js files over other files.</li>
+ 	<li>Practice! You might not always find what you want and you might waste some time, but in any case, you will learn how other developers structure their web pages and develop web visualizations.</li>
+</ol>
+<p><em>Disclaimer: Use the advice here at your own discretion.  Sometimes, it may not be appropriate to use other people’s data, so make sure that you’re ethical in what you’re doing.</em></p>
+
+  </div>
+
+</article>
+<script type="text/javascript"
+    src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+      </div>
+    </div>
+
+    <footer  >
+  <ul class='list-inline'>
+      <li class='no-bullet'><span class='glyphicon glyphicon-earphone text-muted'></span><strong class='contact-detail small'>  <a href='tel:626-264-0741'>626.264.0741</a></strong></li>
+      <li class='no-bullet'><span class='glyphicon glyphicon-envelope text-muted'></span><strong class='contact-detail small'>  <a href="mailto:sfarley2@wisc.edu">sfarley@wisc.edu</a></strong></li>
+      <li class='no-bullet'><span class='glyphicon glyphicon-menu-right text-muted'></span><strong class='contact-detail small'><a href='http://twitter.com/scottsfarley93'> @scottsfarley93</a></strong></li>
+      <li class='no-bullet'><span class='glyphicon glyphicon-menu-right text-muted'></span><strong class='contact-detail small'><a href='http://github.com/scottsfarley93'>  GitHub</a></strong></li>
+      <li class='no-bullet'><span class='glyphicon glyphicon-menu-right text-muted'></span><strong class='contact-detail small'><a href='https://www.linkedin.com/in/scott-farley-25902581'>  LinkedIn</a></strong></li>
+</ul>
+</footer>
+
+
+  </body>
+
+</html>

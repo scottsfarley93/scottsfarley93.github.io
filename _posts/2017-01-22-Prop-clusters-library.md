@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "Proportional Clusters: A Plugin for Leaflet"
-date:   2016-05-8 11:22:52 -0500
+date:  2017-02-11 11:22:52 -0500
 categories: cartography coding
 ---
 
@@ -11,4 +11,4 @@ I've been working hard on Ice Age Mapper lately, and I've been thinking a lot ab
 
 You can see a live demo [here](http://scottsfarley.com/leaflet.proportionalClusters) and you can find the annotated source for the library and example [here](http://github.com/scottsfarley93/leaflet.proportionalClusters).
 
-There's a few more things I want to add to the library. Right now, it's got a dependency on d3, to do the radius scaling. If I can port the d3 scale module into this library, it would remove that, making it a better standalone module. I'd also like to improve the styling, which is currently a combination of jQuery and CSS. Ideally, I'd like to remove all dependence on external stylesheets, and have everything be styled by calls to the constructor function.
+There's a few more things I want to add to the library. Right now, it's got a hard dependency on d3, to do the radius scaling. If I can port the d3 scale module into this library, it would remove that, making it a better standalone module. I'd also like to improve the styling, which is currently a combination of jQuery and CSS. Ideally, I'd like to remove all dependence on external stylesheets, and have everything be styled by calls to the constructor function.

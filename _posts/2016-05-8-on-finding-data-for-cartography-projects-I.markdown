@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "On Finding Data for Cartography Projects, Part I: Reading Existing Source Code"
-date:   2016-05-8 11:22:52 -0500
+date:   2017-02-11 11:22:52 -0500
 categories: cartography
 ---
 

@@ -3,6 +3,7 @@ title: Misguided and Dangerous
 thumb: "assets/madThumb.png"
 layout: project
 order: '6'
+category: "portfolio"
 ---
 
 <div class="container">

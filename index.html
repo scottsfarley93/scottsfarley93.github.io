@@ -2,16 +2,52 @@
 layout: index-layout
 ---
 
-<style>
-
-
-</style>
-<div class="home">
 
 <div id='content'>
-<h2 class='page-header ph-center'>Projects</h3>
+  <div id='intro' class='col-xs-12'>
+
+    <h1 class='page-header col-xs-12 col-sm-2' id='intro-header'>Scott Sherwin Farley</h1>
+    <p class='text-muted col-xs-12 col-sm-10 large'>I am a second year graduate student at the University of Wisconsin, Madison studying Cartography and GIS.
+      I am interested in developing inuitive, engaging, fun, and useful geospatial web applications that improve decision making.
+      I love to program, usually in JavaScript and sometimes in python. I spend most of my time building things -- you can see some of them <a href="http://github.com/scottsfarley93">on my GitHub</a>.
+      I am interested in climate change and its impact on biodiversity, humans, and natural disasters. My Master's thesis project looks at ways to
+    optimize computer models for predicting future species range shifts so we can be better prepared to adapt to changing patterns of biodiversity.
+    I think that data-driven interfaces and machine learning tools will be able to guide and improve the way we respond to the
+    (irreversible) changes in the Earth System. When I'm not at my desk, I like to compete in endurance races, rock climb, and travel.
+  I am currently training for a 55km cross country ski race in Northern Wisconsin and planning a week-long sport climbing trip to the Southwest.
+  <br /><br /><br />
+  This website showcases a selection of my projects, houses my <a href="#blog">research blog</a>, and is a platform for many of my front-end code projects. Have a look around!
+</p>
+
+
+  </div>
+
+
+<h2 class='page-header col-xs-12' id='portfolio-header'>Portfolio  <span class='text-muted' id='portfolio-explanation'>Here's some of my best work...</span></h3>
+
 <div class='row col-xs-12' id='portfolio'>
-  {% assign sorted_projects = site.projects | sort: 'order' %}
+  {% assign sorted_projects = site.projects | where: "category": "portfolio" | sort: 'order'  %}
+    {% for project in sorted_projects %}
+    <div class='col-xs-6 col-sm-4 col-md-3 col-lg-3 col-xl-1 portfolio-content'>
+      <a href="{{project.url | prepend: site.baseurl}}">
+        <img class='img img-responsive portfolio-teaser' src="{{project.thumb | prepend: site.baseurl}}" />
+      <div class="carousel-caption">
+           {% if project.overlay %}
+            <img class='overlay' src="{{project.overlay | prepend: site.baseurl}}"/>
+          {% endif %}
+          {% if project.overlayName %}
+            <h4 class='overlay-name'><i>{{project.overlayName}}</i></h4>
+          {% endif %}
+     </div>
+     <h3>{{project.title}}</h3>
+    </a>
+    </div>
+    {% endfor %}
+</div>
+
+<h2 class='page-header col-xs-12' id='ongoing-header'>Ongoing Projects  <span class='text-muted' id='portfolio-explanation'>How I spend my days...</span></h3>
+<div class='row col-xs-12' id='ongoing-projects'>
+  {% assign sorted_projects = site.projects | where: "category": "ongoing" | sort: 'order'  %}
     {% for project in sorted_projects %}
     <div class='col-xs-6 col-sm-4 col-md-3 col-lg-3 col-xl-1 portfolio-content'>
       <a href="{{project.url | prepend: site.baseurl}}">
@@ -33,25 +69,29 @@ layout: index-layout
 
 <hr />
 
-<h2 class='page-header ph-center' id='blog-header'>Blog</h3>
-  <ul class="post-list" id='blog'>
-    {% for post in site.posts %}
-      <li>
-        <span class="post-meta">{{ post.date | date: "%b %-d, %Y" }}</span>
+<h2 class='page-header col-xs-12' id='blog-header'>Blog <span class='text-muted' id='portfolio-explanation'>Things I think about...</span></h3>
 
-        <h2>
-          <a class="post-link" href="{{ post.url | prepend: site.baseurl }}">{{ post.title }}</a>
-        </h2>
-        <div class='container'>
-          {{ post.excerpt }}
-        </div>
-      </li>
-    {% endfor %}
-  </ul>
+<div id='posts' class='row col-xs-12'>
+  {% for post in site.posts %}
+    <div class='col-xs-12 col-sm-6 col-md-4 post'>
+      <h4>{{ post.date | date: "%b %-d, %Y" }}</h4>
+      <h2>
+        <a class="post-link" href="{{ post.url | prepend: site.baseurl }}">{{ post.title }}</a>
+      </h2>
+      <div class='col-xs-10 col-xs-offset-1'>
+        {{ post.excerpt }}
+      </div>
+    </div>
+  {% endfor %}
+</div>
+
 
   <p class="rss-subscribe">subscribe <a href="{{ "/feed.xml" | prepend: site.baseurl }}">via RSS</a></p>
 </div>
-</div>
+
+<footer>
+  Scott Farley | <a href="tel:+16262640741">626-264-0741</a> | <a href="mailto:sfarley2@wisc.edu">sfarley2@wisc.edu</a>
+</footer>
 
 
 
@@ -65,21 +105,4 @@ $(".portfolio-content").mouseleave(function(){
 		$(this).find(".carousel-caption").hide();
 	});
 })
-</script>
-
-<script>
-
-bgChoices = ["assets/bg.png", "assets/gb1.png", "assets/background.png", "assets/pclusters.png", "assets/dc-mapbox-thumb.png"]
-
-function chooseRandom(choices) {
-  var index = Math.floor(Math.random() * choices.length);
-  return choices[index];
-}
-
-bgChoice = chooseRandom(bgChoices)
-
-$("#landing-main").css("background-image", "url(" + bgChoice + ")")
-
-
-console.log(bgChoice)
 </script>

@@ -2,7 +2,8 @@
 title: Interactive Neotoma Taxonomy
 thumb: "assets/taxThumb.png"
 layout: project
-order: '6'
+order: '7'
+category: "ongoing"
 ---
 
 <div class="container">

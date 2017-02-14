@@ -3,6 +3,7 @@ title: Ice Age Mapper
 thumb: "assets/iceAgeMapperThumb.png"
 layout: project
 order: '2'
+category: "ongoing"
 ---
 
 <div class="container">

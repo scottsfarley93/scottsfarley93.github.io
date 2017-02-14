@@ -3,6 +3,7 @@ title: DC-Mapbox Plugin
 thumb: "assets/dc-mapbox-thumb.png"
 layout: project
 order: '7'
+category: "ongoing"
 ---
 <div class="container">
     <div class="modal-content">

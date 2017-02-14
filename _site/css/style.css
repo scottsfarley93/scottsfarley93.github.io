@@ -1,19 +1,13 @@
 html, body{
 	height: 100% !important;
+	font-family: "Gill Sans", "Gill Sans MT", Calibri, sans-serif;
 }
-#landing-main{
-	height:100% !important;
-}
+
 
 #landing-container{
 	text-align: left;
 }
 
-#portfolio-header, #contact-header{
-	text-align:center;
-	padding-top: 0%;
-	margin-top: 0%;
-}
 
 /*.row, .portfolio-content{
 	margin-bottom: 8%;
@@ -102,19 +96,22 @@ ul{
 nav{
 	z-index: 1288812;
 }
-.home{
+#content{
 	text-align: center;
-	position: absolute;
-	top: 100%;
-	left:0px;
 }
 .ph-center{
 	text-align: center;
 	display: block;
 }
-#content{
-	position: relative;
+
+
+
+#intro{
+	text-align: left;
+	font-size: 16px!important;
+	line-height: 24px;
 }
+
 
 .img{
 	height: 100%!important;
@@ -125,9 +122,6 @@ nav{
 	width: 40%!important;
 	padding-bottom: 10%!important;
 }
-#portfolio{
-	padding-bottom: 250px!important;
-}
 .overlay-name{
 	padding-bottom: 20%;
 }
@@ -137,4 +131,30 @@ nav{
 }
 .portfolio-content{
   height: 300px !important;
+}
+
+#portfolio-explanation{
+	margin-left: 10px;
+	font-size: 14px;
+}
+
+#portfolio-header{
+	padding-top: 7.5%;
+}
+
+
+#blog-header{
+	padding-top: 10%!important;
+}
+
+#posts{
+	float:none!important;
+}
+
+.post{
+	margin-top: 5%!important;
+}
+
+footer{
+	text-align: center;
 }

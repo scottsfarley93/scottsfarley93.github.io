@@ -5,6 +5,7 @@ layout: project
 overlay: "assets/uwgeog.png"
 overlayName: Barbara Bartz Petchenik Memorial Award Winner for Cartographic Design
 order: '4'
+category: "portfolio"
 ---
 <div class="container">
     <div class="modal-content">

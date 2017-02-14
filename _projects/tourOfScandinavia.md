@@ -3,6 +3,7 @@ title: Tour of Scandinavia Promotional Poster
 thumb: "assets/scandinaviaThumb.png"
 layout: project
 order: '3'
+category: "none"
 ---
 
 <div class="container">

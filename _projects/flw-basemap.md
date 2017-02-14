@@ -3,6 +3,7 @@ title: Frank Lloyd Wright Inspired Tileset
 thumb: "assets/flwThumb.png"
 layout: project
 order: '5'
+category: "none"
 ---
 <div class="container">
     <div class="modal-content">

@@ -5,6 +5,7 @@ overlay: "assets/first_place.png"
 overlayName: "NACIS Dynamic Mapping Competition"
 layout: project
 order: '1'
+category: "portfolio"
 ---
 <div class="container">
     <div class="modal-content">

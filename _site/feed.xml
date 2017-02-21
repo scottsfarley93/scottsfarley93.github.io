@@ -6,9 +6,87 @@
 </description>
     <link>/</link>
     <atom:link href="/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Mon, 13 Feb 2017 18:16:53 -0600</pubDate>
-    <lastBuildDate>Mon, 13 Feb 2017 18:16:53 -0600</lastBuildDate>
+    <pubDate>Tue, 21 Feb 2017 17:18:44 -0600</pubDate>
+    <lastBuildDate>Tue, 21 Feb 2017 17:18:44 -0600</lastBuildDate>
     <generator>Jekyll v3.1.6</generator>
+    
+      <item>
+        <title>What to do with 360 degrees of longitude?</title>
+        <description>&lt;p&gt;I recently spent several days trying to solve a (seemingly) simple problem: vectorizing some rasters. I’m making an interactive of ice sheet volume during deglaciation, and I needed the data in geojson format to put into my mapboxgl map. After finding the &lt;a href=&quot;https://pmip2.lsce.ipsl.fr/design/ice5g/&quot;&gt;data&lt;/a&gt; there were two main problems I encountered:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;The data was in NetCDF format.&lt;/li&gt;
+  &lt;li&gt;The data had longitude coordinates from 0-360 degrees instead of -180 to 180 degrees.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;In my experience, if it’s in NetCDF, you’re going to spend some time getting frustrated trying to work it into a traditional GIS/web mapping workflow. Luckily, gdal has native support for multidimensional netcdfs, so processing isn’t totally impossible.&lt;/p&gt;
+
+&lt;p&gt;The second problem was much more challenging for me and one that required me to download and install no less than four obscure and poorly documented software packages, work in three different languages, and cause general headache. Figure 1 shows a screenshot of the problem.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/bad.png&quot; alt=&quot;Bad&quot; /&gt;
+&lt;strong&gt;Figure 1&lt;/strong&gt;: The problem&lt;/p&gt;
+
+&lt;p&gt;In this post, I’ll discuss some of the problems I encountered and how I eventually came upon my solution.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;&lt;em&gt;TL;DR; Use R&lt;/em&gt;&lt;/strong&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;em&gt;Start Simple&lt;/em&gt; Okay, so I’ve got these weird coordinates in this weird netcdf format. The first logical thing for me to do was to convert to an ASCII &lt;code class=&quot;highlighter-rouge&quot;&gt;.xyz&lt;/code&gt; file so that I could directly manipulate the coordinates. The &lt;code class=&quot;highlighter-rouge&quot;&gt;.xyz&lt;/code&gt; file format is a space-delimited file that lists the x, y, and value (z) data on regular grid. It’s inefficient space-wise, but gives you direct access to both the coordinates and the attributes of a raster file. Using gdal I can convert directly to xyz using something like &lt;code class=&quot;highlighter-rouge&quot;&gt;gdal_translate NETCDF:in.nc:varname -of &quot;XYZ&quot; output.xyz&lt;/code&gt;. Easy. Then I can directly modify the x (longitude) coordinates – coercing them into a -180 to 180 range using the formula:&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;&lt;span class=&quot;n&quot;&gt;newLongitude&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;((&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;oldLongitude&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;+&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;180&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;360&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;180&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;This does the correct conversion but isn’t an easily viable technique because of the &lt;code class=&quot;highlighter-rouge&quot;&gt;.xyz&lt;/code&gt; file specification. Specifically,&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;For a same Y coordinate value, the lines in the dataset must be organized by increasing X values. The value of the Y coordinate can increase or decrease however.&lt;/p&gt;
+
+  &lt;p&gt;(GDAL Reference: http://www.gdal.org/frmt_xyz.html)&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;So, I’d have to do some nifty sorting to get this to actually work. Moreover, using this method requires direct manipulation of my data’s coordinates, which seems bad.&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;
+    &lt;p&gt;&lt;em&gt;Combining subsets into single grid&lt;/em&gt;: The next technique I considered was to split the offending portion of the data (longitude &amp;gt; 180) into it’s own tiff file. Make another tiff file for the non-offending longitudes (&amp;lt; 180). Modify the coordinates on the offending file and then merge the two together using &lt;code class=&quot;highlighter-rouge&quot;&gt;gdal_merge.py&lt;/code&gt;. This seemed totally reasonable and very logical. Unfortunately, it caused some weird distortion on the grids, and caused things to not line up properly. I’m not exactly sure what the problem was here, but it caused the dataset to be entirely unusable.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;&lt;em&gt;Use Proj4 and &lt;code class=&quot;highlighter-rouge&quot;&gt;gdalwarp&lt;/code&gt;&lt;/em&gt;: Inspired by &lt;a href=&quot;http://gis.stackexchange.com/questions/37790/how-to-reproject-raster-from-0-360-to-180-180-with-cutting-180-meridian&quot;&gt;this post&lt;/a&gt; I tried to use the &lt;code class=&quot;highlighter-rouge&quot;&gt;gdalwarp&lt;/code&gt; to do the coordinate manipulations directly by reprojecting the existing coordinate info. The post suggests:&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;gdalwarp -t_srs WGS84 ~/0_360.tif 180.tif  -wo &lt;span class=&quot;nv&quot;&gt;SOURCE_EXTRA&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;1000 --config CENTER_LONG 0&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;However, if you try do execute this command directly on a netcdf, you get an error: &lt;code class=&quot;highlighter-rouge&quot;&gt;ERROR 1: Input file NETCDF:ice5g_v1.2_03.0k_1deg.nc has no raster bands&lt;/code&gt;. In theory, you could first convert to a 360 degree geotiff, then do this coordinate wrapping, but it seemed like that could cause issues with the coordinates, since geotiffs are not designed to have longitudes &amp;gt; 360. I also tried some stuff with writing new coordinates using proj4 and the lon_wrap parameter.&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;
+    &lt;p&gt;&lt;em&gt;Do more googling&lt;/em&gt;: It looks like there are packages out there that will do this conversion for you. Most are difficult to figure out exactly how to work them or if they’ll work with netcdfs. I downloaded, installed, and messed with the &lt;a href=&quot;http://www.ncl.ucar.edu/Applications/&quot;&gt;NCAR Command Language (NCL)&lt;/a&gt;, &lt;a href=&quot;http://gmt.soest.hawaii.edu/projects/gmt&quot;&gt;Generic Mapping Tools&lt;/a&gt;, a package of &lt;a href=&quot;https://code.zmaw.de/projects/cdo/embedded/index.html&quot;&gt;Climate Data Operators&lt;/a&gt;, and a promising looking python package. All seem to be (1) poorly documented, (2) hard to use, (3) lacking in examples, (4) extremely esoteric and (5) obscure. &lt;strong&gt;Update&lt;/strong&gt; As I’m writing up this post, it looks like the CDO package actually does work – you can create a new netcdf with rotated grid coordinates using &lt;code class=&quot;highlighter-rouge&quot;&gt;cdo sellonlat,-180,180,-90,90 infile.nc outfile.nc&lt;/code&gt;.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;&lt;em&gt;Use R&lt;/em&gt;: I should have considered using R earlier in the process, but I was convinced that command line GIS tools would be the way to approach this problem. Nonetheless, R has everything I need: (1) support for netcdf files using the &lt;code class=&quot;highlighter-rouge&quot;&gt;raster&lt;/code&gt; package, (2) geospatial manipulation tools, again in the &lt;code class=&quot;highlighter-rouge&quot;&gt;raster&lt;/code&gt; package (among others), and (3) can write to new formats. In fact, the whole thing can be done in only three lines of R code:&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-r&quot; data-lang=&quot;r&quot;&gt;&lt;span class=&quot;n&quot;&gt;a&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;raster&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;inNC&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;varname&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;varName&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;rotated&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;-&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;rotate&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;a&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;writeRaster&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;rotated&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;outRaster&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;R definitely appears to be the way to go.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/good.png&quot; alt=&quot;Good&quot; /&gt;
+&lt;strong&gt;Figure 2:&lt;/strong&gt; Correct alignment!&lt;/p&gt;
+</description>
+        <pubDate>Tue, 21 Feb 2017 10:22:52 -0600</pubDate>
+        <link>/cartography/analysis/2017/02/21/Netcdf-to-vector.html</link>
+        <guid isPermaLink="true">/cartography/analysis/2017/02/21/Netcdf-to-vector.html</guid>
+        
+        
+        <category>cartography</category>
+        
+        <category>analysis</category>
+        
+      </item>
     
       <item>
         <title>DC-Mapbox: A Library for Creating Geographically Enabled Dashboards with Mapbox-GL and DC.js</title>
@@ -815,138 +893,6 @@ gdal_translate NETCDF:[PATH_TO_NC_FILE]:[DIMENSION_OF_INTEREST] -of &lt;span cla
         
         
         <category>Tutorial</category>
-        
-      </item>
-    
-      <item>
-        <title>Ecological Data: Is it &#39;Big Data&#39;?</title>
-        <description>&lt;p&gt;We’ve all heard the term ‘Big Data’, though it’s often thrown around as a techy buzzword, along with others, like ‘The Cloud’, without a clear meaning.  In the Williams Lab, we’re working with datasets that are sometimes called ‘Big Data’ in talks by &lt;a href=&quot;https://twitter.com/iceageecologist&quot;&gt;@iceageecolgist&lt;/a&gt; and others, housed in databases like &lt;a href=&quot;http://neotomadb.org&quot;&gt;Neotoma&lt;/a&gt;, &lt;a href=&quot;http://gbif.org&quot;&gt;the Global Biodiversity Information Facility&lt;/a&gt;, and the &lt;a href=&quot;http://paleobiodb.org&quot;&gt;Paleobiology Database&lt;/a&gt;.  Today, I ask, what characteristics of our data make it ‘Big Data’?&lt;/p&gt;
-
-&lt;h3 id=&quot;problem-and-scope&quot;&gt;Problem and Scope&lt;/h3&gt;
-&lt;blockquote&gt;
-  &lt;p&gt;Question: Can ecological biodiversity data fit under the rubric of Big Data? If so, what are the characteristics that make it Big?&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;First, let’s put a limit on the scope of the problem.  Ecology generally has many different subfields, each with their own data and data types.  Some of these may be particularly large, as in the case of ecological modelers, and some may be smaller.  For the sake of argument today, I’ll limit the discussion to ecological biodiversity data documenting &lt;em&gt;occurrences&lt;/em&gt;.   Each occurrence comes with metadata describing what species (typically, but could also be to another taxonomic grouping) was encountered, where it was encountered, and when it was encountered. This type of data is pervasive in the field, and can be used in a host of analyses, including modeling, climate change assessment, and hypotheses testing. Recently, there have been large international campaigns to aggregate these records into large, structured databases that facilitate global biodiversity syntheses.  Three that are commonly encountered are Neotoma (Quaternary), GBIF (modern and instrumental period), and PBDB (deep time).  Since PBDB’s &lt;code class=&quot;highlighter-rouge&quot;&gt;R&lt;/code&gt; package was hard to use, I investigate the question today using data from Neotoma and GBIF.&lt;/p&gt;
-
-&lt;h3 id=&quot;definitions-of-big-data&quot;&gt;Definitions of Big Data&lt;/h3&gt;
-&lt;p&gt;There are two often-encountered, decidedly non-technical, designations of Big Data.  The first comes from Wikipedia&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;Big data is a term for data sets that are so large or complex that traditional data processing applications are inadequate.&lt;/p&gt;
-
-  &lt;p&gt;(Wikipedia)&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;This is commonly seen in the marketing materials surrounding big computation and the cloud, though it’s really not a definition at all.  It doesn’t say much about what it is, just that ‘traditional’ means are not capable of processing it, pointing towards distributed computing, cloud computing, and other recent technological advances as its facilitator.  We do get a couple things from this definition though. We know that we’re looking at discrete data sets, partitioned, presumably, in a logical manner.  We’re looking for data sets that ‘traditional’ data processing applications are not feasible.  By using these words, ‘large’ and ‘traditional’, in particular, we can see that ‘Big Data’ is in the eye of the beholder, so to speak, and it depends on your tradition of data processing whether a new dataset is Big or not.  Guterman (2009) suggests, “for some organizations, facing hundreds of gigabytes of data for the first time may trigger a need to reconsider data management options. For others, it may take tens or hundreds of terabytes before data size becomes a significant consideration.”  From Guterman’s perspective, the focus is really on the number of bytes a dataset has, but as we’ll see in a minute, there can be other important factors that comprise a data set’s Bigness.&lt;/p&gt;
-
-&lt;p&gt;The second defintion comes from Yang and Huang’s 2013 book Spatial Cloud Computing:
-&amp;gt;Big Data refers to the four V’s: volume, velocity, veracity, and variety.
-&amp;gt;
-&amp;gt;(Yang and Huang, 2013)&lt;/p&gt;
-
-&lt;p&gt;A varient of this definition can be traced back to an early IBM report on the topic, and can be seen in a variety of cheesy infographics, &lt;a href=&quot;http://www.ibmbigdatahub.com/infographic/four-vs-big-data&quot;&gt;like this one&lt;/a&gt;.  Yang and Huang go on to further describe the meaning of the four V’s, noting that “volume refers to the size of the data; velocity indicates that big data are sensitive to time, variety means big data comprise various types of data with complicated relationships, and veracity indicates the trustworthiness of the data” (p 276).  Here we get a bit more structure than the wikipedia definition gives us, and with the two together, we have a pretty good rubric on which to look at biodiversity datasets.&lt;/p&gt;
-
-&lt;h2 id=&quot;evaluation&quot;&gt;Evaluation&lt;/h2&gt;
-
-&lt;h4 id=&quot;wikipedia&quot;&gt;Wikipedia&lt;/h4&gt;
-&lt;p&gt;I argue that the very existence of complex relational databases, like GBIF, Neotoma and PBDB, suggest that biodiversity data do fall under the category of Big Data, as the traditional means of analyzing these data are possible anymore.  Of course, ‘complex’ in the context of the wikipedia statement typically refers to the preponderance of unstructured data, like videos and photos, and ‘large’ usually means too big to fit into a computer’s memory and/or storage drives.  From this perspective, our data is not complex, rather it’s stored in really organized relational tables, and fairly small (the entire Neotoma SQL dump can be downloaded at only 43MB).&lt;/p&gt;
-
-&lt;p&gt;But, if we keep in mind that big data can mean different things to different people, then from our perspective in ecology, our data is Big. Consider the complexity of the relationships between different data records, for example. Figure 1 shows the Neotoma relational table structure, and the complicated web of relationships between each entity.  The data is both spatial and temporal, requiring these attributes, which are known to be messy (see “Veracity”), along with sample data and metadata.  Now, consider keeping track of this for tens of thousands (Neotoma) or hundreds of millions (GBIF) or records, among thousands of independent researchers, and we see why non-traditional techniques like these databases have been developed. Further developments, like APIs and R packages, are even more recent developments to further simplify the tasks of accessing, filtering and working with the datasets. No, ecological biodiversity data does not meet the scale and extent of YouTube, Twitter, or Amazon, but it does require new, custom built tools to store, analyze, and use.&lt;/p&gt;
-
-&lt;p&gt;&lt;a href=&quot;http://www.neotomadb.org/uploads/NeotomaDMD.pdf&quot;&gt;&lt;img src=&quot;/assets/bigData/Neotoma_ER.jpg&quot; alt=&quot;Neotoma_ER&quot; /&gt;&lt;/a&gt;
-&lt;em&gt;Figure 1: Neotoma’s Relational Table Structure&lt;/em&gt;&lt;/p&gt;
-
-&lt;h4 id=&quot;volume&quot;&gt;Volume&lt;/h4&gt;
-&lt;p&gt;Of the four V’s, the one that most comes to mind when considering what is, or is not, Big Data is volume: how much data is there?  As the quote from Guterman (2009) suggests, some experts consider this to be the only factor in determining what makes data Big. Our datasets are not on the scale of billions of hours of YouTube videos or hundreds of billions of Tweets, but the scale of biodiversity data has exploded in recent years, bringing it to a place where the volume alone is challenging to manage.&lt;/p&gt;
-
-&lt;p&gt;Since the late 1990s, biodiversity databases have quickly and decisively increased the amount of data available to ecologists. Consider Figures 2 and 3, tracking the growth in collections of Neotoma and GBIF through time.  In 1990, only 2 of the records now stored in Neotoma were in digitized collections.  Today, there are over 14,000 datasets.  Each dataset is comprised of spatial and temporal metadata, along with one or more samples with data and associated metadata. The growth rate averages out to about 1.4 datasets every single day for over 26 years.  Considering the time, effort, and money that goes into working up a sediment core (or any of the other data types in Neotoma) this is a really impressive growth rate. For an interesting perspective on ecological Big Data’s reliance on blood, sweat, and tears, take a look at this &lt;a href=&quot;https://contemplativemammoth.com/2013/07/10/is-pollen-analysis-dead-paleoecology-in-the-era-of-big-data/&quot;&gt;Blog Post&lt;/a&gt; by former Williams Labber Jacquelyn Gill.&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/assets/bigData/Neotoma_Growth.png&quot; alt=&quot;Neotoma_Growth&quot; /&gt;
-&lt;em&gt;Figure 2: Cumulative number of datasets in Neotoma&lt;/em&gt;&lt;/p&gt;
-
-&lt;p&gt;The scale of GBIF is on an entirely different level than Neotoma (perhaps because some of the data gathering challenges faced in getting paleo data don’t apply as strongly to modern data collection). Today, GBIF houses digital records of well over 500 million observations, recorded specimens (both fossil and living), and occurrences noted in the scientific literature. GBIF’s records are largely comprised of museum collections, which allow their digital collection to date back to before 1900. The facility itself was introduced in 1999 and officially launched in 2001.  Since 2001, the facility’s holdings have grown nearly 300%, from about 180 million in 2001 to just shy of 614 million occurrence records today.  Managing 613+ million records and associated metadata, and comping with such a fast growth rate, is, without a doubt, a data management challenge worthy of Big Data classification.  Figure 3 shows the exponential growth in GBIF’s holdings since AD 1500, and Figure 4 is an interactive map showing the changes in spatial distribution of their observed data since the late 1800’s.&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/assets/bigData/GBIF_Growth.png&quot; alt=&quot;GBIF_Growth&quot; /&gt;
-&lt;em&gt;Figure 4: Exponential growth of occurrence records in GBIF&lt;/em&gt;&lt;/p&gt;
-
-&lt;link rel=&quot;stylesheet&quot; href=&quot;https://npmcdn.com/leaflet@0.7.7/dist/leaflet.css&quot; /&gt;
-
-&lt;script src=&quot;https://npmcdn.com/leaflet@0.7.7/dist/leaflet.js&quot;&gt;&lt;/script&gt;
-
-&lt;script src=&quot;https://code.jquery.com/jquery-3.1.0.slim.min.js&quot; integrity=&quot;sha256-cRpWjoSOw5KcyIOaZNo4i6fZ9tKPhYYb6i5T9RSVJG8=&quot; crossorigin=&quot;anonymous&quot;&gt;&lt;/script&gt;
-
-&lt;div id=&quot;map&quot; style=&quot;height:500px;&quot;&gt;
-&lt;/div&gt;
-&lt;p&gt;1890&lt;input type=&quot;range&quot; min=&quot;1890&quot; max=&quot;2016&quot; step=&quot;1&quot; style=&quot;width:50%; display:inline-block; vertical-align:middle&quot; id=&quot;gbif_range&quot; /&gt;2016
-&lt;script src=&quot;/assets/gbif_map.js&quot;&gt;&lt;/script&gt;&lt;/p&gt;
-
-&lt;p&gt;&lt;em&gt;Figure 4: Interactive – Spatial Distribution of GBIF Holdings Through Time&lt;/em&gt;&lt;/p&gt;
-
-&lt;h4 id=&quot;variety&quot;&gt;Variety&lt;/h4&gt;
-&lt;p&gt;The second characteristic of Big Data in the four V’s framework is the Variety of the data, and its ‘various types with complicated relationships’ (Yang and Huang). Biodiversity data is highly diverse with many very complicated relationships and interrelationships.&lt;/p&gt;
-
-&lt;p&gt;Neotoma’s holdings range from XRF measurements, to geochronologic data, to fossil vertebrates, to modern pollen surface samples.  In total, there are 23 dataset categories in the database, with more being added from time to time. Though it is structured similarly in the database tables, each of these data types comes from a different community of researchers, using different methods and instruments. Figure 5 shows the breakdown of dataset types in the database.&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/assets/bigData/Neotoma_types.png&quot; alt=&quot;Neotoma_Record_types&quot; /&gt;
-&lt;em&gt;Figure 5: Dataset Type Breakdown of Neotoma’s Holdings&lt;/em&gt;&lt;/p&gt;
-
-&lt;p&gt;GBIF has 9 defined record type categories, including human observation, living specimen, literature review, and machine measurements.  As with the Neotoma dataset types, these are wildly different from each other.  A living specimen is clearly a totally different type of data to work with than something was derived from a literature review. Yet all of these types coexist together in these large biodiversity datasets. Figure 6 shows how GBIF’s records are distributed amongst these nine types.&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/assets/bigData/gbif_types.png&quot; alt=&quot;GBIF&quot; /&gt;
-&lt;em&gt;Figure 6: Dataset Type Breakdown of GBIF Holdings&lt;/em&gt;&lt;/p&gt;
-
-&lt;p&gt;To further add to the variety and complexity of our data, it is both spatial and temporal in nature, causing complicated interrelationships between data entities. 87.6 % of GBIF’s records are georeferenced to a real place in the world. 100% of Neotoma’s datasets have spatial information. In these databases, the spatial information is compounded by other fields that describe the location of the observation.  For example, Neotoma has fields describing the site where the fossil was found – it’s altitude, environment, area.  PBDB has extensive metadata for depositional environment, giving additional context to fossil occurrences.  GBIF often notes somewhat colloquial location descriptions in addition to geographic coordinates.   And, of course, there are the relationships between the spatial coordinates themselves – are these things in the same place? do they overlap?&lt;/p&gt;
-
-&lt;p&gt;Managing data with a spatial component is nearly always more challenging than managing data without it. Figure 7 shows how the spatial locations of the datasets contained in Neotoma have changed through time.  Note the expansion in Europe and eastern Asia, and the lack of datasets in Africa.&lt;/p&gt;
-
-&lt;p&gt;&lt;a href=&quot;/assets/bigData/neotoma_spatial_dist.png&quot;&gt;&lt;img src=&quot;/assets/bigData/neotoma_spatial_dist.png&quot; alt=&quot;Neotoma_Maps&quot; /&gt;&lt;/a&gt;
-&lt;em&gt;Figure 7: Spatial distribution of additions in Neotoma since 1990&lt;/em&gt;&lt;/p&gt;
-
-&lt;p&gt;A final point on variety is that each record, though now cleanly structured and easily accessed as a record in a database, represents the work of an individual researcher.  The controlled vocabularies and organization policies enforced by the databases have helped to efficiently aggregate the data, however, nearly every record was collected, worked up, and published by a unique individual.  Figure 8 shows the number of datasets attributed to each PI in Neotoma.  Yes the names are too small to read.  The point, though, is that while a couple researchers have a very large number of datasets credited to them (John T Andrews has the most with 335), most have many fewer.  The median number of datasets contributed is 2, and the 3rd quartile value is just 7.  Each researcher will use different equipment, in a different way, call things different names, and generally just do things slightly differently – yielding a highly variable dataset.&lt;/p&gt;
-
-&lt;p&gt;&lt;a href=&quot;/assets/bigData/Neotoma_PIs.png&quot;&gt;&lt;img src=&quot;/assets/bigData/Neotoma_PIs.png&quot; alt=&quot;GBIF&quot; /&gt;&lt;/a&gt;
-&lt;em&gt;Figure 8: Neotoma dataset submissions by principle investigator&lt;/em&gt;&lt;/p&gt;
-
-&lt;h4 id=&quot;veracity&quot;&gt;Veracity&lt;/h4&gt;
-&lt;p&gt;Ecological data has high levels of uncertainty associated with it.  Some can be estimated, like temporal and spatial uncertainty.  Others are less amenable to being quantified, for example inter-researcher identification differences, measurement errors, and data lost in the transition from field to lab to database. See &lt;a href=&quot;http://www.sciencedirect.com/science/article/pii/S0277379116300142#appsec1&quot;&gt;this paper&lt;/a&gt; for a Paleon project that used expert elicitation to quantify the differences between the dates assigned to European settlement horizon, a process they argue varies between sites, and depends on the “temporal density of pollen samples, time-averaging of sediments, the rapidity of forest clearance and landscape transformation, the pollen representation of dominant trees, which can dampen or amplify the ragweed signal, and expert knowledge of the region and the late-Holocene history of the site.” The raw data from the expert elicitation is included as supplementary information in their paper, and can be seen to vary pretty significantly between the four experts.&lt;/p&gt;
-
-&lt;p&gt;Some information will be lost in the process of going from a field site through a lab workflow to being aggregated in the dataset.  Not all process details can be incorporated into database metadata fields, and probably more importantly, contextual details essential to proper interpretation of the data often gets lost on aggregation.&lt;/p&gt;
-
-&lt;p&gt;Coincidentally, when I start working on my PhD here at UW, I’ll be working to tackle some of these uncertainty issues.&lt;/p&gt;
-
-&lt;p&gt;To illustrate the veracity (or lack thereof) of the biodiversity data, let’s look at spatial coordinate uncertainty in GBIF and temporal uncertainty of chronological control points in Neotoma. The GBIF database, in addition to recording the geographic coordiantes of an occurrence, also includes a field for uncertainty in spatial location, though this field is optional.  I downloaded 10,000 records of the genus &lt;em&gt;Picea&lt;/em&gt;, of which over half did not include this field (though all were georeferenced).  This means that even if I am able include and propagate uncertainty in my models (as in Bayesian Hierarchical Models), I would be unable to do so really effectively, because few researchers even report this field. Of the 4,519 records that did report &lt;code class=&quot;highlighter-rouge&quot;&gt;coordinateUncertaintyInMeters&lt;/code&gt;, the average uncertainty was 305m (if you exclude zero, which seems reasonable to do). The maximum uncertainty in this dataset was 1,970m.  From this brief, and admittedly flawed, assessment, we can see there are some pretty serious problems with using the coordinates without considering their uncertainty first.  If, for example, you’re using 800m gridded climate model output to look at environmental covariates to species presence (which I do), a 300m uncertainty in species location could cause significant deviations due to gridcell mis-assignment, particularly in mountainous regions like the Western U.S.&lt;/p&gt;
-
-&lt;p&gt;On the temporal side of things, we can do a similar assessment, this time using the Neotoma data.  Neotoma samples are assigned an age using age controls (like radiocarbon dates or varve counts) or an age model, which interpolates between the age controls. The age model issue is a challenging one, and there’s a lot of literature out there about it, as well as software to improve from simple linear models. Every age model is based on a set of age controls, which often have uncertainty associated with them.   Neotoma records an minimum and maximum age for each age control for each dataset.  Out of a sample of 32,341 age controls in the database, only 5,722 reported age uncertainty.  Some record types, like varves, can perhaps be assigned an uncertainty of zero, so we can safely ignore 2,830 more controls, leaving us with 2,892 that report values for minimum and maximum age. The summary statistics for these age controls suggest that the median age model tie point has a temporal uncertainty of 260.0 years. The 25% percentile is an uncertainty of 137.5 years and the 75% 751.2 years.  Using the mean of 260.0 years, I suggest that we can only identify down to ± 130 years of the actual date.  Considering sediment mixing, laboratory precision, and other processes at work, maybe this isn’t that big of a deal, but it definitely is something to be aware of and contributes to biodiversity data’s lack of absolute veracity.&lt;/p&gt;
-
-&lt;h4 id=&quot;velocity&quot;&gt;Velocity&lt;/h4&gt;
-&lt;p&gt;The final piece of the framework is the data’s velocity – how time sensitive is the data.  Data’s velocity important because high velocity data must be analyzed as a stream.  Tweets, for example, must be analyzed for trends as they are posted. Knowing the trending topics of two weeks ago might be interesting to me, but the real draw of a Big Data platform like twitter is that I can participate in the trending topics of &lt;em&gt;right now&lt;/em&gt;.  To do such an analysis, one must use sophisticated sampling techniques and algorithms to detect clusters and trends in real time, for example &lt;a href=&quot;http://jmlr.csail.mit.edu/proceedings/papers/v17/bifet11a/bifet11a.pdf&quot;&gt;this paper&lt;/a&gt;, which comments on sampling strategies used for trend detection.&lt;/p&gt;
-
-&lt;p&gt;This is the one area where I would suggest that ecological biodiversity data is not Big Data.  Biodiversity analyses, like species distribution models, at least the ones I am familiar with, usually take between a few minutes and a few days to complete and are not especially time sensitive.  The rate of increase in data volume in both Neotoma and GBIF is not fast enough to invalidate the results from previous analyses.  Neotoma gets approximately 1.4 new datasets each day (1990-2016 average).  GBIF gets about 59,000 new occurrences each day (2000-2015 average).  Sure, that’s a lot of new datasets, but the likelihood you would actually use the new data in a given analysis is low, and the likelihood that its immediately inclusion into a new model would significantly change your conclusions is even lower.&lt;/p&gt;
-
-&lt;p&gt;The velocity of data coming into the databases, particularly into GBIF, is staggering, no doubt about it.  Nonetheless, I don’t think it it warrants the use of specialized streaming algorithms for extracting information from the new data points.  I have not seen anyone attempt to do such a thing (though maybe this would be an interesting experiment?).  Moreover, there is little incentive to immediately analyze the data, because there is next to nothing to be gained from modeling biodiversity faster than you can report your results in publications.&lt;/p&gt;
-
-&lt;h3 id=&quot;so-is-it&quot;&gt;So, is it?&lt;/h3&gt;
-&lt;p&gt;Velocity notwithstanding, biodiversity occurrence data passes four of five facets of the Big Data, so I conclude that, &lt;strong&gt;yes, it is big data.&lt;/strong&gt; It requires specialized databases and software to interact with it, it has large numbers of records, it is extremely diverse, and it has high levels of uncertainty with which to deal.&lt;/p&gt;
-
-&lt;p&gt;Looking forward, I suspect Big Data will continue to challenge those involved in synthetic research. Perhaps one of the most challenging aspects is the relatively short period of time in which these data became Big. Figures 9 and 10 show the annual increase in holdings for Neotoma (Fig. 9) and GBIF (Fig 10) through time (top) and the rate of change of annual increase (bottom). While Neotoma’s rate of increase as remained relatively steady through time (clear from the near-linear trend in Figure 2), GBIF’s rate shows a significant upward trend in the last several years.&lt;/p&gt;
-
-&lt;p&gt;&lt;a href=&quot;/assets/bigData/Neotoma_growth_diff.png&quot;&gt;&lt;img src=&quot;/assets/bigData/Neotoma_growth_diff.png&quot; alt=&quot;Neotoma_Delta&quot; /&gt;&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;&lt;em&gt;Figure 9: Neotoma holdings, Annual Change and Rate of Change of Annual Change&lt;/em&gt;&lt;/p&gt;
-
-&lt;p&gt;&lt;a href=&quot;/assets/bigData/gif_growth_diff.png&quot;&gt;&lt;img src=&quot;/assets/bigData/gif_growth_diff.png&quot; alt=&quot;GBIF_Delta&quot; /&gt;&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;&lt;em&gt;Figure 10: GBIF holdings, Annual Change and Rate of Change of Annual Change&lt;/em&gt;&lt;/p&gt;
-</description>
-        <pubDate>Wed, 31 Aug 2016 08:22:52 -0500</pubDate>
-        <link>/research/paleo/2016/08/31/Big-Data-In-Ecology.html</link>
-        <guid isPermaLink="true">/research/paleo/2016/08/31/Big-Data-In-Ecology.html</guid>
-        
-        
-        <category>Research</category>
-        
-        <category>Paleo</category>
         
       </item>
     

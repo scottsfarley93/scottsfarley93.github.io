@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+  <title>What to do with 360 degrees of longitude?</title>
+  <meta name="description" content="I recently spent several days trying to solve a (seemingly) simple problem: vectorizing some rasters. I’m making an interactive of ice sheet volume during de...">
+
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="canonical" href="/cartography/analysis/2017/02/21/Netcdf-to-vector.html">
+  <link rel="alternate" type="application/rss+xml" title="Scott's Blog" href="/feed.xml">
+
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name='viewport' content='width=device-width, initial-scale=1'/>
+    <meta name='keywords' content="maps, cartography"/>
+    <!---Links--->
+    <!-- Latest compiled and minified CSS -->
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+<!-- Optional theme -->
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+    <link rel="stylesheet" href='/css/cv.css'>
+    <link rel="stylesheet" href='/css/style.css'>
+    <style>
+    	footer{
+    		text-align:center;
+    	}
+    </style>
+    <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-83006302-2', 'auto');
+    ga('send', 'pageview');
+  </script>
+
+  <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha256-/SIrNqv8h6QGKDuNoLGA4iret+kyesCkHGzVUUV0shc=" crossorigin="anonymous"></script>
+<!-- Latest compiled and minified JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+
+</head>
+
+
+  <body>
+
+    
+
+
+<nav class="navbar navbar-default navbar-static-top">
+<div class="container">
+<div class="navbar-header">
+  <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+    <span class="sr-only">Toggle navigation</span>
+    <span class="icon-bar"></span>
+    <span class="icon-bar"></span>
+    <span class="icon-bar"></span>
+  </button>
+  <a class="navbar-brand" href="/index.html">Scott Farley</a>
+</div>
+<div id="navbar" class="navbar-collapse collapse">
+  <ul class="nav navbar-nav navbar-right">
+    <li><a href="/index.html">Home</a></li>
+    <li><a href="/cv.html">CV</a></li>
+    <li><a href="/index.html#blog">Blog</a></li>
+</div><!--/.nav-collapse -->
+</div>
+</nav>
+
+
+    <div class="page-content">
+      <div class="wrapper">
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title" itemprop="name headline">What to do with 360 degrees of longitude?</h1>
+    <p class="post-meta"><time datetime="2017-02-21T10:22:52-06:00" itemprop="datePublished">Feb 21, 2017</time></p>
+  </header>
+
+  <div class="post-content" itemprop="articleBody">
+    <p>I recently spent several days trying to solve a (seemingly) simple problem: vectorizing some rasters. I’m making an interactive of ice sheet volume during deglaciation, and I needed the data in geojson format to put into my mapboxgl map. After finding the <a href="https://pmip2.lsce.ipsl.fr/design/ice5g/">data</a> there were two main problems I encountered:</p>
+
+<ol>
+  <li>The data was in NetCDF format.</li>
+  <li>The data had longitude coordinates from 0-360 degrees instead of -180 to 180 degrees.</li>
+</ol>
+
+<p>In my experience, if it’s in NetCDF, you’re going to spend some time getting frustrated trying to work it into a traditional GIS/web mapping workflow. Luckily, gdal has native support for multidimensional netcdfs, so processing isn’t totally impossible.</p>
+
+<p>The second problem was much more challenging for me and one that required me to download and install no less than four obscure and poorly documented software packages, work in three different languages, and cause general headache. Figure 1 shows a screenshot of the problem.</p>
+
+<p><img src="/assets/bad.png" alt="Bad" />
+<strong>Figure 1</strong>: The problem</p>
+
+<p>In this post, I’ll discuss some of the problems I encountered and how I eventually came upon my solution.</p>
+
+<p><strong><em>TL;DR; Use R</em></strong></p>
+
+<ul>
+  <li><em>Start Simple</em> Okay, so I’ve got these weird coordinates in this weird netcdf format. The first logical thing for me to do was to convert to an ASCII <code class="highlighter-rouge">.xyz</code> file so that I could directly manipulate the coordinates. The <code class="highlighter-rouge">.xyz</code> file format is a space-delimited file that lists the x, y, and value (z) data on regular grid. It’s inefficient space-wise, but gives you direct access to both the coordinates and the attributes of a raster file. Using gdal I can convert directly to xyz using something like <code class="highlighter-rouge">gdal_translate NETCDF:in.nc:varname -of "XYZ" output.xyz</code>. Easy. Then I can directly modify the x (longitude) coordinates – coercing them into a -180 to 180 range using the formula:</li>
+</ul>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="n">newLongitude</span> <span class="o">=</span> <span class="p">((</span><span class="n">oldLongitude</span><span class="o">+</span><span class="mi">180</span><span class="p">)</span> <span class="o">%</span> <span class="mi">360</span><span class="p">)</span> <span class="o">-</span> <span class="mi">180</span></code></pre></figure>
+
+<p>This does the correct conversion but isn’t an easily viable technique because of the <code class="highlighter-rouge">.xyz</code> file specification. Specifically,</p>
+
+<blockquote>
+  <p>For a same Y coordinate value, the lines in the dataset must be organized by increasing X values. The value of the Y coordinate can increase or decrease however.</p>
+
+  <p>(GDAL Reference: http://www.gdal.org/frmt_xyz.html)</p>
+</blockquote>
+
+<p>So, I’d have to do some nifty sorting to get this to actually work. Moreover, using this method requires direct manipulation of my data’s coordinates, which seems bad.</p>
+
+<ul>
+  <li>
+    <p><em>Combining subsets into single grid</em>: The next technique I considered was to split the offending portion of the data (longitude &gt; 180) into it’s own tiff file. Make another tiff file for the non-offending longitudes (&lt; 180). Modify the coordinates on the offending file and then merge the two together using <code class="highlighter-rouge">gdal_merge.py</code>. This seemed totally reasonable and very logical. Unfortunately, it caused some weird distortion on the grids, and caused things to not line up properly. I’m not exactly sure what the problem was here, but it caused the dataset to be entirely unusable.</p>
+  </li>
+  <li>
+    <p><em>Use Proj4 and <code class="highlighter-rouge">gdalwarp</code></em>: Inspired by <a href="http://gis.stackexchange.com/questions/37790/how-to-reproject-raster-from-0-360-to-180-180-with-cutting-180-meridian">this post</a> I tried to use the <code class="highlighter-rouge">gdalwarp</code> to do the coordinate manipulations directly by reprojecting the existing coordinate info. The post suggests:</p>
+  </li>
+</ul>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">gdalwarp -t_srs WGS84 ~/0_360.tif 180.tif  -wo <span class="nv">SOURCE_EXTRA</span><span class="o">=</span>1000 --config CENTER_LONG 0</code></pre></figure>
+
+<p>However, if you try do execute this command directly on a netcdf, you get an error: <code class="highlighter-rouge">ERROR 1: Input file NETCDF:ice5g_v1.2_03.0k_1deg.nc has no raster bands</code>. In theory, you could first convert to a 360 degree geotiff, then do this coordinate wrapping, but it seemed like that could cause issues with the coordinates, since geotiffs are not designed to have longitudes &gt; 360. I also tried some stuff with writing new coordinates using proj4 and the lon_wrap parameter.</p>
+
+<ul>
+  <li>
+    <p><em>Do more googling</em>: It looks like there are packages out there that will do this conversion for you. Most are difficult to figure out exactly how to work them or if they’ll work with netcdfs. I downloaded, installed, and messed with the <a href="http://www.ncl.ucar.edu/Applications/">NCAR Command Language (NCL)</a>, <a href="http://gmt.soest.hawaii.edu/projects/gmt">Generic Mapping Tools</a>, a package of <a href="https://code.zmaw.de/projects/cdo/embedded/index.html">Climate Data Operators</a>, and a promising looking python package. All seem to be (1) poorly documented, (2) hard to use, (3) lacking in examples, (4) extremely esoteric and (5) obscure. <strong>Update</strong> As I’m writing up this post, it looks like the CDO package actually does work – you can create a new netcdf with rotated grid coordinates using <code class="highlighter-rouge">cdo sellonlat,-180,180,-90,90 infile.nc outfile.nc</code>.</p>
+  </li>
+  <li>
+    <p><em>Use R</em>: I should have considered using R earlier in the process, but I was convinced that command line GIS tools would be the way to approach this problem. Nonetheless, R has everything I need: (1) support for netcdf files using the <code class="highlighter-rouge">raster</code> package, (2) geospatial manipulation tools, again in the <code class="highlighter-rouge">raster</code> package (among others), and (3) can write to new formats. In fact, the whole thing can be done in only three lines of R code:</p>
+  </li>
+</ul>
+
+<figure class="highlight"><pre><code class="language-r" data-lang="r"><span class="n">a</span> <span class="o">&lt;-</span> <span class="n">raster</span><span class="p">(</span><span class="n">inNC</span><span class="p">,</span> <span class="n">varname</span><span class="o">=</span><span class="n">varName</span><span class="p">)</span>
+<span class="n">rotated</span> <span class="o">&lt;-</span> <span class="n">rotate</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+<span class="n">writeRaster</span><span class="p">(</span><span class="n">rotated</span><span class="p">,</span> <span class="n">outRaster</span><span class="p">)</span></code></pre></figure>
+
+<p>R definitely appears to be the way to go.</p>
+
+<p><img src="/assets/good.png" alt="Good" />
+<strong>Figure 2:</strong> Correct alignment!</p>
+
+  </div>
+
+</article>
+<script type="text/javascript"
+    src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+      </div>
+    </div>
+
+    <footer  >
+  <ul class='list-inline'>
+      <li class='no-bullet'><span class='glyphicon glyphicon-earphone text-muted'></span><strong class='contact-detail small'>  <a href='tel:626-264-0741'>626.264.0741</a></strong></li>
+      <li class='no-bullet'><span class='glyphicon glyphicon-envelope text-muted'></span><strong class='contact-detail small'>  <a href="mailto:sfarley2@wisc.edu">sfarley@wisc.edu</a></strong></li>
+      <li class='no-bullet'><span class='glyphicon glyphicon-menu-right text-muted'></span><strong class='contact-detail small'><a href='http://twitter.com/scottsfarley93'> @scottsfarley93</a></strong></li>
+      <li class='no-bullet'><span class='glyphicon glyphicon-menu-right text-muted'></span><strong class='contact-detail small'><a href='http://github.com/scottsfarley93'>  GitHub</a></strong></li>
+      <li class='no-bullet'><span class='glyphicon glyphicon-menu-right text-muted'></span><strong class='contact-detail small'><a href='https://www.linkedin.com/in/scott-farley-25902581'>  LinkedIn</a></strong></li>
+</ul>
+</footer>
+
+
+  </body>
+
+</html>

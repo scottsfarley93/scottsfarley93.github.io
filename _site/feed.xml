@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Scott&#39;s Blog</title>
+    <title>Scott Sherwin Farley</title>
     <description>I am a graduate student at UW Madison studying computing applications to physical geography and paleoecological change.
 </description>
     <link>/</link>
     <atom:link href="/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Wed, 05 Apr 2017 09:49:40 -0500</pubDate>
-    <lastBuildDate>Wed, 05 Apr 2017 09:49:40 -0500</lastBuildDate>
+    <pubDate>Wed, 05 Apr 2017 10:08:00 -0500</pubDate>
+    <lastBuildDate>Wed, 05 Apr 2017 10:08:00 -0500</lastBuildDate>
     <generator>Jekyll v3.1.6</generator>
     
       <item>

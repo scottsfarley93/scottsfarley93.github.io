@@ -6,9 +6,29 @@
 </description>
     <link>/</link>
     <atom:link href="/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Wed, 05 Apr 2017 10:08:00 -0500</pubDate>
-    <lastBuildDate>Wed, 05 Apr 2017 10:08:00 -0500</lastBuildDate>
+    <pubDate>Tue, 18 Apr 2017 10:21:59 -0500</pubDate>
+    <lastBuildDate>Tue, 18 Apr 2017 10:21:59 -0500</lastBuildDate>
     <generator>Jekyll v3.1.6</generator>
+    
+      <item>
+        <title>Masters Defense: A general framework for predicting the optimal computing configuration for climate-driven ecological forecasting models</title>
+        <description>&lt;p&gt;Yesterday I successfully defended my masters thesis project in both a public talk in front of an audience of about 20 of my friends (and mother!) and in a closed-door session with my committee.&lt;/p&gt;
+
+&lt;p&gt;I think that both portions went quite well. I was smooth and confident in the public talk. I was in with my committee for over one hour – much longer than I was expecting. The conversation during that time was congenial – not the grilling gotcha questions I was expecting. Some of the questions were difficult, but more on a conceptual level about the project’s position in the field. We also talked a lot about the publication venue for the work, and are likely to get at least two pieces of writing out of it.&lt;/p&gt;
+
+&lt;p&gt;I tried to live stream the talk, but unfortunately, the stream came through with no sound. Instead, I’ll include my powerpoint slides here, if you’d like to browse them. Look for a copy of my finished thesis here on my blog later this spring.&lt;/p&gt;
+
+&lt;iframe src=&quot;//www.slideshare.net/slideshow/embed_code/key/wdMmm8GZhg4cUu&quot; width=&quot;595&quot; height=&quot;485&quot; frameborder=&quot;0&quot; marginwidth=&quot;0&quot; marginheight=&quot;0&quot; scrolling=&quot;no&quot; style=&quot;border:1px solid #CCC; border-width:1px; margin-bottom:5px; max-width: 100%;&quot; allowfullscreen=&quot;&quot;&gt; &lt;/iframe&gt;
+&lt;div style=&quot;margin-bottom:5px&quot;&gt; &lt;strong&gt; &lt;a href=&quot;//www.slideshare.net/ScottFarley3/a-general-framework-for-predicting-the-optimal-computing-configuration-for-climatedriven-ecological-forecasting-models-scott-farleys-masters-thesis-defense&quot; title=&quot;A general framework for predicting the optimal computing configuration for climate-driven ecological forecasting models: Scott Farley&amp;#x27;s Masters Thesis Defense&quot; target=&quot;_blank&quot;&gt;A general framework for predicting the optimal computing configuration for climate-driven ecological forecasting models: Scott Farley&amp;#x27;s Masters Thesis Defense&lt;/a&gt; &lt;/strong&gt; from &lt;strong&gt;&lt;a target=&quot;_blank&quot; href=&quot;https://www.slideshare.net/ScottFarley3&quot;&gt;Scott Farley&lt;/a&gt;&lt;/strong&gt; &lt;/div&gt;
+</description>
+        <pubDate>Tue, 18 Apr 2017 10:10:52 -0500</pubDate>
+        <link>/research/2017/04/18/Masters-degree-defense.html</link>
+        <guid isPermaLink="true">/research/2017/04/18/Masters-degree-defense.html</guid>
+        
+        
+        <category>research</category>
+        
+      </item>
     
       <item>
         <title>Workshop Presenation: Using Paleobiodiversity Databases for Ancient Land Cover Reconstruction</title>
@@ -496,39 +516,6 @@ gdal_translate NETCDF:[PATH_TO_NC_FILE]:[DIMENSION_OF_INTEREST] -of &lt;span cla
         
         
         <category>Tutorial</category>
-        
-      </item>
-    
-      <item>
-        <title>PhD Preview</title>
-        <description>&lt;p&gt;I’ve been thinking a lot about my PhD research, even as I’ve been working 12 hours a day to finish my master’s thesis. If you were recently thinking &lt;em&gt;“I wonder what Scott will be doing in Wisconsin for the next 3-6 years”&lt;/em&gt;, wonder no more. This is the Cliff Notes version, expect a 150-200 page version in early 2021.&lt;/p&gt;
-
-&lt;p&gt;Contemporary understanding of past land cover dynamics comes primarily from expert interpretation of paleoenvironmental proxies, such as fossil pollen or vertebrate macrofossils. My dissertation research will focus on the link between the paleoecological proxy data, particularly fossil pollen, and the drivers of land use change by developing a hierarchical Bayesian model that calibrates dense networks of modern pollen samples with MODIS remote sensing data.  Once calibrated, the model will be used to develop a gridded dataset that reconstructs tree cover percentage and relative composition of broadleaf and needleleaf plant types at 500-year intervals since the Last Glacial Maximum (22kya). The reconstructions can then be used to to identify and test the drivers of regional and global scale land cover shifts, in response to climate and other forcings. I plan to test the impact of vegetation change during the late Pleistocene to draw inference about megafaunal decline and extinction. My work bridges a key gap by providing a mechanism to propagate our understanding of modern land cover change, in the form of remote sensing data products, back through time while estimating model uncertainty.  Using land cover dynamics from the recent geologic past can help to forecast how land cover and biodiversity will change when exposed to 21st century climatic and anthropogenic forcings.&lt;/p&gt;
-
-&lt;h4 id=&quot;research-plan&quot;&gt;Research Plan&lt;/h4&gt;
-&lt;p&gt;I plan to split my research into three phases, each lasting approximately one year.&lt;/p&gt;
-
-&lt;ol&gt;
-  &lt;li&gt;
-    &lt;p&gt;Model Development and Parameterization: During this phase, I will develop a spatiotemporal Bayesian hierarchical regression model to reconstruct past land cover, focusing on model development, calibration, and parameterization.  I will use the Bayesian framework to assimilate modern land cover datasets, derived from Moderate Resolution Imaging Spectroradiometer (MODIS) satellite data and modern pollen surface samples from the Neotoma Paleoecological Database and the North American Modern Pollen Database. The MODIS data is an gridded product describing the relative proportion of broad leaved, needle leaved, coniferous, and deciduous tree cover, and non-arboreal land cover in each 5’ grid cell. The modern pollen surface samples, which record the relative abundance of taxa in the local biota, will be used to regress the remote sensing data onto the sedimentary record, allowing me to calibrate a predictive model to infer land cover at 500-year intervals from the Last Glacial Maximum to the present in North America. The model will specifically incorporate spatial and temporal uncertainty in pollen source area and dispersal kernels, temporal and dating uncertainty in the fossil record, and uncertainties inherent in the classification process used by MODIS. Specific care will be taken to develop a robust model that can be applied both the relative homogeneous eastern forests and the highly complex and mountainous vegetation mosaics in the western areas of the continent.&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;Model Assessment and Human Impacts: I will also look specifically at the model’s reconstructions of areas of known human development to determine the model’s success in capturing human landscape-scale modification processes, such as burning and agriculture.  I will work with the archeological literature and paleoenvironmental syntheses, such as those using fossil charcoal, that document human landscape alteration, to compare know areas of impact with the model’s estimates.&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;Late-Pleistocene Megafauna Extinction: I will demonstrate the usefulness of the model by applying its output to an often-studied problem in paleoecological change: determining the key drivers of megafuana extinction during the late Pleistocene.  Models of megafauna decline are currently often only informed by climate model output and expert-inferred climate and vegetation characteristics from paleoecological proxies, such as fossil pollen. I will use the land cover reconstructions I develop to assess the degree to which land cover change was a driver of fuanal decline.  Using species distribution modeling techniques, I will evaluate the degree to which vegetation and climate contribute to the decline individually and when they are allowed to interact. This phase will demonstrate the model’s application and reconstructions ability to be incorporated as an input into other models, and provide new insight into a lingering question in global change research.&lt;/p&gt;
-  &lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;h4 id=&quot;importance&quot;&gt;Importance&lt;/h4&gt;
-&lt;p&gt;In addition to contributing to scientific understanding of human-induced change and faunal declines, the techniques and datasets produced in the course of this research are essential for improving the estimates of carbon sequestration and warming during the 21st century produced by ecosystem and global circulation climate models. The advantages of Bayesian hierarchical models for reconstructing past landscapes have been demonstrated, though they have yet to be applied to the continental scale and to the problem of land cover in North America, though other techniques have been applied to European land cover during the Holocene. Biogeophysical feedback cycles, particularly the carbon cycle, can have considerable effects, though their operational scale is too small to be effectively captured by the still relatively rough resolution of global earth system models, so independent reconstructions are of high priority to climate modelers. Additionally, hypotheses about carbon sequestration and climate change mitigation strategies cannot be validated without further understanding of past land cover dynamics.&lt;/p&gt;
-</description>
-        <pubDate>Mon, 19 Sep 2016 09:22:52 -0500</pubDate>
-        <link>/research/2016/09/19/PHD-Preview.html</link>
-        <guid isPermaLink="true">/research/2016/09/19/PHD-Preview.html</guid>
-        
-        
-        <category>Research</category>
         
       </item>
     

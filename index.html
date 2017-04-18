@@ -74,7 +74,7 @@ layout: index-layout
 
 <div id='posts' class='container row'>
   {% for post in site.posts %}
-    <div class='col-xs-12 col-sm-6 col-md-4  post'>
+    <div class='col-xs-12 col-sm-6 col-md-4  post-teaser'>
       <h4>{{ post.date | date: "%b %-d, %Y" }}</h4>
       <h2>
         <a class="post-link" href="{{ post.url | prepend: site.baseurl }}">{{ post.title }}</a>

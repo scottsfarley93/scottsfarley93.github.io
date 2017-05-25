@@ -6,9 +6,31 @@
 </description>
     <link>/</link>
     <atom:link href="/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Tue, 18 Apr 2017 10:21:59 -0500</pubDate>
-    <lastBuildDate>Tue, 18 Apr 2017 10:21:59 -0500</lastBuildDate>
+    <pubDate>Thu, 25 May 2017 13:29:27 -0400</pubDate>
+    <lastBuildDate>Thu, 25 May 2017 13:29:27 -0400</lastBuildDate>
     <generator>Jekyll v3.1.6</generator>
+    
+      <item>
+        <title>Scraping record stats from the Paleobiology Database</title>
+        <description>&lt;p&gt;I’m writing a review paper that synthesizes some of the recent literature in Big Data and ecoinformatics and situates ecoinformatics as a Big Data science. I’m drawing on some work I did for my Masters thesis that examines the growth curves of the Neotoma Database and GBIF. Jack and I have wanted to see how the Paleobiology Database lines up with these other allied resources, but their API is not as user friendly for getting stats as the other two. GBIF wins in the stats category, with a whole endpoint and &lt;code class=&quot;highlighter-rouge&quot;&gt;r&lt;/code&gt; function designed for getting custom stats reports.&lt;/p&gt;
+
+&lt;p&gt;Anyways, I finally wrote up a short script to get the records out and turn them into a growth curve. It turned out to not be that difficult, except all of the occurrences had to be downloaded, so it took a long time. The database appears to follow a nearly linear growth curve, in contrast, to say, GBIF, whose growth curve is clearly exponential.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/pbdb_trends.png&quot; alt=&quot;PBDB Occurrence Records&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;The data and code to get it follows. I made the chart in excel – pretty simple stuff.&lt;/p&gt;
+
+&lt;script src=&quot;https://gist.github.com/scottsfarley93/92d271b9eedb21582648260f4e30ab57.js&quot;&gt;&lt;/script&gt;
+
+</description>
+        <pubDate>Thu, 25 May 2017 12:22:52 -0400</pubDate>
+        <link>/research/2017/05/25/scraping-pbdb-data.html</link>
+        <guid isPermaLink="true">/research/2017/05/25/scraping-pbdb-data.html</guid>
+        
+        
+        <category>research</category>
+        
+      </item>
     
       <item>
         <title>Masters Defense: A general framework for predicting the optimal computing configuration for climate-driven ecological forecasting models</title>
@@ -21,7 +43,7 @@
 &lt;iframe src=&quot;//www.slideshare.net/slideshow/embed_code/key/wdMmm8GZhg4cUu&quot; width=&quot;595&quot; height=&quot;485&quot; frameborder=&quot;0&quot; marginwidth=&quot;0&quot; marginheight=&quot;0&quot; scrolling=&quot;no&quot; style=&quot;border:1px solid #CCC; border-width:1px; margin-bottom:5px; max-width: 100%;&quot; allowfullscreen=&quot;&quot;&gt; &lt;/iframe&gt;
 &lt;div style=&quot;margin-bottom:5px&quot;&gt; &lt;strong&gt; &lt;a href=&quot;//www.slideshare.net/ScottFarley3/a-general-framework-for-predicting-the-optimal-computing-configuration-for-climatedriven-ecological-forecasting-models-scott-farleys-masters-thesis-defense&quot; title=&quot;A general framework for predicting the optimal computing configuration for climate-driven ecological forecasting models: Scott Farley&amp;#x27;s Masters Thesis Defense&quot; target=&quot;_blank&quot;&gt;A general framework for predicting the optimal computing configuration for climate-driven ecological forecasting models: Scott Farley&amp;#x27;s Masters Thesis Defense&lt;/a&gt; &lt;/strong&gt; from &lt;strong&gt;&lt;a target=&quot;_blank&quot; href=&quot;https://www.slideshare.net/ScottFarley3&quot;&gt;Scott Farley&lt;/a&gt;&lt;/strong&gt; &lt;/div&gt;
 </description>
-        <pubDate>Tue, 18 Apr 2017 10:10:52 -0500</pubDate>
+        <pubDate>Tue, 18 Apr 2017 11:10:52 -0400</pubDate>
         <link>/research/2017/04/18/Masters-degree-defense.html</link>
         <guid isPermaLink="true">/research/2017/04/18/Masters-degree-defense.html</guid>
         
@@ -37,7 +59,7 @@
 &lt;iframe src=&quot;//www.slideshare.net/slideshow/embed_code/key/aUAu42jQs5D0c0&quot; width=&quot;595&quot; height=&quot;485&quot; frameborder=&quot;0&quot; marginwidth=&quot;0&quot; marginheight=&quot;0&quot; scrolling=&quot;no&quot; style=&quot;border:1px solid #CCC; border-width:1px; margin-bottom:5px; max-width: 100%;&quot; allowfullscreen=&quot;&quot;&gt; &lt;/iframe&gt;
 &lt;div style=&quot;margin-bottom:5px&quot;&gt; &lt;strong&gt; &lt;a href=&quot;//www.slideshare.net/ScottFarley3/using-paleobiodiversity-databases-to-reconstruct-past-land-cover&quot; title=&quot;Using paleobiodiversity databases to reconstruct past land cover&quot; target=&quot;_blank&quot;&gt;Using paleobiodiversity databases to reconstruct past land cover&lt;/a&gt; &lt;/strong&gt; from &lt;strong&gt;&lt;a target=&quot;_blank&quot; href=&quot;//www.slideshare.net/ScottFarley3&quot;&gt;Scott Farley&lt;/a&gt;&lt;/strong&gt; &lt;/div&gt;
 </description>
-        <pubDate>Wed, 29 Mar 2017 11:22:52 -0500</pubDate>
+        <pubDate>Wed, 29 Mar 2017 12:22:52 -0400</pubDate>
         <link>/research/presentations/2017/03/29/Digital-Data-Paleontology-Presentation.html</link>
         <guid isPermaLink="true">/research/presentations/2017/03/29/Digital-Data-Paleontology-Presentation.html</guid>
         
@@ -115,7 +137,7 @@
 &lt;p&gt;&lt;img src=&quot;/assets/good.png&quot; alt=&quot;Good&quot; /&gt;
 &lt;strong&gt;Figure 2:&lt;/strong&gt; Correct alignment!&lt;/p&gt;
 </description>
-        <pubDate>Tue, 21 Feb 2017 10:22:52 -0600</pubDate>
+        <pubDate>Tue, 21 Feb 2017 11:22:52 -0500</pubDate>
         <link>/cartography/analysis/2017/02/21/Netcdf-to-vector.html</link>
         <guid isPermaLink="true">/cartography/analysis/2017/02/21/Netcdf-to-vector.html</guid>
         
@@ -142,7 +164,7 @@
 
 &lt;p&gt;There’s a live demo &lt;a href=&quot;http://scottsfarley.com/dc-mapbox/examples&quot;&gt;here&lt;/a&gt; and some annotated source and example code on my &lt;a href=&quot;http://github.com/scottsfarley93/dc-mapbox&quot;&gt;github&lt;/a&gt;. Tell me what you think and feel free to contribute if you like what you see or think it could be better.&lt;/p&gt;
 </description>
-        <pubDate>Sat, 11 Feb 2017 11:00:00 -0600</pubDate>
+        <pubDate>Sat, 11 Feb 2017 12:00:00 -0500</pubDate>
         <link>/cartography/coding/2017/02/11/DC-Mapbox-Plugin.html</link>
         <guid isPermaLink="true">/cartography/coding/2017/02/11/DC-Mapbox-Plugin.html</guid>
         
@@ -163,7 +185,7 @@
 
 &lt;p&gt;There’s a few more things I want to add to the library. Right now, it’s got a hard dependency on d3, to do the radius scaling. If I can port the d3 scale module into this library, it would remove that, making it a better standalone module. I’d also like to improve the styling, which is currently a combination of jQuery and CSS. Ideally, I’d like to remove all dependence on external stylesheets, and have everything be styled by calls to the constructor function.&lt;/p&gt;
 </description>
-        <pubDate>Sat, 11 Feb 2017 10:22:52 -0600</pubDate>
+        <pubDate>Sat, 11 Feb 2017 11:22:52 -0500</pubDate>
         <link>/cartography/coding/2017/02/11/Prop-clusters-library.html</link>
         <guid isPermaLink="true">/cartography/coding/2017/02/11/Prop-clusters-library.html</guid>
         
@@ -189,7 +211,7 @@ gdal_translate NETCDF:[PATH_TO_NC_FILE]:[DIMENSION_OF_INTEREST] -of &lt;span cla
 
 &lt;p&gt;This creates a 2204 band raster representing ice area in the tiff format. Super handy for then converting into a format to be digested by a web application.&lt;/p&gt;
 </description>
-        <pubDate>Sun, 05 Feb 2017 11:00:00 -0600</pubDate>
+        <pubDate>Sun, 05 Feb 2017 12:00:00 -0500</pubDate>
         <link>/research/data/cartography/2017/02/05/Converting-Netcdf-To-Raster.html</link>
         <guid isPermaLink="true">/research/data/cartography/2017/02/05/Converting-Netcdf-To-Raster.html</guid>
         
@@ -418,7 +440,7 @@ gdal_translate NETCDF:[PATH_TO_NC_FILE]:[DIMENSION_OF_INTEREST] -of &lt;span cla
   &lt;li&gt;Add a new endpoint that summarizes the delays by airport.&lt;/li&gt;
 &lt;/ol&gt;
 </description>
-        <pubDate>Tue, 31 Jan 2017 11:00:00 -0600</pubDate>
+        <pubDate>Tue, 31 Jan 2017 12:00:00 -0500</pubDate>
         <link>/research/education/teaching/2017/01/31/Creating-a-data-service.html</link>
         <guid isPermaLink="true">/research/education/teaching/2017/01/31/Creating-a-data-service.html</guid>
         
@@ -471,7 +493,7 @@ gdal_translate NETCDF:[PATH_TO_NC_FILE]:[DIMENSION_OF_INTEREST] -of &lt;span cla
 
 &lt;p&gt;If this sounds interesting to you, let me know! If you want to consume my data service, that’d be awesome. I’d be happy to modify the existing returns to fit your needs. Here are up-to-date &lt;a href=&quot;http://grad.geography.wisc.edu/cds/docs&quot;&gt;docs&lt;/a&gt; with examples. If you want to help develop, that’d be awesome too. I’m super excited about this project, but pushing the limits of what I know. Send me an &lt;a href=&quot;&amp;#109;&amp;#097;&amp;#105;&amp;#108;&amp;#116;&amp;#111;:&amp;#115;&amp;#102;&amp;#097;&amp;#114;&amp;#108;&amp;#101;&amp;#121;&amp;#050;&amp;#064;&amp;#119;&amp;#105;&amp;#115;&amp;#099;&amp;#046;&amp;#101;&amp;#100;&amp;#117;&quot;&gt;email&lt;/a&gt; – let’s talk.&lt;/p&gt;
 </description>
-        <pubDate>Fri, 16 Dec 2016 07:22:52 -0600</pubDate>
+        <pubDate>Fri, 16 Dec 2016 08:22:52 -0500</pubDate>
         <link>/research/data/2016/12/16/Climate-Data-Service.html</link>
         <guid isPermaLink="true">/research/data/2016/12/16/Climate-Data-Service.html</guid>
         
@@ -491,28 +513,9 @@ gdal_translate NETCDF:[PATH_TO_NC_FILE]:[DIMENSION_OF_INTEREST] -of &lt;span cla
 &lt;iframe src=&quot;http://wooden-ships.github.io/&quot; style=&quot;height: 1000px; width:100%&quot; /&gt;
 
 </description>
-        <pubDate>Thu, 03 Nov 2016 09:22:52 -0500</pubDate>
+        <pubDate>Thu, 03 Nov 2016 10:22:52 -0400</pubDate>
         <link>/tutorial/2016/11/03/Nacis-Award.html</link>
         <guid isPermaLink="true">/tutorial/2016/11/03/Nacis-Award.html</guid>
-        
-        
-        <category>Tutorial</category>
-        
-      </item>
-    
-      <item>
-        <title>Occurrences in Neotoma: 18,900,000 and counting...</title>
-        <description>&lt;p&gt;A few weeks ago, I posted about Big Data in the field of ecology, specifically biodiversity informatics, where I looked at the holdings of the Neotoma Paleoecological Database and the Global Biodiversity Information Facility (GBIF). I made some comparisons between the two databases, though the units of scale were different. In Neotoma, I used the number of &lt;em&gt;datasets&lt;/em&gt; that had been submitted, while for GBIF, I commented on the number of &lt;em&gt;occurrences&lt;/em&gt;.  These are two fundamentally different units, so I set out to resolve the issue and find out how many occurrences there are in Neotoma.&lt;/p&gt;
-
-&lt;p&gt;Counting every single taxa in every single level in Neotoma, there are over 18.9 million occurrence records – identifications of a single type at a single space-time locus.&lt;/p&gt;
-
-&lt;p&gt;To be exact, there are 18,903,236 occurrence records, with a steeply increasing trend over the last several months. I suspect we’ll be up over 20 million by the middle of 2017.&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/assets/bigData/Neotoma_Occurrences.png&quot; alt=&quot;NeotomaOccurrenceRecords&quot; /&gt;&lt;/p&gt;
-</description>
-        <pubDate>Sat, 22 Oct 2016 09:22:52 -0500</pubDate>
-        <link>/tutorial/2016/10/22/18-Million-Neotoma-Occurrences.html</link>
-        <guid isPermaLink="true">/tutorial/2016/10/22/18-Million-Neotoma-Occurrences.html</guid>
         
         
         <category>Tutorial</category>

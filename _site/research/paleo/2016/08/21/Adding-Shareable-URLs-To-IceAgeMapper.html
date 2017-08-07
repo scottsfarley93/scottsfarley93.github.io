@@ -9,8 +9,8 @@
   <meta name="description" content="One of the features Rob suggested I add to Ice Age Mapper during our last meeting was a dynamic url that would record the current state of the application, a...">
 
   <link rel="stylesheet" href="/css/main.css">
-  <link rel="canonical" href="/research/paleo/2016/08/21/Adding-Shareable-URLs-To-IceAgeMapper.html">
-  <link rel="alternate" type="application/rss+xml" title="Scott Sherwin Farley" href="/feed.xml">
+  <link rel="canonical" href="http://localhost:4000/research/paleo/2016/08/21/Adding-Shareable-URLs-To-IceAgeMapper.html">
+  <link rel="alternate" type="application/rss+xml" title="Scott Sherwin Farley" href="http://localhost:4000/feed.xml">
 
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta name='viewport' content='width=device-width, initial-scale=1'/>
@@ -21,8 +21,8 @@
 
 <!-- Optional theme -->
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
-    <link rel="stylesheet" href='/css/cv.css'>
-    <link rel="stylesheet" href='/css/style.css'>
+    <link rel="stylesheet" href='http://localhost:4000/css/cv.css'>
+    <link rel="stylesheet" href='http://localhost:4000/css/style.css'>
     <style>
     	footer{
     		text-align:center;
@@ -60,13 +60,13 @@
     <span class="icon-bar"></span>
     <span class="icon-bar"></span>
   </button>
-  <a class="navbar-brand" href="/index.html">Scott Farley</a>
+  <a class="navbar-brand" href="http://localhost:4000/index.html">Scott Farley</a>
 </div>
 <div id="navbar" class="navbar-collapse collapse">
   <ul class="nav navbar-nav navbar-right">
-    <li><a href="/index.html">Home</a></li>
-    <li><a href="/cv.html">CV</a></li>
-    <li><a href="/index.html#blog">Blog</a></li>
+    <li><a href="http://localhost:4000/index.html">Home</a></li>
+    <li><a href="http://localhost:4000/cv.html">CV</a></li>
+    <li><a href="http://localhost:4000/index.html#blog">Blog</a></li>
 </div><!--/.nav-collapse -->
 </div>
 </nav>
@@ -78,7 +78,7 @@
 
   <header class="post-header">
     <h1 class="post-title" itemprop="name headline">Adding Shareable URLs to IceAgeMapper</h1>
-    <p class="post-meta"><time datetime="2016-08-21T09:22:52-04:00" itemprop="datePublished">Aug 21, 2016</time></p>
+    <p class="post-meta"><time datetime="2016-08-21T08:22:52-05:00" itemprop="datePublished">Aug 21, 2016</time></p>
   </header>
 
   <div class="post-content" itemprop="articleBody">
@@ -152,9 +152,9 @@
 <p>Once all of the query variables have been parsed, we need a way of translating the new state information into the actual application state.  I do this in two steps.  First, I have a function that does all of the parsing.  During the parsing, the global variable objects gets property values for the configuration (e.g., <code class="highlighter-rouge">globals.taxon = 'Quercus'</code>).  Next, I call a load function, which is pretty much the same as what I had when I didn’t allow URL configuration, but instead of just setting the variables to <code class="highlighter-rouge">Null</code> at the start, it checks to see if the property has already been set during the parsing phase.  This method works really well for components like map zoom and time extent.  However, it will not automatically load the data from Neotoma, because loading the data requires a button click to send an AJAX request to the Neotoma API.  Therefore, we add a <code class="highlighter-rouge">globals.autoload</code> property, which automatically triggers a click on that button, if the necessary state configurtion variables (like taxon) are set in the URL.</p>
 
 <h3 id="part-3--sharing-on-social-media">Part 3:  Sharing on Social Media</h3>
-<p>One you’ve implemented the generating and parsing, and know that your share URL gives you a reliable application state representation, you can share the URL on twitter or other social media really easily.<br />
-#### Copying to the clipboard
-While not social, you may wish to allow users to copy the link directly to their copy-paste clipboard.  I read some discussion of how this may be a bad idea for security.  I’m not sure – I added it anyways.</p>
+<p>One you’ve implemented the generating and parsing, and know that your share URL gives you a reliable application state representation, you can share the URL on twitter or other social media really easily.</p>
+<h4 id="copying-to-the-clipboard">Copying to the clipboard</h4>
+<p>While not social, you may wish to allow users to copy the link directly to their copy-paste clipboard.  I read some discussion of how this may be a bad idea for security.  I’m not sure – I added it anyways.</p>
 
 <figure class="highlight"><pre><code class="language-js" data-lang="js"><span class="c1">// create hidden text element, if it doesn't already exist</span>
 <span class="nx">$</span><span class="p">(</span><span class="s2">"#share-link"</span><span class="p">).</span><span class="nx">focus</span><span class="p">()</span> <span class="c1">//highlight the text element that contains the link</span>

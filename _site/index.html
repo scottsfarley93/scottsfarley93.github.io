@@ -10,8 +10,8 @@
 ">
 
   <link rel="stylesheet" href="/css/main.css">
-  <link rel="canonical" href="/">
-  <link rel="alternate" type="application/rss+xml" title="Scott Sherwin Farley" href="/feed.xml">
+  <link rel="canonical" href="http://localhost:4000/">
+  <link rel="alternate" type="application/rss+xml" title="Scott Sherwin Farley" href="http://localhost:4000/feed.xml">
 
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta name='viewport' content='width=device-width, initial-scale=1'/>
@@ -22,8 +22,8 @@
 
 <!-- Optional theme -->
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
-    <link rel="stylesheet" href='/css/cv.css'>
-    <link rel="stylesheet" href='/css/style.css'>
+    <link rel="stylesheet" href='http://localhost:4000/css/cv.css'>
+    <link rel="stylesheet" href='http://localhost:4000/css/style.css'>
     <style>
     	footer{
     		text-align:center;
@@ -61,13 +61,13 @@
     <span class="icon-bar"></span>
     <span class="icon-bar"></span>
   </button>
-  <a class="navbar-brand" href="/index.html">Scott Farley</a>
+  <a class="navbar-brand" href="http://localhost:4000/index.html">Scott Farley</a>
 </div>
 <div id="navbar" class="navbar-collapse collapse">
   <ul class="nav navbar-nav navbar-right">
-    <li><a href="/index.html">Home</a></li>
-    <li><a href="/cv.html">CV</a></li>
-    <li><a href="/index.html#blog">Blog</a></li>
+    <li><a href="http://localhost:4000/index.html">Home</a></li>
+    <li><a href="http://localhost:4000/cv.html">CV</a></li>
+    <li><a href="http://localhost:4000/index.html#blog">Blog</a></li>
 </div><!--/.nav-collapse -->
 </div>
 </nav>
@@ -88,7 +88,7 @@
   <br /><br /><br />
   This website showcases a selection of my projects, houses my <a href="#posts">research blog</a>, and is a platform for many of my front-end code projects. Have a look around!
   </p>
-  <img class='right img img-responsive col-xs-4 col-sm-2' src="/assets/Scott.jpg" />
+  <img class='right img img-responsive col-xs-4 col-sm-2' src="http://localhost:4000/assets/Scott.jpg" />
 
 
 </div>
@@ -182,17 +182,6 @@
     </div>
     
     <div class='col-xs-12 col-sm-4 col-md-3 col-lg-3 col-xl-1 portfolio-content'>
-      <a href="/projects/neotomaTaxonomy.html">
-        <img class='img img-responsive portfolio-teaser' src="assets/taxThumb.png" />
-      <div class="carousel-caption">
-           
-          
-     </div>
-     <h3>Interactive Neotoma Taxonomy</h3>
-    </a>
-    </div>
-    
-    <div class='col-xs-12 col-sm-4 col-md-3 col-lg-3 col-xl-1 portfolio-content'>
       <a href="/projects/dc-mapbox.html">
         <img class='img img-responsive portfolio-teaser' src="assets/dc-mapbox-thumb.png" />
       <div class="carousel-caption">
@@ -200,6 +189,17 @@
           
      </div>
      <h3>DC-Mapbox Plugin</h3>
+    </a>
+    </div>
+    
+    <div class='col-xs-12 col-sm-4 col-md-3 col-lg-3 col-xl-1 portfolio-content'>
+      <a href="/projects/neotomaTaxonomy.html">
+        <img class='img img-responsive portfolio-teaser' src="assets/taxThumb.png" />
+      <div class="carousel-caption">
+           
+          
+     </div>
+     <h3>Interactive Neotoma Taxonomy</h3>
     </a>
     </div>
     
@@ -211,6 +211,33 @@
 <h2 class='page-header col-xs-12' id='blog-header'>Blog <span class='text-muted' id='portfolio-explanation'>Things I think about...</span></h2>
 
 <div id='posts' class='container row'>
+  
+    <div class='col-xs-12 col-sm-6 col-md-4  post-teaser'>
+      <h4>Aug 1, 2017</h4>
+      <h2>
+        <a class="post-link" href="/opendigit/projects/2017/08/01/Cats-and-Dogs.html">Cats and Dogs: Experimenting with Deep Learning</a>
+      </h2>
+      <div class=''>
+        <p>I’ve recently been trying to wrap my head around  deep learning algorithms and the frameworks used to
+implement them. I’ve done most of my ML work in R and that’s been great. However, R doesn’t have great support for neural nets and its design is not great for huge datasets. There are several frameworks out there now that are specifically designed for implementing neural networks and simplifying their computation. Most of these libraries seem to be written in C (high speed) with python (numpy) wrappers. Specifically, I’ve been starting to experiment with TensorFlow and Caffe. Both are widely used. Both are in python.</p>
+
+
+      </div>
+    </div>
+  
+    <div class='col-xs-12 col-sm-6 col-md-4  post-teaser'>
+      <h4>Aug 1, 2017</h4>
+      <h2>
+        <a class="post-link" href="/opendigit/projects/2017/08/01/OpenDigit.html">OpenDIGIT: Open Digital Infrastructure for GLobal Infection Tracking</a>
+      </h2>
+      <div class=''>
+        <blockquote>
+You want to make a map of confirmed cases of Zika virus that have occurred in the last month.
+</blockquote>
+
+
+      </div>
+    </div>
   
     <div class='col-xs-12 col-sm-6 col-md-4  post-teaser'>
       <h4>May 25, 2017</h4>
@@ -266,7 +293,7 @@
         <a class="post-link" href="/cartography/coding/2017/02/11/DC-Mapbox-Plugin.html">DC-Mapbox: A Library for Creating Geographically Enabled Dashboards with Mapbox-GL and DC.js</a>
       </h2>
       <div class=''>
-        <p><img src="/assets/dc-mapbox-thumb.png" alt="Screenshot" /></p>
+        <p><img src="http://localhost:4000/assets/dc-mapbox-thumb.png" alt="Screenshot" /></p>
 
 
       </div>
@@ -278,7 +305,7 @@
         <a class="post-link" href="/cartography/coding/2017/02/11/Prop-clusters-library.html">Proportional Clusters: A Plugin for Leaflet</a>
       </h2>
       <div class=''>
-        <p><img src="/assets/pclusters.png" alt="Screenshot" /></p>
+        <p><img src="http://localhost:4000/assets/pclusters.png" alt="Screenshot" /></p>
 
 
       </div>

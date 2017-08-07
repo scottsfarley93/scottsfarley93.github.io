@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+  <title>OpenDIGIT: Open Digital Infrastructure for GLobal Infection Tracking</title>
+  <meta name="description" content="You want to make a map of confirmed cases of Zika virus that have occurred in the last month.">
+
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="canonical" href="http://localhost:4000/opendigit/projects/2017/08/01/OpenDigit.html">
+  <link rel="alternate" type="application/rss+xml" title="Scott Sherwin Farley" href="http://localhost:4000/feed.xml">
+
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name='viewport' content='width=device-width, initial-scale=1'/>
+    <meta name='keywords' content="maps, cartography"/>
+    <!---Links--->
+    <!-- Latest compiled and minified CSS -->
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+<!-- Optional theme -->
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+    <link rel="stylesheet" href='http://localhost:4000/css/cv.css'>
+    <link rel="stylesheet" href='http://localhost:4000/css/style.css'>
+    <style>
+    	footer{
+    		text-align:center;
+    	}
+    </style>
+    <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-83006302-2', 'auto');
+    ga('send', 'pageview');
+  </script>
+
+  <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha256-/SIrNqv8h6QGKDuNoLGA4iret+kyesCkHGzVUUV0shc=" crossorigin="anonymous"></script>
+<!-- Latest compiled and minified JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+
+</head>
+
+
+  <body>
+
+    
+
+
+<nav class="navbar navbar-default navbar-static-top">
+<div class="container">
+<div class="navbar-header">
+  <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+    <span class="sr-only">Toggle navigation</span>
+    <span class="icon-bar"></span>
+    <span class="icon-bar"></span>
+    <span class="icon-bar"></span>
+  </button>
+  <a class="navbar-brand" href="http://localhost:4000/index.html">Scott Farley</a>
+</div>
+<div id="navbar" class="navbar-collapse collapse">
+  <ul class="nav navbar-nav navbar-right">
+    <li><a href="http://localhost:4000/index.html">Home</a></li>
+    <li><a href="http://localhost:4000/cv.html">CV</a></li>
+    <li><a href="http://localhost:4000/index.html#blog">Blog</a></li>
+</div><!--/.nav-collapse -->
+</div>
+</nav>
+
+
+    <div class="page-content">
+      <div class="wrapper">
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title" itemprop="name headline">OpenDIGIT: Open Digital Infrastructure for GLobal Infection Tracking</h1>
+    <p class="post-meta"><time datetime="2017-08-01T11:22:52-05:00" itemprop="datePublished">Aug 1, 2017</time></p>
+  </header>
+
+  <div class="post-content" itemprop="articleBody">
+    <blockquote>
+You want to make a map of confirmed cases of Zika virus that have occurred in the last month.
+</blockquote>
+
+<p>Shouldn’t be too hard, right?</p>
+
+<p>This task is just about impossible. There are a couple issues, but basically what it comes down to is: the data just doesn’t exist.</p>
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/OC27DpB49Dk" frameborder="0" allowfullscreen=""></iframe>
+
+<p><strong>A video I made to highlight the OpenDIGIT project</strong></p>
+
+<p>I recently came across a great visualization of <a href="https://www.flightradar24.com/32.64,-80.74/4">every single</a> commercial aircraft’s location, in real time. It made me wonder, how can we know, with such precision and timeliness, the location of these aircrafts, but not know very much at all about very basic things, like the location of cases of infectious diseases that impact millions of people each year? It seems to me that having this dataset available for researchers, doctors, and the public to interact with is a no-brainer. The insight we could gain from studying epidemic progression through populations and across space in real-time would be massive.</p>
+
+<p>There are a lot of parties with a little bit of this data; from individual doctors, hospitals, and clinics, to local, regional, and national public health agencies, to international governmental and non-governmental organizations. There is not a standardized reporting protocol among these parties, and even if there was, where would the data go? The WHO seems the most likely candidate, and they have a relatively good data repository, but a lot of cases are never reported up the ladder to higher level agencies, making the data incomplete. Furthermore, and perhaps more importantly, even aggregating organizations like the CDC and the WHO don’t produce any data in real time. While both agencies yield relatively good data about past epidemics, there is no information at all about ongoing outbreaks. Finally, due to patient privacy concerns and laws, the data is almost always aggregated to large geographical units. Indeed, most of the best data I could find was reported at a national enumeration unit. Together, that’s a one-two punch to being able to use this data in predictive algorithms for developing prevention strategies: the data that is reported is out of date <em>and</em> it has been aggregated to a point that it is almost no longer useful in models that take spatial position into account.</p>
+
+<p>I envision a dedicated system of databases for reporting cases of infectious diseases in real time, by doctors and nurses in the field. The data therein would be completely free and open, and anyone who wanted to could download the most recent authoritative reports of disease occurrence. The system would allow many, many more people to work with the data, improving the quantity and quality of insights related to how outbreaks spread. The visualizations and models produced could be completely revolutionary. At a higher level, shouldn’t we be able to identify potential threats to our own health?</p>
+
+<p>This won’t be an easy task. I see three categories of challenges we’ll need to overcome in pursuit of the ultimate goal.</p>
+
+<ol>
+  <li>
+    <p><strong><em>Technical</em></strong>: The dataset I’m proposing to make available would be huge. Indeed, it could be on the order of several billion data points, collected annually. The data would need to be available in real time with little latency and no downtime, and would need to be efficiently indexed and highly searchable. To make matters more complicated, the data would be messy, come from many different pipelines, and would likely be incompletely attributed. Altogether, the technical challenges are pretty approachable.</p>
+  </li>
+  <li>
+    <p><strong><em>Ethical</em></strong>: As much as it would be a good idea to have all of this data available at the push of a button, it is health data, and it is sensitive. Whatever solution we come up with would have to protect patient privacy. If we can’t do that, we’re probably doing as much harm as good – and we’d probably get sued a bunch too. I believe that by providing only spatiotemporal coordinates (latitude, longitude, time), and by obfuscating these coordinates to reduce precision, we could provide a much higher resolution product than currently available while still ensuring ethical guidelines were followed. Strong collaborations with established NGOs in the field could alleviate some of these challenges and build trust.</p>
+  </li>
+  <li>
+    <p><strong><em>Practical</em></strong>: Even if the system was engineered perfectly and met all ethical standards, it would be useless if people didn’t use it. This seems like it’d be the hardest part of the whole project. Because the data resides with so many different organizations, it would take a lot of work to get people to contribute to a new repository. And there’s a big trust barrier to overcome as well. I believe that getting a couple established organizations to partner with early in the project lifecycle would be very helpful to this end. I’m thinking Doctors without Border, local health agencies, even WHO. The practical challenges are really the make it or break it of this project.</p>
+  </li>
+</ol>
+
+<p>National Geographic is giving out a small bit of cash money to innovative new projects. I <a href="http://www.natgeochasinggenius.com/video/347">applied</a> – cross your fingers. If you’ve got any other good sources of funding that I should apply for, let me know.</p>
+
+<p>I know that, given the right team and some funding, the results of this project could be game changing.</p>
+
+  </div>
+
+</article>
+<script type="text/javascript"
+    src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+      </div>
+    </div>
+
+    <footer  >
+  <ul class='list-inline'>
+      <li class='no-bullet'><span class='glyphicon glyphicon-earphone text-muted'></span><strong class='contact-detail small'>  <a href='tel:626-264-0741'>626.264.0741</a></strong></li>
+      <li class='no-bullet'><span class='glyphicon glyphicon-envelope text-muted'></span><strong class='contact-detail small'>  <a href="mailto:sfarley2@wisc.edu">sfarley@wisc.edu</a></strong></li>
+      <li class='no-bullet'><span class='glyphicon glyphicon-menu-right text-muted'></span><strong class='contact-detail small'><a href='http://twitter.com/scottsfarley93'> @scottsfarley93</a></strong></li>
+      <li class='no-bullet'><span class='glyphicon glyphicon-menu-right text-muted'></span><strong class='contact-detail small'><a href='http://github.com/scottsfarley93'>  GitHub</a></strong></li>
+      <li class='no-bullet'><span class='glyphicon glyphicon-menu-right text-muted'></span><strong class='contact-detail small'><a href='https://www.linkedin.com/in/scott-farley-25902581'>  LinkedIn</a></strong></li>
+</ul>
+</footer>
+
+
+  </body>
+
+</html>

@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+  <title>Cats and Dogs: Experimenting with Deep Learning</title>
+  <meta name="description" content="I’ve recently been trying to wrap my head around  deep learning algorithms and the frameworks used toimplement them. I’ve done most of my ML work in R and th...">
+
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="canonical" href="http://localhost:4000/opendigit/projects/2017/08/01/Cats-and-Dogs.html">
+  <link rel="alternate" type="application/rss+xml" title="Scott Sherwin Farley" href="http://localhost:4000/feed.xml">
+
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name='viewport' content='width=device-width, initial-scale=1'/>
+    <meta name='keywords' content="maps, cartography"/>
+    <!---Links--->
+    <!-- Latest compiled and minified CSS -->
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+<!-- Optional theme -->
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+    <link rel="stylesheet" href='http://localhost:4000/css/cv.css'>
+    <link rel="stylesheet" href='http://localhost:4000/css/style.css'>
+    <style>
+    	footer{
+    		text-align:center;
+    	}
+    </style>
+    <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-83006302-2', 'auto');
+    ga('send', 'pageview');
+  </script>
+
+  <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha256-/SIrNqv8h6QGKDuNoLGA4iret+kyesCkHGzVUUV0shc=" crossorigin="anonymous"></script>
+<!-- Latest compiled and minified JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+
+</head>
+
+
+  <body>
+
+    
+
+
+<nav class="navbar navbar-default navbar-static-top">
+<div class="container">
+<div class="navbar-header">
+  <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+    <span class="sr-only">Toggle navigation</span>
+    <span class="icon-bar"></span>
+    <span class="icon-bar"></span>
+    <span class="icon-bar"></span>
+  </button>
+  <a class="navbar-brand" href="http://localhost:4000/index.html">Scott Farley</a>
+</div>
+<div id="navbar" class="navbar-collapse collapse">
+  <ul class="nav navbar-nav navbar-right">
+    <li><a href="http://localhost:4000/index.html">Home</a></li>
+    <li><a href="http://localhost:4000/cv.html">CV</a></li>
+    <li><a href="http://localhost:4000/index.html#blog">Blog</a></li>
+</div><!--/.nav-collapse -->
+</div>
+</nav>
+
+
+    <div class="page-content">
+      <div class="wrapper">
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title" itemprop="name headline">Cats and Dogs: Experimenting with Deep Learning</h1>
+    <p class="post-meta"><time datetime="2017-08-01T11:22:52-05:00" itemprop="datePublished">Aug 1, 2017</time></p>
+  </header>
+
+  <div class="post-content" itemprop="articleBody">
+    <p>I’ve recently been trying to wrap my head around  deep learning algorithms and the frameworks used to
+implement them. I’ve done most of my ML work in R and that’s been great. However, R doesn’t have great support for neural nets and its design is not great for huge datasets. There are several frameworks out there now that are specifically designed for implementing neural networks and simplifying their computation. Most of these libraries seem to be written in C (high speed) with python (numpy) wrappers. Specifically, I’ve been starting to experiment with TensorFlow and Caffe. Both are widely used. Both are in python.</p>
+
+<p>As a fun project, I decided to teach my computer to tell the difference between pictures of dogs and pictures of cats. As recently as 2007, this was a very difficult computer vision problem, but advances in deep learning have made it relatively trivial. It’s now a common toy example used to demonstrate the setup and execution of convolutional neural nets.  In this post, I’ll introduce some of the code I used to build my cat/dog classifier, using TensorFlow, and specifically, a high-level wrapper called <code class="highlighter-rouge">TFLearn</code>. <code class="highlighter-rouge">TFLearn</code> is designed to make the coding of CNN models easier – and man, it’s pretty easy. The hardest part of developing the model, I found, was keeping track of the dimensions of your numpy arrays. Note: There are a lot of great tutorials out there that I drew heavily on while putting this script together. When I get a bit more time, I’d like to put together a more in-depth tutorial.</p>
+
+<p>In the end, I was able to get a classifier with a ~99% accuracy on a validation set. I was pretty psyched about this, since this was my first foray into deep learning. It goes to show that these framework (TensorFlow, TFLearn, Caffe) can vastly simplify the process of building and training complex models.</p>
+
+<p>There are four main parts of our program.</p>
+
+<ol>
+  <li>Get the data into python.</li>
+  <li>Prepare the data for the algorithm.</li>
+  <li>Define the network architecture.</li>
+  <li>Train the model and get the results.</li>
+</ol>
+
+<p><strong>Input</strong>: I used the cat/dog dataset available on Kaggle. This gives 25,000 labeled images of cats and dogs to work with. CNNs work with (multidimensional) arrays of pixel values, not raw images. Therefore, the first thing to do is to read the images into python.I actually found this first step to be the most challenging, since I haven’t done much with image I/O in python. Most posts I found on the interwebs skipped this part entirely. In the end, I found that the step was pretty much trivial. The <code class="highlighter-rouge">CV2</code> and <code class="highlighter-rouge">skimage</code> libraries both provide simple methods of reading images to numpy arrays of pixel values.</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="k">def</span> <span class="nf">load_img</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">do_resize</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">do_save</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="n">_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">filename</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">imx</span> <span class="o">=</span> <span class="n">x</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">imread</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">do_resize</span><span class="p">:</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">imresize</span><span class="p">(</span><span class="n">imx</span><span class="p">,</span> <span class="p">(</span><span class="n">IMG_SIZE</span><span class="p">,</span> <span class="n">IMG_SIZE</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">do_save</span><span class="p">:</span>
+        <span class="n">io</span><span class="o">.</span><span class="n">imsave</span><span class="p">(</span> <span class="s">"./../smalltrain/"</span> <span class="o">+</span> <span class="n">_file</span><span class="p">,</span><span class="n">x</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">_file</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="s">"cat"</span><span class="p">:</span>
+        <span class="n">label</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="n">_file</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="s">"dog"</span><span class="p">:</span>
+        <span class="n">label</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">label</span><span class="p">)</span></code></pre></figure>
+
+<p><em>My function to read the pixel values and parse the label from a filename</em></p>
+
+<p>Of course, we have an entire directory of labeled training images, all of which we’d like to process.</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="k">def</span> <span class="nf">load_dir</span><span class="p">(</span><span class="nb">dir</span><span class="o">=</span><span class="n">IMAGE_DIR</span><span class="p">):</span>
+    <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n</span><span class="p">,</span> <span class="n">IMG_SIZE</span><span class="p">,</span> <span class="n">IMG_SIZE</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="s">'float64'</span><span class="p">)</span>
+    <span class="n">Y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+    <span class="n">idx</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">_file</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="nb">dir</span><span class="p">)[</span><span class="mi">0</span><span class="p">:</span><span class="n">n</span><span class="p">]:</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">dir</span><span class="p">,</span> <span class="n">_file</span><span class="p">)</span>
+        <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">load_img</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">do_resize</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">do_save</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">x</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="c"># x = resize_img_array(x)</span>
+            <span class="n">X</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+            <span class="n">Y</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">y</span>
+        <span class="n">idx</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">)</span></code></pre></figure>
+
+<p><em>A function to read a directory of images to a big array of 3-D arrays of pixel values and a big 1-D array of labels</em></p>
+
+<p>TFLearn has its own image loader. However, it expects your images to be in separate directories for each category. I decided that (1) I liked having all my training examples in a single directory, and (2) I wanted the experience of writing a custom loader.</p>
+
+<p><strong>Preprocessing</strong>: The images you feed into a a CNN should all be of the same size. The loader I wrote above has an optional resize argument that will resize each image to <code class="highlighter-rouge">IMG_SIZE</code> x <code class="highlighter-rouge">IMG_SIZE</code> pixels, and save them to another diretory, so they can be loaded more quickly (without resizing) later on.</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="o">...</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">imresize</span><span class="p">(</span><span class="n">imx</span><span class="p">,</span> <span class="p">(</span><span class="n">IMG_SIZE</span><span class="p">,</span> <span class="n">IMG_SIZE</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span> <span class="c">## 3 color channels</span>
+<span class="o">...</span></code></pre></figure>
+
+<p><em>Resize the images to be a consistent square size.</em></p>
+
+<p>You also often want to scale and center the training data to make it more consistent. TFLearn has built-in utilities for this.</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="o">...</span>
+<span class="n">img_prep</span> <span class="o">=</span> <span class="n">tflearn</span><span class="o">.</span><span class="n">ImagePreprocessing</span><span class="p">()</span>
+
+<span class="c"># ZCenter</span>
+<span class="n">img_prep</span><span class="o">.</span><span class="n">add_featurewise_zero_center</span><span class="p">()</span>
+
+<span class="c"># Scale</span>
+<span class="n">img_prep</span><span class="o">.</span><span class="n">add_featurewise_stdnorm</span><span class="p">()</span>
+<span class="o">...</span></code></pre></figure>
+
+<p><em>Scale and center the data</em></p>
+
+<p>And finally, preprocessing the labels. TF expects a so-called ‘one-hot’ representation of the labels. Basically a binary vector of length <em>n</em> (for <em>n</em> classes) with a one for the class being represented and zeros for all other classes.</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="o">...</span>
+<span class="k">if</span> <span class="n">_file</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="s">"cat"</span><span class="p">:</span>
+    <span class="n">label</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+<span class="k">elif</span> <span class="n">_file</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="s">"dog"</span><span class="p">:</span>
+    <span class="n">label</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+<span class="o">...</span></code></pre></figure>
+
+<p><em>Parse the labels</em></p>
+
+<p><strong>Defining network architecture</strong>: With TensorFlow and TFLearn in particular, it is quite easy to build complex CNN (and other deep learning) models. The mathematics are all wrapped in tidy functions, so it’s basically just plug-in-play. Yay abstraction!</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="c"># Define the input</span>
+<span class="n">network</span> <span class="o">=</span> <span class="n">input_data</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="n">IMG_SIZE</span><span class="p">,</span> <span class="n">IMG_SIZE</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span>
+                 <span class="n">data_preprocessing</span><span class="o">=</span><span class="n">img_prep</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">'input'</span><span class="p">)</span> <span class="c">## do the image processing described above</span>
+
+<span class="c"># 32 conv filters, 3x3x3</span>
+<span class="n">conv_1</span> <span class="o">=</span> <span class="n">conv_2d</span><span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s">'relu'</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">'conv_1'</span><span class="p">)</span>
+
+<span class="c"># max pooling downsampling</span>
+<span class="n">network</span> <span class="o">=</span> <span class="n">max_pool_2d</span><span class="p">(</span><span class="n">conv_1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+
+<span class="c"># 64 conv filters, 3x3x3</span>
+<span class="n">conv_2</span> <span class="o">=</span> <span class="n">conv_2d</span><span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s">'relu'</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">'conv_2'</span><span class="p">)</span>
+
+<span class="c"># max pool</span>
+<span class="n">network</span> <span class="o">=</span> <span class="n">max_pool_2d</span><span class="p">(</span><span class="n">conv_2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+
+<span class="c"># 128 conv filters, 3x3x3</span>
+<span class="n">conv_3</span> <span class="o">=</span> <span class="n">conv_2d</span><span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s">'relu'</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">'conv_3'</span><span class="p">)</span>
+
+<span class="c"># max pool</span>
+<span class="n">network</span> <span class="o">=</span> <span class="n">max_pool_2d</span><span class="p">(</span><span class="n">conv_3</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+
+<span class="c"># 128 conv filters, 3x3x3</span>
+<span class="n">conv_4</span> <span class="o">=</span> <span class="n">conv_2d</span><span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s">'relu'</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">'conv_4'</span><span class="p">)</span>
+
+<span class="c"># max pool</span>
+<span class="n">network</span> <span class="o">=</span> <span class="n">max_pool_2d</span><span class="p">(</span><span class="n">conv_4</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+
+<span class="c"># 128 conv filters, 3x3x3</span>
+<span class="n">conv_5</span> <span class="o">=</span> <span class="n">conv_2d</span><span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s">'relu'</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">'conv_5'</span><span class="p">)</span>
+
+<span class="c"># max pool</span>
+<span class="n">network</span> <span class="o">=</span> <span class="n">max_pool_2d</span><span class="p">(</span><span class="n">conv_5</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+
+<span class="c"># first fully connected layer</span>
+<span class="n">network</span> <span class="o">=</span> <span class="n">fully_connected</span><span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="mi">512</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s">'relu'</span><span class="p">)</span>
+
+<span class="c"># random dropout</span>
+<span class="n">network</span> <span class="o">=</span> <span class="n">dropout</span><span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
+
+<span class="c"># second fully connected layer</span>
+<span class="n">network</span> <span class="o">=</span> <span class="n">fully_connected</span><span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="mi">512</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s">'relu'</span><span class="p">)</span>
+
+<span class="c"># second random dropout</span>
+<span class="n">network</span> <span class="o">=</span> <span class="n">dropout</span><span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
+
+<span class="c"># third fully connected layer</span>
+<span class="n">network</span> <span class="o">=</span> <span class="n">fully_connected</span><span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="mi">512</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s">'relu'</span><span class="p">)</span>
+
+<span class="c"># third random dropout</span>
+<span class="n">network</span> <span class="o">=</span> <span class="n">dropout</span><span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
+
+<span class="c"># the classification --&gt; 2 classes</span>
+<span class="n">network</span> <span class="o">=</span> <span class="n">fully_connected</span><span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s">'softmax'</span><span class="p">)</span>
+
+<span class="c"># Describe the optimizer</span>
+<span class="n">acc</span> <span class="o">=</span> <span class="n">Accuracy</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">"Accuracy"</span><span class="p">)</span>
+<span class="n">network</span> <span class="o">=</span> <span class="n">regression</span><span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="n">optimizer</span><span class="o">=</span><span class="s">'adam'</span><span class="p">,</span>
+                     <span class="n">loss</span><span class="o">=</span><span class="s">'categorical_crossentropy'</span><span class="p">,</span>
+                     <span class="n">learning_rate</span><span class="o">=</span><span class="mf">0.0005</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="n">acc</span><span class="p">)</span></code></pre></figure>
+
+<p><em>Blueprint the CNN architecture</em></p>
+
+<p>I am far from an expert at the architecture. To be honest, I just dropped a lot of layers, in order, together. I did a bit of reading, and know the general sequences (conv-&gt; pool) and (fully-connected -&gt; dropout -&gt; softmax) are pretty standard. Big name CNNs (AlexNet, etc) put a ton of thought into the sequence of the layers. I wonder what additional accuracy I could get by reordering the layers I have here.</p>
+
+<p><strong>Train the model</strong>: Finally, it is time to train the classifier. Here, I’m telling it to train on the training set <code class="highlighter-rouge">X</code> with labels <code class="highlighter-rouge">Y</code>. I also tell it to use a validation set for determining how accurate it is. I tell it to train for 12 epochs, meaning that all the data will be seen 12 times.</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="n">model</span> <span class="o">=</span> <span class="n">tflearn</span><span class="o">.</span><span class="n">DNN</span><span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="n">tensorboard_verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">validation_set</span><span class="o">=</span><span class="p">(</span><span class="n">test_X</span><span class="p">,</span> <span class="n">test_Y</span><span class="p">),</span>
+      <span class="n">n_epoch</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span> <span class="n">show_metric</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span></code></pre></figure>
+
+<p><em>Train the model</em></p>
+
+<p>** <em>Bonus</em> Saving/loading the model**</p>
+
+<p>One thing I encountered that turned out to be very useful was saving and loading models. To save a model once it has been fitted,</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="n">model</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s">'/path/to/model'</span><span class="p">)</span></code></pre></figure>
+
+<p><em>Save the model</em></p>
+
+<p>You can reload your model using</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="n">model</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s">'/path/to/model'</span><span class="p">)</span></code></pre></figure>
+
+<p><em>Load the model</em></p>
+
+<p>And then you can just keep on chugging away at the training. The architecture of the model must be the same, between loads, and I believe the size of the input must be the same as well. But it allows you to easily pause your model training between epochs. A handy block then is,</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="s">"/path/to/model.meta"</span><span class="p">):</span>
+  <span class="n">model</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s">"/path/to/model"</span><span class="p">)</span>
+
+<span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">)</span>
+
+<span class="n">model</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s">"/path/to/model"</span><span class="p">)</span></code></pre></figure>
+
+<p><em>Continue training if the model already exists</em></p>
+
+<p><strong><em>The complete code</em></strong></p>
+
+<p>Here is the complete code I used in building this model:</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="kn">from</span> <span class="nn">skimage</span> <span class="kn">import</span> <span class="n">color</span><span class="p">,</span> <span class="n">io</span> <span class="c">## for reading the images</span>
+<span class="kn">from</span> <span class="nn">scipy.misc</span> <span class="kn">import</span> <span class="n">imresize</span> <span class="c">## for resizing the images</span>
+
+<span class="kn">import</span> <span class="nn">tflearn</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">matplotlib.image</span> <span class="kn">as</span> <span class="nn">mpimg</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">random</span>
+<span class="kn">import</span> <span class="nn">tflearn</span>
+<span class="kn">from</span> <span class="nn">tflearn.layers.core</span> <span class="kn">import</span> <span class="n">input_data</span><span class="p">,</span> <span class="n">dropout</span><span class="p">,</span> <span class="n">fully_connected</span>
+<span class="kn">from</span> <span class="nn">tflearn.layers.conv</span> <span class="kn">import</span> <span class="n">conv_2d</span><span class="p">,</span> <span class="n">max_pool_2d</span>
+<span class="kn">from</span> <span class="nn">tflearn.layers.normalization</span> <span class="kn">import</span> <span class="n">local_response_normalization</span>
+<span class="kn">from</span> <span class="nn">tflearn.layers.estimator</span> <span class="kn">import</span> <span class="n">regression</span>
+<span class="kn">from</span> <span class="nn">tflearn.data_utils</span> <span class="kn">import</span> <span class="n">shuffle</span><span class="p">,</span> <span class="n">to_categorical</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">sklearn.cross_validation</span> <span class="kn">import</span> <span class="n">train_test_split</span>
+<span class="kn">from</span> <span class="nn">tflearn.metrics</span> <span class="kn">import</span> <span class="n">Accuracy</span>
+
+
+<span class="n">img_prep</span> <span class="o">=</span> <span class="n">tflearn</span><span class="o">.</span><span class="n">ImagePreprocessing</span><span class="p">()</span>
+
+<span class="n">IMAGE_DIR</span> <span class="o">=</span> <span class="s">"./../smalltrain/"</span>
+<span class="n">IMG_SIZE</span> <span class="o">=</span> <span class="mi">64</span>
+<span class="n">n</span> <span class="o">=</span> <span class="mi">25000</span>
+
+<span class="k">print</span> <span class="s">"Imported all modules..."</span>
+<span class="k">def</span> <span class="nf">load_img</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">do_resize</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">do_save</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="n">_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">filename</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">imx</span> <span class="o">=</span> <span class="n">x</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">imread</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">do_resize</span><span class="p">:</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">imresize</span><span class="p">(</span><span class="n">imx</span><span class="p">,</span> <span class="p">(</span><span class="n">IMG_SIZE</span><span class="p">,</span> <span class="n">IMG_SIZE</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">do_save</span><span class="p">:</span>
+        <span class="n">io</span><span class="o">.</span><span class="n">imsave</span><span class="p">(</span> <span class="s">"./../smalltrain/"</span> <span class="o">+</span> <span class="n">_file</span><span class="p">,</span><span class="n">x</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">_file</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="s">"cat"</span><span class="p">:</span>
+        <span class="n">label</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="n">_file</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="s">"dog"</span><span class="p">:</span>
+        <span class="n">label</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">label</span><span class="p">)</span>
+
+
+
+<span class="k">def</span> <span class="nf">load_dir</span><span class="p">(</span><span class="nb">dir</span><span class="o">=</span><span class="n">IMAGE_DIR</span><span class="p">):</span>
+    <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n</span><span class="p">,</span> <span class="n">IMG_SIZE</span><span class="p">,</span> <span class="n">IMG_SIZE</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="s">'float64'</span><span class="p">)</span>
+    <span class="n">Y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+    <span class="n">idx</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">_file</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="nb">dir</span><span class="p">)[</span><span class="mi">0</span><span class="p">:</span><span class="n">n</span><span class="p">]:</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">dir</span><span class="p">,</span> <span class="n">_file</span><span class="p">)</span>
+        <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">load_img</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">do_resize</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">do_save</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">x</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="c"># x = resize_img_array(x)</span>
+            <span class="n">X</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+            <span class="n">Y</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">y</span>
+        <span class="n">idx</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">idx</span> <span class="o">%</span> <span class="mi">1000</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="k">print</span> <span class="s">"Processed "</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">)</span>
+
+
+
+
+<span class="n">X</span><span class="p">,</span> <span class="n">Y</span> <span class="o">=</span> <span class="n">load_dir</span><span class="p">()</span>
+<span class="n">X</span><span class="p">,</span> <span class="n">test_X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">test_Y</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
+<span class="c"># Y = to_categorical(Y, 2)</span>
+<span class="c"># Y_test = to_categorical(test_Y, 2)</span>
+
+
+
+<span class="n">img_prep</span><span class="o">.</span><span class="n">add_featurewise_zero_center</span><span class="p">()</span>
+<span class="n">img_prep</span><span class="o">.</span><span class="n">add_featurewise_stdnorm</span><span class="p">()</span>
+
+<span class="k">print</span> <span class="s">"defining network"</span>
+
+<span class="n">network</span> <span class="o">=</span> <span class="n">input_data</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="n">IMG_SIZE</span><span class="p">,</span> <span class="n">IMG_SIZE</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span>
+                 <span class="n">data_preprocessing</span><span class="o">=</span><span class="n">img_prep</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">'input'</span><span class="p">)</span>
+
+<span class="n">conv_1</span> <span class="o">=</span> <span class="n">conv_2d</span><span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s">'relu'</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">'conv_1'</span><span class="p">)</span>
+<span class="n">network</span> <span class="o">=</span> <span class="n">max_pool_2d</span><span class="p">(</span><span class="n">conv_1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="n">conv_2</span> <span class="o">=</span> <span class="n">conv_2d</span><span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s">'relu'</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">'conv_2'</span><span class="p">)</span>
+<span class="n">network</span> <span class="o">=</span> <span class="n">max_pool_2d</span><span class="p">(</span><span class="n">conv_2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="n">conv_3</span> <span class="o">=</span> <span class="n">conv_2d</span><span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s">'relu'</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">'conv_3'</span><span class="p">)</span>
+<span class="n">network</span> <span class="o">=</span> <span class="n">max_pool_2d</span><span class="p">(</span><span class="n">conv_3</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="n">conv_4</span> <span class="o">=</span> <span class="n">conv_2d</span><span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s">'relu'</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">'conv_4'</span><span class="p">)</span>
+<span class="n">network</span> <span class="o">=</span> <span class="n">max_pool_2d</span><span class="p">(</span><span class="n">conv_4</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="n">conv_5</span> <span class="o">=</span> <span class="n">conv_2d</span><span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s">'relu'</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">'conv_5'</span><span class="p">)</span>
+<span class="n">network</span> <span class="o">=</span> <span class="n">max_pool_2d</span><span class="p">(</span><span class="n">conv_5</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="n">network</span> <span class="o">=</span> <span class="n">fully_connected</span><span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="mi">512</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s">'relu'</span><span class="p">)</span>
+<span class="n">network</span> <span class="o">=</span> <span class="n">dropout</span><span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
+<span class="n">network</span> <span class="o">=</span> <span class="n">fully_connected</span><span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="mi">512</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s">'relu'</span><span class="p">)</span>
+<span class="n">network</span> <span class="o">=</span> <span class="n">dropout</span><span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
+<span class="n">network</span> <span class="o">=</span> <span class="n">fully_connected</span><span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="mi">512</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s">'relu'</span><span class="p">)</span>
+<span class="n">network</span> <span class="o">=</span> <span class="n">dropout</span><span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
+<span class="n">network</span> <span class="o">=</span> <span class="n">fully_connected</span><span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s">'softmax'</span><span class="p">)</span>
+<span class="n">acc</span> <span class="o">=</span> <span class="n">Accuracy</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">"Accuracy"</span><span class="p">)</span>
+<span class="n">network</span> <span class="o">=</span> <span class="n">regression</span><span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="n">optimizer</span><span class="o">=</span><span class="s">'adam'</span><span class="p">,</span>
+                     <span class="n">loss</span><span class="o">=</span><span class="s">'categorical_crossentropy'</span><span class="p">,</span>
+                     <span class="n">learning_rate</span><span class="o">=</span><span class="mf">0.0005</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="n">acc</span><span class="p">)</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">tflearn</span><span class="o">.</span><span class="n">DNN</span><span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="n">tensorboard_verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+
+<span class="k">print</span> <span class="s">"Training network"</span>
+<span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="s">"~/Documents/cats_and_dogs/tensorflow/model.model.meta"</span><span class="p">):</span>
+  <span class="n">model</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s">"model.model"</span><span class="p">)</span>
+
+<span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">validation_set</span><span class="o">=</span><span class="p">(</span><span class="n">test_X</span><span class="p">,</span> <span class="n">test_Y</span><span class="p">),</span>
+      <span class="n">n_epoch</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span> <span class="n">show_metric</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+<span class="n">model</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s">"model.model"</span><span class="p">)</span></code></pre></figure>
+
+
+  </div>
+
+</article>
+<script type="text/javascript"
+    src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+      </div>
+    </div>
+
+    <footer  >
+  <ul class='list-inline'>
+      <li class='no-bullet'><span class='glyphicon glyphicon-earphone text-muted'></span><strong class='contact-detail small'>  <a href='tel:626-264-0741'>626.264.0741</a></strong></li>
+      <li class='no-bullet'><span class='glyphicon glyphicon-envelope text-muted'></span><strong class='contact-detail small'>  <a href="mailto:sfarley2@wisc.edu">sfarley@wisc.edu</a></strong></li>
+      <li class='no-bullet'><span class='glyphicon glyphicon-menu-right text-muted'></span><strong class='contact-detail small'><a href='http://twitter.com/scottsfarley93'> @scottsfarley93</a></strong></li>
+      <li class='no-bullet'><span class='glyphicon glyphicon-menu-right text-muted'></span><strong class='contact-detail small'><a href='http://github.com/scottsfarley93'>  GitHub</a></strong></li>
+      <li class='no-bullet'><span class='glyphicon glyphicon-menu-right text-muted'></span><strong class='contact-detail small'><a href='https://www.linkedin.com/in/scott-farley-25902581'>  LinkedIn</a></strong></li>
+</ul>
+</footer>
+
+
+  </body>
+
+</html>

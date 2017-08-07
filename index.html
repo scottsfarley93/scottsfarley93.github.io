@@ -7,7 +7,7 @@ layout: index-layout
   <div id='intro' class='col-xs-12'>
     <h1 class='page-header col-xs-12 col-sm-2' id='intro-header'>Scott Sherwin Farley</h1>
     <p class='text-muted col-xs-8 col-sm-8'>
-      Hi! I am a second year graduate student at the University of Wisconsin, Madison studying Cartography and GIS.
+      Hi! I recent graduated from the University of Wisconsin, Madison with a Masters degree in Geographic Information Science and Cartography.
       I am interested in developing inuitive, engaging, fun, and useful geospatial web applications that improve decision making.
       I love to program, usually in JavaScript and sometimes in python. I spend most of my time building things -- you can see some of them
       <a href="http://github.com/scottsfarley93">on my GitHub</a>.
@@ -16,7 +16,7 @@ layout: index-layout
     I think that data-driven interfaces and machine learning tools will be able to guide and improve the way we respond to the
     (irreversible) changes in the Earth System. When I'm not at my desk, I like to compete in endurance skiing and running races, rock climb, and travel.
   <br /><br /><br />
-  This website showcases a selection of my projects, houses my <a href="#posts">research blog</a>, and is a platform for many of my front-end code projects. Have a look around!
+  This website showcases a selection of my projects, houses my <a href="#posts"> blog</a>, and is a platform for many of my  projects. Have a look around!
   </p>
   <img class='right img img-responsive col-xs-4 col-sm-2' src="{{site.url}}/assets/Scott.jpg" />
 
@@ -74,7 +74,7 @@ layout: index-layout
 
 <div id='posts' class='container row'>
   {% for post in site.posts %}
-    <div class='col-xs-12 col-sm-6 col-md-4  post-teaser'>
+    <div class='col-xs-12 col-sm-6 col-md-6  post-teaser'>
       <h4>{{ post.date | date: "%b %-d, %Y" }}</h4>
       <h2>
         <a class="post-link" href="{{ post.url | prepend: site.baseurl }}">{{ post.title }}</a>

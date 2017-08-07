@@ -156,9 +156,9 @@ nav{
 
 .post-teaser{
 	margin-top: 5%!important;
-	min-height: 350px!important;
-	max-height: 350px!important;
-	height: 350px!important;
+	min-height: 400px!important;
+	max-height: 400px!important;
+	height: 400px!important;
 	overflow-y: auto;
 }
 

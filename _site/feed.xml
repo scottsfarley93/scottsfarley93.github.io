@@ -6,8 +6,8 @@
 </description>
     <link>http://localhost:4000/</link>
     <atom:link href="http://localhost:4000/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Sun, 06 Aug 2017 21:11:18 -0500</pubDate>
-    <lastBuildDate>Sun, 06 Aug 2017 21:11:18 -0500</lastBuildDate>
+    <pubDate>Sun, 06 Aug 2017 21:26:30 -0500</pubDate>
+    <lastBuildDate>Sun, 06 Aug 2017 21:26:30 -0500</lastBuildDate>
     <generator>Jekyll v3.5.1</generator>
     
       <item>
@@ -373,6 +373,24 @@ You want to make a map of confirmed cases of Zika virus that have occurred in th
       </item>
     
       <item>
+        <title>Thesis: Deposited</title>
+        <description>&lt;p&gt;Wait no further! The final draft of my thesis, in its immutable entirety, has been submitted to the library, and, although the man there was unhappy about the size of my margins, it has been accepted. You can download the whole file &lt;a href=&quot;http://localhost:4000/assets/FarleyThesis_FINAL.pdf&quot;&gt;here&lt;/a&gt; or read it below.&lt;/p&gt;
+
+&lt;embed src=&quot;http://localhost:4000/assets/FarleyThesis_FINAL.pdf&quot; height=&quot;700&quot; width=&quot;700&quot; /&gt;
+
+</description>
+        <pubDate>Thu, 20 Jul 2017 11:22:52 -0500</pubDate>
+        <link>http://localhost:4000/research/status/2017/07/20/thesis-finished.html</link>
+        <guid isPermaLink="true">http://localhost:4000/research/status/2017/07/20/thesis-finished.html</guid>
+        
+        
+        <category>research</category>
+        
+        <category>status</category>
+        
+      </item>
+    
+      <item>
         <title>Scraping record stats from the Paleobiology Database</title>
         <description>&lt;p&gt;I’m writing a review paper that synthesizes some of the recent literature in Big Data and ecoinformatics and situates ecoinformatics as a Big Data science. I’m drawing on some work I did for my Masters thesis that examines the growth curves of the Neotoma Database and GBIF. Jack and I have wanted to see how the Paleobiology Database lines up with these other allied resources, but their API is not as user friendly for getting stats as the other two. GBIF wins in the stats category, with a whole endpoint and &lt;code class=&quot;highlighter-rouge&quot;&gt;r&lt;/code&gt; function designed for getting custom stats reports.&lt;/p&gt;
 
@@ -583,235 +601,6 @@ gdal_translate NETCDF:[PATH_TO_NC_FILE]:[DIMENSION_OF_INTEREST] -of &lt;span cla
         <category>Data</category>
         
         <category>Cartography</category>
-        
-      </item>
-    
-      <item>
-        <title>A Whirlwind Tour to Creating Your Own Data Service Using Postgres and Javascript</title>
-        <description>&lt;p&gt;I led this week’s edition of the &lt;a href=&quot;http://www.geography.wisc.edu/cartography/&quot;&gt;Cart Lab Education Series&lt;/a&gt; with a quick tutorial on how to go about creating an application backend (or Data Service or API, depending on your terminology) using JavaScript (Node.js) and Postgres. It was a lot to cover in less than half an hour, so I wanted to write up a quick blog post about it too. To lead the discussion, I created this infographic that outlines the components of a data service, and how they might relate to one another.&lt;/p&gt;
-
-&lt;embed height=&quot;800&quot; width=&quot;100%&quot; src=&quot;http://localhost:4000/assets/cles_Jan_30.pdf&quot; /&gt;
-
-&lt;p&gt;As a hands on demo, I created a database with some example data from the &lt;a href=&quot;http://www.transtats.bts.gov/DL_SelectFields.asp?Table_ID=236&amp;amp;DB_Short_Name=On-Time&quot;&gt;Flight Delay Dataset&lt;/a&gt;, and wrote up a couple annotated code examples.  The code examples are on &lt;a href=&quot;https://github.com/scottsfarley93&quot;&gt;my GitHub&lt;/a&gt;, as well as a SQL dump of the database, if you want to follow along at home.  If you’re at the University of Wisconsin, you can query the database I am hosting on the Geography Department’s server.&lt;/p&gt;
-
-&lt;h3 id=&quot;setting-up-the-database&quot;&gt;Setting up the Database&lt;/h3&gt;
-
-&lt;p&gt;To have a data service, you need a data base.  The database can use any RMDBS you want (MySQL, PostGres, SQLite, MongoDB).  You should think about the system you want to use and the schema you want to implement before you start.  That’s a theme for another CLES, or Qunying’s Geography 576.&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;Install the Database Management System&lt;/li&gt;
-  &lt;li&gt;Create user roles and privileges&lt;/li&gt;
-  &lt;li&gt;Think about a relational table structure that makes sense for your data&lt;/li&gt;
-  &lt;li&gt;Implement the schema&lt;/li&gt;
-  &lt;li&gt;Add data (may require massaging your data, and often requires a script)&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h3 id=&quot;setting-up-the-bridge&quot;&gt;Setting up the Bridge&lt;/h3&gt;
-&lt;p&gt;The second component of the data service is the ‘bridge’, or what other people might call an API or application backend. I like the term bridge, because it makes clear its role as linking the database and the application client.  Call it what you like. I like to use Node.js for my bridge programs, here are some reasons: it’s fast, it’s popular, and it’s JavaScript. I find it a lot easier to write the full stack in a single language than going back and forth between different scripting languages. That being said, there are lots of other choices for language: Python, ASP, .NET, PHP.  I’ve written similar programs in both python and PHP and it’s not that different. Choose what you’re comfortable with.&lt;/p&gt;
-
-&lt;p&gt;If you do go with node, here are the major steps (detailed below) that lead to a finished data service:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;Install Node (https://nodejs.org/en/)&lt;/li&gt;
-  &lt;li&gt;Create a new application using &lt;code class=&quot;highlighter-rouge&quot;&gt;npm init&lt;/code&gt; (or clone my repo)&lt;/li&gt;
-  &lt;li&gt;Set up the application in &lt;code class=&quot;highlighter-rouge&quot;&gt;app.js&lt;/code&gt;&lt;/li&gt;
-  &lt;li&gt;Write controllers for each endpoint&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h3 id=&quot;creating-a-new-node-application&quot;&gt;Creating a new Node Application&lt;/h3&gt;
-&lt;p&gt;All Node programs are also node packages, which are managed by the node package manager (&lt;code class=&quot;highlighter-rouge&quot;&gt;npm&lt;/code&gt;).  There’s a handy wizard that will guide you through the creation of a new package in &lt;code class=&quot;highlighter-rouge&quot;&gt;npm init&lt;/code&gt;.  Our program (and yours probably, if it does anything interesting) uses other people’s libraries.  There are node libraries for everything: compression, password hashing, file system access, you name it.  When in doubt, use a module, don’t try to write it yourself.  Once we’ve created the new package, we tell it about the libraries we require (these are called dependencies), by adding a section in &lt;code class=&quot;highlighter-rouge&quot;&gt;package.json&lt;/code&gt;.&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;Initialize new project with &lt;code class=&quot;highlighter-rouge&quot;&gt;npm init&lt;/code&gt;&lt;/li&gt;
-  &lt;li&gt;Follow prompts on terminal screen to initialize new application&lt;/li&gt;
-  &lt;li&gt;Open &lt;code class=&quot;highlighter-rouge&quot;&gt;package.json&lt;/code&gt; with your favorite text editor.&lt;/li&gt;
-  &lt;li&gt;Add the following to include dependencies:&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-json&quot; data-lang=&quot;json&quot;&gt;&lt;span class=&quot;w&quot;&gt;  &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;dependencies&quot;&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
-    &lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&quot;express&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;latest&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
-    &lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&quot;body-parser&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;latest&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
-    &lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&quot;pg&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;latest&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
-    &lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&quot;pg-promise&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;latest&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
-  &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
-  &lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-
-&lt;p&gt;This installs the following libraries:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;express&lt;/code&gt;: Web framework&lt;/li&gt;
-  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;body-parser&lt;/code&gt;: For getting query data&lt;/li&gt;
-  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;pg&lt;/code&gt;: Postgres bindings&lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;pg-promise&lt;/code&gt;: Postgres bindings with better syntax&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;Run the command &lt;code class=&quot;highlighter-rouge&quot;&gt;npm install&lt;/code&gt;&lt;/li&gt;
-  &lt;li&gt;You’re now able to run your application. If you (at any time) need to add more dependencies, add them to the section you just created.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h3 id=&quot;set-up-the-application&quot;&gt;Set up the application&lt;/h3&gt;
-&lt;p&gt;The bridge application will do the actual work on parsing user input values, writing SQL, executing queries, receiving database output, and packaging it up for the client.  Everything will be done in JavaScript functions, and will live in &lt;code class=&quot;highlighter-rouge&quot;&gt;app.js&lt;/code&gt;. (If you write a complex service, or use a tool like &lt;a href=&quot;http://swagger.io/&quot;&gt;Swagger&lt;/a&gt;, you may put pieces of your code into different files.  Not now.) Key parts of this file include importing libraries, connecting to the database using your credentials, and writing function for each service endpoint (next section).&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;Create a file called &lt;code class=&quot;highlighter-rouge&quot;&gt;app.js&lt;/code&gt;&lt;/li&gt;
-  &lt;li&gt;Import the required modules (this part is a lot like python) by creating a new variable with its name:&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;    &lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;express&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;require&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'express'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-    &lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;Create a connection to the database.
-    &lt;ul&gt;
-      &lt;li&gt;For this, I like to use a function, so it can be reused. For example:&lt;/li&gt;
-    &lt;/ul&gt;
-  &lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;    &lt;span class=&quot;nx&quot;&gt;createDBConnection&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(){&lt;/span&gt;
-      &lt;span class=&quot;c1&quot;&gt;//returns a database connection&lt;/span&gt;
-        &lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;cn&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-        &lt;span class=&quot;na&quot;&gt;host&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;yourHost&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
-        &lt;span class=&quot;na&quot;&gt;port&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;5432&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;//default&lt;/span&gt;
-        &lt;span class=&quot;na&quot;&gt;database&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;yourDBName&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
-        &lt;span class=&quot;na&quot;&gt;user&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;yourUsername&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
-        &lt;span class=&quot;na&quot;&gt;password&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;yourPassword&lt;/span&gt;
-    &lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;
-    &lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;db&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;pgp&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;cn&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;//do the connection using pg-promise library&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;db&lt;/span&gt;
-    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-    &lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;Write endpoint functions.&lt;/li&gt;
-  &lt;li&gt;Start your application. Tell the server to listen for incoming client requests. I like to develop on ports 8000 and 8080.  Apache (web server) uses 80 (default in web browsers).&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;    &lt;span class=&quot;nx&quot;&gt;app&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;listen&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;8080&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-      &lt;span class=&quot;nx&quot;&gt;console&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;log&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'Started application.'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-  &lt;span class=&quot;p&quot;&gt;})&lt;/span&gt;
-    &lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-
-&lt;h3 id=&quot;writing-endpoint-functions&quot;&gt;Writing endpoint functions&lt;/h3&gt;
-&lt;ul&gt;
-  &lt;li&gt;In the body of your &lt;code class=&quot;highlighter-rouge&quot;&gt;app.js&lt;/code&gt; file, write a function for each endpoint you want to support. For now, we’ll just focus on &lt;code class=&quot;highlighter-rouge&quot;&gt;GET&lt;/code&gt; requests, but you can do other verbs as well (most importantly, you can add data to the database with &lt;code class=&quot;highlighter-rouge&quot;&gt;POST&lt;/code&gt; requests). Also, for now we’ll look at getting data from the query string, but you can also get data passed in via the body of the request if you want that too…&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;If we want to give a user a lost of the flights (day, time, departure city, arrival city, delay amount, we might want to have an endpoint called &lt;code class=&quot;highlighter-rouge&quot;&gt;flights&lt;/code&gt; that a user would access by going to &lt;code class=&quot;highlighter-rouge&quot;&gt;https://my.website.com/api/flights&lt;/code&gt;.  That way the user knows for sure she’s getting the flights.  It’s a good idea to organize your endpoints into logical groups of what they return.&lt;/p&gt;
-
-&lt;p&gt;However, our user might not want all the flights, rather she wants to query for those from or to a particular city, or to limit the number of results coming back from the database.&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;Start of by writing a function like this, for a &lt;code class=&quot;highlighter-rouge&quot;&gt;GET&lt;/code&gt; request to the &lt;code class=&quot;highlighter-rouge&quot;&gt;/flights&lt;/code&gt; service.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;  &lt;span class=&quot;nx&quot;&gt;app&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;get&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'/flights'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;req&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;res&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-    &lt;span class=&quot;c1&quot;&gt;//this function is the endpoint for the flight data&lt;/span&gt;
-
-    &lt;span class=&quot;c1&quot;&gt;//do step two here&lt;/span&gt;
-    &lt;span class=&quot;c1&quot;&gt;//do step three here&lt;/span&gt;
-    &lt;span class=&quot;c1&quot;&gt;//do step four here&lt;/span&gt;
-    &lt;span class=&quot;c1&quot;&gt;//do step five here&lt;/span&gt;
-  &lt;span class=&quot;p&quot;&gt;})&lt;/span&gt;
-
-  &lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;Inside of the function body, parse the user input – how are they searching or filtering:&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;  &lt;span class=&quot;c1&quot;&gt;//get query parameters&lt;/span&gt;
-  &lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;originCity&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;req&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;query&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;originCity&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;||&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;null&lt;/span&gt;
-  &lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-
-&lt;p&gt;Include one variable for each filter/query parameter/argument you want in your endpoint. This gives you the value of that parameter, if it’s in the query string, otherwise, you get a &lt;code class=&quot;highlighter-rouge&quot;&gt;null&lt;/code&gt;.&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;Write a SQL query, using the value other the parameter(s) given by the user. The SQL here is arbitrary – you can do anything you might want to do in PGAdmin or psql.  Joins, views, selects, deletes – it’s all on the table. Pass user parameter values in via the &lt;code class=&quot;highlighter-rouge&quot;&gt;${variableName}&lt;/code&gt; syntax, or see the &lt;a href=&quot;https://github.com/vitaly-t/pg-promise&quot;&gt;pg-promise&lt;/a&gt; library docs.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-sql&quot; data-lang=&quot;sql&quot;&gt;  &lt;span class=&quot;k&quot;&gt;sql&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;&quot;SELECT * FROM flightdelays &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;\&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;
-    WHERE 1=1
-    AND (${origin} IS NULL or flightdelays.origin = ${origin})&quot;&lt;/span&gt;
-  &lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-
-&lt;p&gt;This syntax ensures that all results will be given back to the user in the case that no origin city is specified, and is extremely helpful for API building.&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;Execute the query, using the pg-promise functions. This happens asynchronously, so be prepared. You can make an object with the query values first, if that helps you think through what you’re passing to the query.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;  &lt;span class=&quot;nx&quot;&gt;db&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;any&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;sql&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;origin&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;originCity&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;})&lt;/span&gt;
-    &lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;then&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;data&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;){&lt;/span&gt;
-      &lt;span class=&quot;c1&quot;&gt;//happens on success&lt;/span&gt;
-      &lt;span class=&quot;p&quot;&gt;})&lt;/span&gt;
-    &lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;catch&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;err&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;){&lt;/span&gt;
-      &lt;span class=&quot;c1&quot;&gt;//happens on error&lt;/span&gt;
-      &lt;span class=&quot;p&quot;&gt;})&lt;/span&gt;
-  &lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;Do any data conversions or other stuff you want. Then return the result as JSON. I like to include a timestamp, and a message that says the call succeeded.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;  &lt;span class=&quot;c1&quot;&gt;//return response to user&lt;/span&gt;
-  &lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;ts&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;Date&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;().&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;toJSON&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
-  &lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;resOut&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-    &lt;span class=&quot;s2&quot;&gt;&quot;success&quot;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
-    &lt;span class=&quot;s2&quot;&gt;&quot;timestamp&quot;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;ts&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
-    &lt;span class=&quot;na&quot;&gt;data&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;data&lt;/span&gt;
-  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-  &lt;span class=&quot;nx&quot;&gt;res&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;json&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;resOut&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;//finish request by sending data back to the user&lt;/span&gt;
-
-  &lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-
-&lt;h3 id=&quot;start-the-service&quot;&gt;Start the Service&lt;/h3&gt;
-&lt;p&gt;Now that you’ve built your awesome data service, you’ll need to start it. Here’s how:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;Open a new terminal/command line window&lt;/li&gt;
-  &lt;li&gt;Run the command &lt;code class=&quot;highlighter-rouge&quot;&gt;node app.js&lt;/code&gt;&lt;/li&gt;
-  &lt;li&gt;The server is running.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id=&quot;setting-up-the-client&quot;&gt;Setting up the Client&lt;/h2&gt;
-&lt;p&gt;The client can be set up as you would for any AJAX call. No special modifications are needed, you just need to know the names and data types of the values being passed in via the query string.&lt;/p&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;&lt;span class=&quot;nx&quot;&gt;$&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;ajax&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;localhost:8080&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-    &lt;span class=&quot;na&quot;&gt;data&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-      &lt;span class=&quot;na&quot;&gt;origin&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'PHX'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
-    &lt;span class=&quot;p&quot;&gt;},&lt;/span&gt;
-    &lt;span class=&quot;na&quot;&gt;success&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;data&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;){&lt;/span&gt;
-      &lt;span class=&quot;nx&quot;&gt;console&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;log&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;Got data!&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-      &lt;span class=&quot;nx&quot;&gt;console&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;log&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;data&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-    &lt;span class=&quot;p&quot;&gt;},&lt;/span&gt;
-    &lt;span class=&quot;nx&quot;&gt;error&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;status&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;xhr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;error&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;){&lt;/span&gt;
-      &lt;span class=&quot;nx&quot;&gt;console&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;log&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;xhr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;responseText&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-  &lt;span class=&quot;p&quot;&gt;})&lt;/span&gt;
-  &lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-
-&lt;h2 id=&quot;next-steps&quot;&gt;Next Steps:&lt;/h2&gt;
-&lt;p&gt;If you’ve made it this far, you might want to try some more challenging tasks, such as:&lt;/p&gt;
-
-&lt;ol&gt;
-  &lt;li&gt;Check out the annotated source in &lt;code class=&quot;highlighter-rouge&quot;&gt;app.js&lt;/code&gt;.&lt;/li&gt;
-  &lt;li&gt;Add a new query parameter to filter destination city.&lt;/li&gt;
-  &lt;li&gt;Add a new query parameter to include only those results that have more than a certain delay (in minutes).&lt;/li&gt;
-  &lt;li&gt;Add a new endpoint that lists the airports in the dataset and their states and cities.&lt;/li&gt;
-  &lt;li&gt;Add a new endpoint that summarizes the delays by airport.&lt;/li&gt;
-&lt;/ol&gt;
-</description>
-        <pubDate>Tue, 31 Jan 2017 11:00:00 -0600</pubDate>
-        <link>http://localhost:4000/research/education/teaching/2017/01/31/Creating-a-data-service.html</link>
-        <guid isPermaLink="true">http://localhost:4000/research/education/teaching/2017/01/31/Creating-a-data-service.html</guid>
-        
-        
-        <category>Research</category>
-        
-        <category>Education</category>
-        
-        <category>Teaching</category>
         
       </item>
     

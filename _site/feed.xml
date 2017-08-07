@@ -6,9 +6,58 @@
 </description>
     <link>http://localhost:4000/</link>
     <atom:link href="http://localhost:4000/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Sun, 06 Aug 2017 21:26:30 -0500</pubDate>
-    <lastBuildDate>Sun, 06 Aug 2017 21:26:30 -0500</lastBuildDate>
+    <pubDate>Sun, 06 Aug 2017 22:33:24 -0500</pubDate>
+    <lastBuildDate>Sun, 06 Aug 2017 22:33:24 -0500</lastBuildDate>
     <generator>Jekyll v3.5.1</generator>
+    
+      <item>
+        <title>Modeling species distributions using deep convolutional neural networks</title>
+        <description>&lt;p&gt;I’ve recently been tooling around with deep learning frameworks TensorFlow and Caffe. I’ve worked some toy examples, and I have been thinking about ways to apply this to the problem domains I am most familiar with, in particular biodiversity modeling or, recently, infectious disease modeling. I think I have found an interesting and novel application of CNNs to the problem of modeling species distributions. This post is a quick attempt to outline these thoughts. If they still make sense in a couple days, I will attempt to put a prototype together.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;&lt;em&gt;The Problem&lt;/em&gt;&lt;/strong&gt;: Make a prediction of species presence given climatic covariates. It’s been done many times in many ways, and as I note in my &lt;a href=&quot;http://localhost:4000/assets/FarleyThesis_FINAL.pdf&quot;&gt;thesis&lt;/a&gt;, is extremely widely used in both management and the academy. However, there are known shortcomings of existing techniques. One of the drawbacks that comes to mind is that traditional methods for SDM (random forest, logistic regression, etc) take in a &lt;em&gt;n&lt;/em&gt; x &lt;em&gt;p&lt;/em&gt; design matrix of training data. In particular, these models accept &lt;em&gt;n&lt;/em&gt; labeled examples of presence/absence and &lt;em&gt;p&lt;/em&gt; climatic covariates found at that location. The model has no information about the climatic conditions in surrounding areas. Therefore, it may fail to capture information about climatic transitions e.g., the species has a strong affinity for being located on a hot-&amp;gt;cold gradient. This is particularly important when fitting the models, as we often do, with outputs from a general circulation model, since the particular gridcell that the training example falls into may not be fully representative of the broader climatic patterns surrounding the site. Finally, it seems that this could be very valuable for predicting the distribution of animals and other mobile species (including pollen distributions), by characterizing spatial patterns in  climatic covariates in the regions surrounding that in which it has been found.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;&lt;em&gt;The Idea&lt;/em&gt;&lt;/strong&gt;: Turn the problem from site-by-site classification problem into a computer vision problem where each training example is an ‘image’ of the climatic space surrounding each observation with &lt;em&gt;p&lt;/em&gt; channels. In
+ this way, you’d be predicting whether or not the ‘image’ contained a species presence or not. The ‘image’ could be of configurable size, but I’m thinking it would be a 0.5 degree square box extending +/- 0.25 degrees from the location of the occurrence. If we’re working with a GCM output with 800 m^2 gridcells like the &lt;a href=&quot;https://www.nature.com/articles/sdata201648&quot;&gt;Lorenz et al&lt;/a&gt;, this box would contain several hundred gricells. If this box is our training data, we (1) get more information to feed to the classifier, and (2) get information about the configuration of how the climate space around a species presence (or absence) is arranged spatially. It’s a lot more data (in terms of training set bytes), and perhaps it would not be helpful (in terms of predictive accuracy), but it seems like it’d be a neat idea to try.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;&lt;em&gt;How would you do it?&lt;/em&gt;&lt;/strong&gt;: I’ve got a rough plan for doing this. This is &lt;a href=&quot;http://neotomadb.org&quot;&gt;Neotoma&lt;/a&gt;-centric, but I think you could do the same thing with GBIF – it’d just be a lot more data. You could do it with any species, but here, I’m thinking we could try on Spruce (&lt;em&gt;Picea&lt;/em&gt;) or Oak (&lt;em&gt;Quercus&lt;/em&gt;) – they each have many thousands of occurrences and are well distributed, so they’d be good to start out on.&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;
+    &lt;p&gt;Get the spatiotemporal location of all occurrences of terrestrial vascular species in Neotoma. Exclude aquatics, fungi, ostracodes, diatoms, and vertebrates. This would give us Latitude, Longitude, and Years BP for ~ 1 million observations. These are the negative training examples (P=0)&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Get the spatiotemporal location of all occurences of the species of interest in Neotoma (e.g., &lt;em&gt;Quercus&lt;/em&gt;). You’d have to do a bit of work to make sure that the set from (1) didn’t overlap with this set, but that’s no problem. These are the positive training examples (P=1).&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;For both positive and negative examples, download the climate space in a box extending 0.25 degrees N/S/E/W of the documented observation, for the given time period. For example, if this occurrence happened at 2000 years BP at latitude 0 longitude 0, download all 800 meter grid cells from the 2000 years BP climatic predictor layers extending [-0.25W, 0.25E] and [0.25N, -0.25S]. This is a perfect application of my &lt;a href=&quot;http://grad.geography.wisc.edu/cds&quot;&gt;Climate Data Service&lt;/a&gt;. It would need another endpoint, but if I recall correctly, I already wrote the logic for serving arbitrary bounding boxes when making custom png tiles. If this was incorporated in the service, all you’d have to do would be (1) calculate the BBox from spatial position and (2) hit the CDS (3) parse the results to a &lt;em&gt;p&lt;/em&gt;-dimension numpy array. Some resizing or zero padding might need to be done to ensure that every example is exactly the same dimensions.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Define and train a deep convolutional network. This would seem to be the hard part, but with frameworks like Caffe and TensorFlow, I believe this could be accomplished relatively easily. I believe we could have ~1-1.5 million training examples with which to build the network, a reasonable size to train a CNN from scratch. The output layer would have two classes (0: species not present, 1: species present).&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Of course, we’d have a validation set on which we could evaluate accuracy on different hyperparameter values, etc.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;&lt;em&gt;Prediction&lt;/em&gt;: Prediction with this algorithm might get a little messy. Prediction for a single location would, of course, be very easy. It would require picking a lat/long, calculating the bounding box, getting the climate snapshot, and then applying the model. It would get trickier if you wanted to apply the model to get spatial predictions, e.g., a range map. I haven’t done much looking at things like Generative Adversarial Models, but perhaps they could be of use here, in generating range maps given input snapshots. A brute force attempt, however, would be possible. Define a two dimensional grid of lat/lngs, spaced at 800 meter intervals (or whatever resolution you used in training). For every grid cell, perform the steps above to get a prediction. That prediction would use data from the corresponding cells, but would only apply directly to point in the center of the bounding box. Iterate over every point in the grid. Then use an interpolation algorithm to smooth the point-estimates into a range map.&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;I think this could be pretty interesting. Of course, CNNs are notorious for being black boxes – you don’t know what they’re doing, which often doesn’t sit well with ecologists. And ecological data is messy. And, this might be fundamentally flawed – perhaps including the surrounding climate will lead to worse predictions! But if it did improve predictions, it would be a novel application of deep learning and cutting-edge computer vision techniques to the ecological domain.&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;Side Note: ForestNet&lt;/em&gt;: It takes a lot to train a CNN from scratch with random initialization. It seems as though using pre-initialized models often lead to better (and definitely faster) predictions, particularly if the new dataset is rather small. If the technique described above works, it seems possible to build a general &lt;code class=&quot;highlighter-rouge&quot;&gt;ForestNet&lt;/code&gt; that could be used (1) as a land cover prediction and (2) be used to initialize weights for future models. Here’s what I’m thinking:&lt;/p&gt;
+
+&lt;p&gt;ForestNet would be trained using the process described above. However, instead of an individual species of interest (e.g., Oak) it would include an ecosystem of interest (in this case, Forest). The positive examples would be sites in which one or more (or &lt;em&gt;n&amp;gt;q&lt;/em&gt;, where q is some threshold) forest-type species were present. The negative examples would be those sites where zero (or &lt;em&gt;n&amp;lt;q&lt;/em&gt;, where q is some threshold) forst-types were found. The training would proceed as above. The resulting classifier would be general, and could be used to predict the presence or absence of a forest (or other ecosystem type). Once a trained network was available, future species-specific networks could be made by initializing a network with the &lt;code class=&quot;highlighter-rouge&quot;&gt;ForestNet&lt;/code&gt; weights, and then fine-tuning the network to predict the specific species.&lt;/p&gt;
+</description>
+        <pubDate>Sat, 05 Aug 2017 11:22:52 -0500</pubDate>
+        <link>http://localhost:4000/research/ide/2017/08/05/sdms-with-cnn.html</link>
+        <guid isPermaLink="true">http://localhost:4000/research/ide/2017/08/05/sdms-with-cnn.html</guid>
+        
+        
+        <category>research</category>
+        
+        <category>ide</category>
+        
+      </item>
     
       <item>
         <title>Cats and Dogs: Experimenting with Deep Learning</title>
@@ -573,34 +622,6 @@ You want to make a map of confirmed cases of Zika virus that have occurred in th
         <category>cartography</category>
         
         <category>coding</category>
-        
-      </item>
-    
-      <item>
-        <title>Converting NetCDF to Raster</title>
-        <description>&lt;p&gt;Sometimes, especially when working with climate data, it is necessary to work with NetCDFs (Network Common Data Format – standard data packaging for scientific data).  While NetCDF is good for data distribution, storage, and provenance, it is less good for working into standard raster data processing workflows. If you’re used to working with Tiffs or JPEGs, the following command might be helpful, assuming you have gdal installed on your machine.&lt;/p&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;c&quot;&gt;# convert the specified dimension to Raster&lt;/span&gt;
-gdal_translate NETCDF:[PATH_TO_NC_FILE]:[DIMENSION_OF_INTEREST] -of &lt;span class=&quot;s2&quot;&gt;&quot;[FORMAT_DESIRED]&quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;OUTPUT_FILE_NAME]&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-
-&lt;p&gt;This will create an N-banded raster with one band for each time dimension related in your dataset.&lt;/p&gt;
-
-&lt;p&gt;For example, to convert a netcdf file called &lt;code class=&quot;highlighter-rouge&quot;&gt;trace.01-36.22000BP.csim.aice.22000BP_decavg_400BCE.nc&lt;/code&gt; (climate data from the SynTrace paleoclimate experiment) using the dimension &lt;code class=&quot;highlighter-rouge&quot;&gt;aice&lt;/code&gt; (area of gridcell covered in glacier) to a tiff (&lt;code class=&quot;highlighter-rouge&quot;&gt;GTiff&lt;/code&gt;), I might enter:&lt;/p&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;gdal_translate NETCDF:trace.01-36.22000BP.csim.aice.22000BP_decavg_400BCE.nc:aice -of &lt;span class=&quot;s2&quot;&gt;&quot;GTiff&quot;&lt;/span&gt; aice.tif&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-
-&lt;p&gt;This creates a 2204 band raster representing ice area in the tiff format. Super handy for then converting into a format to be digested by a web application.&lt;/p&gt;
-</description>
-        <pubDate>Sun, 05 Feb 2017 11:00:00 -0600</pubDate>
-        <link>http://localhost:4000/research/data/cartography/2017/02/05/Converting-Netcdf-To-Raster.html</link>
-        <guid isPermaLink="true">http://localhost:4000/research/data/cartography/2017/02/05/Converting-Netcdf-To-Raster.html</guid>
-        
-        
-        <category>Research</category>
-        
-        <category>Data</category>
-        
-        <category>Cartography</category>
         
       </item>
     

@@ -1,9 +1,53 @@
-<footer  >
-  <ul class='list-inline'>
-      <li class='no-bullet'><span class='glyphicon glyphicon-earphone text-muted'></span><strong class='contact-detail small'>  <a href='tel:626-264-0741'>626.264.0741</a></strong></li>
-      <li class='no-bullet'><span class='glyphicon glyphicon-envelope text-muted'></span><strong class='contact-detail small'>  <a href="mailto:sfarley2@wisc.edu">sfarley@wisc.edu</a></strong></li>
-      <li class='no-bullet'><span class='glyphicon glyphicon-menu-right text-muted'></span><strong class='contact-detail small'><a href='http://twitter.com/scottsfarley93'> @scottsfarley93</a></strong></li>
-      <li class='no-bullet'><span class='glyphicon glyphicon-menu-right text-muted'></span><strong class='contact-detail small'><a href='http://github.com/scottsfarley93'>  GitHub</a></strong></li>
-      <li class='no-bullet'><span class='glyphicon glyphicon-menu-right text-muted'></span><strong class='contact-detail small'><a href='https://www.linkedin.com/in/scott-farley-25902581'>  LinkedIn</a></strong></li>
-</ul>
-</footer>
+
+<!-- Footer -->
+<div class='align-center'>
+	<footer id="footer" class='pt24 align-center'>
+		<div class="inner">
+			<ul class="icons">
+				{% if site.twitter_url %}
+				<li><a href="{{ site.twitter_url }}" class="icon alt fa-twitter" target="_blank"><span class="label">Twitter</span></a></li>
+				{% endif %}
+				{% if site.googleplus_url %}
+				<li><a href="{{ site.googleplus_url }}" class="icon alt fa-google-plus" target="_blank"><span class="label">Google+</span></a></li>
+				{% endif %}
+				{% if site.facebook_url %}
+				<li><a href="{{ site.facebook_url }}" class="icon alt fa-facebook" target="_blank"><span class="label">Facebook</span></a></li>
+				{% endif %}
+				{% if site.instagram_url %}
+				<li><a href="{{ site.instagram_url }}" class="icon alt fa-instagram" target="_blank"><span class="label">Instagram</span></a></li>
+				{% endif %}
+				{% if site.pinterest_url %}
+				<li><a href="{{ site.pinterest_url }}" class="icon alt fa-pinterest" target="_blank"><span class="label">Pinterest</span></a></li>
+				{% endif %}
+				{% if site.500px_url %}
+				<li><a href="{{ site.500px_url }}" class="icon alt fa-500px" target="_blank"><span class="label">500px</span></a></li>
+				{% endif %}
+				{% if site.gitlab_url %}
+				<li><a href="{{ site.gitlab_url }}" class="icon alt fa-gitlab" target="_blank"><span class="label">GitLab</span></a></li>
+				{% endif %}
+				{% if site.github_url %}
+				<li><a href="{{ site.github_url }}" class="icon alt fa-github" target="_blank"><span class="label">GitHub</span></a></li>
+				{% endif %}
+				{% if site.slack_url %}
+				<li><a href="{{ site.slack_url }}" class="icon alt fa-slack" target="_blank"><span class="label">Slack</span></a></li>
+				{% endif %}
+				{% if site.linkedin_url %}
+				<li><a href="{{ site.linkedin_url }}" class="icon alt fa-linkedin" target="_blank"><span class="label">LinkedIn</span></a></li>
+				{% endif %}
+			</ul>
+			<ul class="copyright mb0">
+				<li>&copy; {{ site.title }} {{ site.subtitle }}</li>
+			</ul>
+		</div>
+	</footer>
+
+</div>
+
+<!-- Scripts -->
+	<script src="{{ "assets/js/jquery.min.js" | absolute_url }}"></script>
+	<script src="{{ "assets/js/jquery.scrolly.min.js" | absolute_url }}"></script>
+	<script src="{{ "assets/js/jquery.scrollex.min.js" | absolute_url }}"></script>
+	<script src="{{ "assets/js/skel.min.js" | absolute_url }}"></script>
+	<script src="{{ "assets/js/util.js" | absolute_url }}"></script>
+	<!--[if lte IE 8]><script src="{{ "assets/js/ie/respond.min.js" | absolute_url }}"></script><![endif]-->
+	<script src="{{ "assets/js/main.js" | absolute_url }}"></script>

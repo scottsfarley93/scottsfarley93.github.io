@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<!--
+	Forty by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+
+<head>
+	<title>Scott Farley</title>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+	<!--[if lte IE 8]><script src="/assets/js/ie/html5shiv.js"></script><![endif]-->
+	<link href="https://api.mapbox.com/mapbox-assembly/v0.19.0/assembly.min.css" rel="stylesheet">
+	<link href="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/default-skin/default-skin.min.css" rel="stylhesheet">
+	<script src='https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/photoswipe.min.js'></script>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/photoswipe.min.css">
+	<link rel='stylesheet' href="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/photoswipe-ui-default.min.js">
+	<link rel="stylesheet" href="/assets/css/main.css" />
+	<link rel='stylesheet' href="/assets/css/highlight.css" />
+	<!--[if lte IE 9]><link rel="stylesheet" href="/assets/css/ie9.css" /><![endif]-->
+	<!--[if lte IE 8]><link rel="stylesheet" href="/assets/css/ie8.css" /><![endif]-->
+	<script src="https://unpkg.com/masonry-layout@4/dist/masonry.pkgd.min.js"></script>
+	<link rel='stylesheet' href="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.10.0/css/lightbox.min.css"/>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.10.0/js/lightbox-plus-jquery.min.js"></script>
+	<link rel='stylesheet' href="/assets/css/photography.css" />
+</head>
+
+
+<body>
+
+    <!-- Wrapper -->
+<div id="wrapper">
+
+<!-- Header -->
+<!-- <header id="header">
+	<a href="/" class="logo"><strong>Scott Farley</strong> <span></span></a>
+	<nav>
+		<a href="#menu">Menu</a>
+	</nav>
+</header> -->
+
+<!-- Menu -->
+<!-- <nav id="menu">
+	<ul class="links">
+        
+		    
+		
+		    
+		        <li><a href="/"></a></li>
+	    	
+		
+		    
+		
+		    
+		
+		
+		    
+		        <li><a href="/blog.html">Blog</a></li>
+		    
+		
+		    
+		
+		    
+		
+		    
+		        <li><a href="/photography.html">Photgraphy</a></li>
+		    
+		
+	</ul>
+</nav> -->
+ 
+    
+    
+<!-- Main -->
+<div id="main" class="alt">
+
+<!-- One -->
+<section id="one">
+	<div class="inner">
+		<header class="major">
+			<h1>Scenery-based routing: A deep learning approach</h1>
+		</header>
+		
+		<p><style>
+  .blogImg{
+    width: 50%;
+  }
+</style>
+
+<p>Here’s an idea I’ve been tossing around in my head for a awhile now that I want to get out there.</p>
+
+<p><em>Scenario</em>: You’ve got a bit of extra time on your commute, or road trip, or other driving-based activity. Your ultimate goal is to get from point A to point B, but you’d like to maximize the level of scenic-ness on your drive. In other words, you’d prefer to drive on nice, pretty roads rather than ugly, boring roads.</p>
+
+<p><img class="blogImg" src="/assets/scenic.jpg" />
+<br />
+<strong>Drive on this</strong></p>
+
+<p><img class="blogImg" src="/assets/ugly.jpg" />
+<br />
+<strong>Not on this</strong></p>
+
+<p>The idea is to populate a road graph with edge weights that represent the <code class="highlighter-rouge">scenic-ness score</code> of that segment of road. If we had that, then we could calculate shortest path algorithms that maximize time spent on beautiful scenic byways.</p>
+
+<p>Here’s how I am thinking about going about it:</p>
+
+<ol>
+  <li>
+    <p>Obtain street-level imagery from road segments using <code class="highlighter-rouge">Mapillary</code> or similar service.</p>
+  </li>
+  <li>
+    <p>Use image classification to rank each street-level images on its <code class="highlighter-rouge">scenic-ness</code>. Using images from officially designated scenic highways as positive training examples and images from urban areas or freeways as negative examples, we obtain the degree of similarity to a scenic road.</p>
+  </li>
+  <li>
+    <p>Average the scenic-ness scores for each image and associate this metric with each segment geometry.</p>
+  </li>
+  <li>
+    <p>Load up the new segments with their scores to <code class="highlighter-rouge">pg-routing</code> engine.</p>
+  </li>
+  <li>
+    <p>Route based on scenic-ness.</p>
+  </li>
+</ol>
+
+<p>More specifically:</p>
+
+<ol>
+  <li>We already know that some roads are more scenic than others, because they’ve been officially designated as such. According to the California Department of Transportation:</li>
+</ol>
+
+<blockquote>
+  <p>A highway may be designated scenic depending upon how much of the natural landscape can be seen by travelers, the scenic quality of the landscape, and the extent to which development intrudes upon the traveler’s enjoyment of the view. <a href="http://www.dot.ca.gov/design/lap/livability/scenic-highways/faq.html">link</a></p>
+</blockquote>
+
+<p>Therefore, we know that road segments that are labeled by the state as scenic highways should score very highly on the scenic-ness metric <code class="highlighter-rouge">scenic=1</code>.</p>
+
+<p>We can get the locations of the scenic highways <a href="https://gist.github.com/scottsfarley93/61ec24b2378b3708c4669dde671b593b">here</a>.</p>
+
+<p>We can get other roads from a source like <a href="https://catalog.data.gov/dataset/tiger-line-shapefile-2013-state-california-primary-and-secondary-roads-state-based-shapefile">TIGER</a>.</p>
+
+<ol>
+  <li>Obtain images of the roads. We’ll use street-level imagery taken along each route to estimate scenic-ness. From along each segment of road, randomly sample <em>N</em> positions along the line. Using the Mapillary A</li>
+</ol>
+</p>
+	</div>
+</section>
+
+</div>
+
+    
+<!-- Footer -->
+<div class='align-center'>
+	<footer id="footer" class='pt24 align-center'>
+		<div class="inner">
+			<ul class="icons">
+				
+				<li><a href="https://twitter.com/scottsfarley93" class="icon alt fa-twitter" target="_blank"><span class="label">Twitter</span></a></li>
+				
+				
+				
+				
+				<li><a href="https://www.instagram.com/scottsfarley/" class="icon alt fa-instagram" target="_blank"><span class="label">Instagram</span></a></li>
+				
+				
+				
+				
+				
+				<li><a href="http://github.com/scottsfarley93" class="icon alt fa-github" target="_blank"><span class="label">GitHub</span></a></li>
+				
+				
+				
+				<li><a href="https://www.linkedin.com/in/scott-farley-25902581" class="icon alt fa-linkedin" target="_blank"><span class="label">LinkedIn</span></a></li>
+				
+			</ul>
+			<ul class="copyright mb0">
+				<li>&copy; Scott Farley </li>
+			</ul>
+		</div>
+	</footer>
+
+</div>
+
+<!-- Scripts -->
+	<script src="/assets/js/jquery.min.js"></script>
+	<script src="/assets/js/jquery.scrolly.min.js"></script>
+	<script src="/assets/js/jquery.scrollex.min.js"></script>
+	<script src="/assets/js/skel.min.js"></script>
+	<script src="/assets/js/util.js"></script>
+	<!--[if lte IE 8]><script src="/assets/js/ie/respond.min.js"></script><![endif]-->
+	<script src="/assets/js/main.js"></script>
+
+
+</body>
+
+</html>

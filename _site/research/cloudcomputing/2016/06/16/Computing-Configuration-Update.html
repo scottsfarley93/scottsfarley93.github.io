@@ -1,88 +1,88 @@
 <!DOCTYPE html>
+<!--
+	Forty by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
 <html>
 
-  <head>
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-
-  <title>Automating my workflow: Building a (somewhat) distributed and (moderately) fault-tolerant system</title>
-  <meta name="description" content="I’ve made significant progress in getting a couple of Google’s computers to do my bidding (aka my thesis), in an automated way, so I thought I would share my...">
-
-  <link rel="stylesheet" href="/css/main.css">
-  <link rel="canonical" href="http://localhost:4000/research/cloudcomputing/2016/06/16/Computing-Configuration-Update.html">
-  <link rel="alternate" type="application/rss+xml" title="Scott Sherwin Farley" href="http://localhost:4000/feed.xml">
-
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <meta name='viewport' content='width=device-width, initial-scale=1'/>
-    <meta name='keywords' content="maps, cartography"/>
-    <!---Links--->
-    <!-- Latest compiled and minified CSS -->
-		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-
-<!-- Optional theme -->
-		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
-    <link rel="stylesheet" href='http://localhost:4000/css/cv.css'>
-    <link rel="stylesheet" href='http://localhost:4000/css/style.css'>
-    <style>
-    	footer{
-    		text-align:center;
-    	}
-    </style>
-    <script>
-    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-    })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
-
-    ga('create', 'UA-83006302-2', 'auto');
-    ga('send', 'pageview');
-  </script>
-
-  <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha256-/SIrNqv8h6QGKDuNoLGA4iret+kyesCkHGzVUUV0shc=" crossorigin="anonymous"></script>
-<!-- Latest compiled and minified JavaScript -->
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
-
-
+<head>
+	<title>Scott Farley</title>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+	<!--[if lte IE 8]><script src="/assets/js/ie/html5shiv.js"></script><![endif]-->
+	<link href="https://api.mapbox.com/mapbox-assembly/v0.19.0/assembly.min.css" rel="stylesheet">
+	<link href="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/default-skin/default-skin.min.css" rel="stylhesheet">
+	<script src='https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/photoswipe.min.js'></script>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/photoswipe.min.css">
+	<link rel='stylesheet' href="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/photoswipe-ui-default.min.js">
+	<link rel="stylesheet" href="/assets/css/main.css" />
+	<link rel='stylesheet' href="/assets/css/highlight.css" />
+	<!--[if lte IE 9]><link rel="stylesheet" href="/assets/css/ie9.css" /><![endif]-->
+	<!--[if lte IE 8]><link rel="stylesheet" href="/assets/css/ie8.css" /><![endif]-->
+	<script src="https://unpkg.com/masonry-layout@4/dist/masonry.pkgd.min.js"></script>
+	<link rel='stylesheet' href="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.10.0/css/lightbox.min.css"/>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.10.0/js/lightbox-plus-jquery.min.js"></script>
+	<link rel='stylesheet' href="/assets/css/photography.css" />
 </head>
 
 
-  <body>
+<body>
 
+    <!-- Wrapper -->
+<div id="wrapper">
+
+<!-- Header -->
+<!-- <header id="header">
+	<a href="/" class="logo"><strong>Scott Farley</strong> <span></span></a>
+	<nav>
+		<a href="#menu">Menu</a>
+	</nav>
+</header> -->
+
+<!-- Menu -->
+<!-- <nav id="menu">
+	<ul class="links">
+        
+		    
+		
+		    
+		        <li><a href="/"></a></li>
+	    	
+		
+		    
+		
+		    
+		
+		
+		    
+		        <li><a href="/blog.html">Blog</a></li>
+		    
+		
+		    
+		
+		    
+		
+		    
+		        <li><a href="/photography.html">Photgraphy</a></li>
+		    
+		
+	</ul>
+</nav> -->
+ 
     
+    
+<!-- Main -->
+<div id="main" class="alt">
 
-
-<nav class="navbar navbar-default navbar-static-top">
-<div class="container">
-<div class="navbar-header">
-  <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
-    <span class="sr-only">Toggle navigation</span>
-    <span class="icon-bar"></span>
-    <span class="icon-bar"></span>
-    <span class="icon-bar"></span>
-  </button>
-  <a class="navbar-brand" href="http://localhost:4000/index.html">Scott Farley</a>
-</div>
-<div id="navbar" class="navbar-collapse collapse">
-  <ul class="nav navbar-nav navbar-right">
-    <li><a href="http://localhost:4000/index.html">Home</a></li>
-    <li><a href="http://localhost:4000/cv.html">CV</a></li>
-    <li><a href="http://localhost:4000/index.html#blog">Blog</a></li>
-</div><!--/.nav-collapse -->
-</div>
-</nav>
-
-
-    <div class="page-content">
-      <div class="wrapper">
-        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
-
-  <header class="post-header">
-    <h1 class="post-title" itemprop="name headline">Automating my workflow: Building a (somewhat) distributed and (moderately) fault-tolerant system</h1>
-    <p class="post-meta"><time datetime="2016-06-16T08:22:52-05:00" itemprop="datePublished">Jun 16, 2016</time></p>
-  </header>
-
-  <div class="post-content" itemprop="articleBody">
-    <p>I’ve made significant progress in getting a couple of Google’s computers to do my bidding (aka my thesis), in an automated way, so I thought I would share my experience setting up my cluster, and, specifically, the configuration of computing nodes and database/control nodes.  My setup draws on a bit on the design of larger systems like Hadoop, which create frameworks for massively large and distributed fault-tolerant systems.  In short, I have one Master Node that hosts a database and a control script, and a pool of compute nodes that are fault-tolerant and designed only for computing.  The compute nodes don’t have to know anything about the progress of the entire project and can handle being shut down mid-run, and the control node doesn’t have to know anything about the simulations being computed.</p>
+<!-- One -->
+<section id="one">
+	<div class="inner">
+		<header class="major">
+			<h1>Automating my workflow: Building a (somewhat) distributed and (moderately) fault-tolerant system</h1>
+		</header>
+		
+		<p><p>I’ve made significant progress in getting a couple of Google’s computers to do my bidding (aka my thesis), in an automated way, so I thought I would share my experience setting up my cluster, and, specifically, the configuration of computing nodes and database/control nodes.  My setup draws on a bit on the design of larger systems like Hadoop, which create frameworks for massively large and distributed fault-tolerant systems.  In short, I have one Master Node that hosts a database and a control script, and a pool of compute nodes that are fault-tolerant and designed only for computing.  The compute nodes don’t have to know anything about the progress of the entire project and can handle being shut down mid-run, and the control node doesn’t have to know anything about the simulations being computed.</p>
 
 <h3 id="requirements">Requirements:</h3>
 <ol>
@@ -153,28 +153,55 @@
 
 <h3 id="conclusion">Conclusion</h3>
 <p>This method so far works pretty well.  Sometimes, the shutdown scripts don’t actually fire (there are known bugs), and so I have one or two experiments that are continuously marked as “STARTED”.  This is a problem for the MasterNode, because the database will continuously report something link 99.75% complete, but will never reach 100%.  When this happens, I need to go in and manually mark the session as closed and the experiments as INTERRUPTED, and then the normal flow of execution can continue.  So I have to remain watchful, but I don’t have to do everything.</p>
+</p>
+	</div>
+</section>
 
-  </div>
+</div>
 
-</article>
-<script type="text/javascript"
-    src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
-</script>
+    
+<!-- Footer -->
+<div class='align-center'>
+	<footer id="footer" class='pt24 align-center'>
+		<div class="inner">
+			<ul class="icons">
+				
+				<li><a href="https://twitter.com/scottsfarley93" class="icon alt fa-twitter" target="_blank"><span class="label">Twitter</span></a></li>
+				
+				
+				
+				
+				<li><a href="https://www.instagram.com/scottsfarley/" class="icon alt fa-instagram" target="_blank"><span class="label">Instagram</span></a></li>
+				
+				
+				
+				
+				
+				<li><a href="http://github.com/scottsfarley93" class="icon alt fa-github" target="_blank"><span class="label">GitHub</span></a></li>
+				
+				
+				
+				<li><a href="https://www.linkedin.com/in/scott-farley-25902581" class="icon alt fa-linkedin" target="_blank"><span class="label">LinkedIn</span></a></li>
+				
+			</ul>
+			<ul class="copyright mb0">
+				<li>&copy; Scott Farley </li>
+			</ul>
+		</div>
+	</footer>
 
-      </div>
-    </div>
+</div>
 
-    <footer  >
-  <ul class='list-inline'>
-      <li class='no-bullet'><span class='glyphicon glyphicon-earphone text-muted'></span><strong class='contact-detail small'>  <a href='tel:626-264-0741'>626.264.0741</a></strong></li>
-      <li class='no-bullet'><span class='glyphicon glyphicon-envelope text-muted'></span><strong class='contact-detail small'>  <a href="mailto:sfarley2@wisc.edu">sfarley@wisc.edu</a></strong></li>
-      <li class='no-bullet'><span class='glyphicon glyphicon-menu-right text-muted'></span><strong class='contact-detail small'><a href='http://twitter.com/scottsfarley93'> @scottsfarley93</a></strong></li>
-      <li class='no-bullet'><span class='glyphicon glyphicon-menu-right text-muted'></span><strong class='contact-detail small'><a href='http://github.com/scottsfarley93'>  GitHub</a></strong></li>
-      <li class='no-bullet'><span class='glyphicon glyphicon-menu-right text-muted'></span><strong class='contact-detail small'><a href='https://www.linkedin.com/in/scott-farley-25902581'>  LinkedIn</a></strong></li>
-</ul>
-</footer>
+<!-- Scripts -->
+	<script src="/assets/js/jquery.min.js"></script>
+	<script src="/assets/js/jquery.scrolly.min.js"></script>
+	<script src="/assets/js/jquery.scrollex.min.js"></script>
+	<script src="/assets/js/skel.min.js"></script>
+	<script src="/assets/js/util.js"></script>
+	<!--[if lte IE 8]><script src="/assets/js/ie/respond.min.js"></script><![endif]-->
+	<script src="/assets/js/main.js"></script>
 
 
-  </body>
+</body>
 
 </html>

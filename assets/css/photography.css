@@ -1,0 +1,12 @@
+/*.grid-item { width: 200px; }
+.grid-item--width2 { width: 400px; }*/
+
+.grid-item{
+  max-width: 320px !important;
+  height: auto !important;
+  margin: 0px;
+}
+
+body{
+  /*background-color: red!important;*/
+}

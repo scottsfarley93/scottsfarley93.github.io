@@ -1,90 +1,90 @@
 <!DOCTYPE html>
+<!--
+	Forty by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
 <html>
 
-  <head>
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-
-  <title>Modeling species distributions using deep convolutional neural networks</title>
-  <meta name="description" content="I’ve recently been tooling around with deep learning frameworks TensorFlow and Caffe. I’ve worked some toy examples, and I have been thinking about ways to a...">
-
-  <link rel="stylesheet" href="/css/main.css">
-  <link rel="canonical" href="http://localhost:4000/research/ide/2017/08/05/sdms-with-cnn.html">
-  <link rel="alternate" type="application/rss+xml" title="Scott Sherwin Farley" href="http://localhost:4000/feed.xml">
-
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <meta name='viewport' content='width=device-width, initial-scale=1'/>
-    <meta name='keywords' content="maps, cartography"/>
-    <!---Links--->
-    <!-- Latest compiled and minified CSS -->
-		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-
-<!-- Optional theme -->
-		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
-    <link rel="stylesheet" href='http://localhost:4000/css/cv.css'>
-    <link rel="stylesheet" href='http://localhost:4000/css/style.css'>
-    <style>
-    	footer{
-    		text-align:center;
-    	}
-    </style>
-    <script>
-    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-    })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
-
-    ga('create', 'UA-83006302-2', 'auto');
-    ga('send', 'pageview');
-  </script>
-
-  <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha256-/SIrNqv8h6QGKDuNoLGA4iret+kyesCkHGzVUUV0shc=" crossorigin="anonymous"></script>
-<!-- Latest compiled and minified JavaScript -->
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
-
-
+<head>
+	<title>Scott Farley</title>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+	<!--[if lte IE 8]><script src="/assets/js/ie/html5shiv.js"></script><![endif]-->
+	<link href="https://api.mapbox.com/mapbox-assembly/v0.19.0/assembly.min.css" rel="stylesheet">
+	<link href="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/default-skin/default-skin.min.css" rel="stylhesheet">
+	<script src='https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/photoswipe.min.js'></script>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/photoswipe.min.css">
+	<link rel='stylesheet' href="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/photoswipe-ui-default.min.js">
+	<link rel="stylesheet" href="/assets/css/main.css" />
+	<link rel='stylesheet' href="/assets/css/highlight.css" />
+	<!--[if lte IE 9]><link rel="stylesheet" href="/assets/css/ie9.css" /><![endif]-->
+	<!--[if lte IE 8]><link rel="stylesheet" href="/assets/css/ie8.css" /><![endif]-->
+	<script src="https://unpkg.com/masonry-layout@4/dist/masonry.pkgd.min.js"></script>
+	<link rel='stylesheet' href="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.10.0/css/lightbox.min.css"/>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.10.0/js/lightbox-plus-jquery.min.js"></script>
+	<link rel='stylesheet' href="/assets/css/photography.css" />
 </head>
 
 
-  <body>
+<body>
 
+    <!-- Wrapper -->
+<div id="wrapper">
+
+<!-- Header -->
+<!-- <header id="header">
+	<a href="/" class="logo"><strong>Scott Farley</strong> <span></span></a>
+	<nav>
+		<a href="#menu">Menu</a>
+	</nav>
+</header> -->
+
+<!-- Menu -->
+<!-- <nav id="menu">
+	<ul class="links">
+        
+		    
+		
+		    
+		        <li><a href="/"></a></li>
+	    	
+		
+		    
+		
+		    
+		
+		
+		    
+		        <li><a href="/blog.html">Blog</a></li>
+		    
+		
+		    
+		
+		    
+		
+		    
+		        <li><a href="/photography.html">Photgraphy</a></li>
+		    
+		
+	</ul>
+</nav> -->
+ 
     
+    
+<!-- Main -->
+<div id="main" class="alt">
 
+<!-- One -->
+<section id="one">
+	<div class="inner">
+		<header class="major">
+			<h1>Modeling species distributions using deep convolutional neural networks</h1>
+		</header>
+		
+		<p><p>I’ve recently been tooling around with deep learning frameworks TensorFlow and Caffe. I’ve worked some toy examples, and I have been thinking about ways to apply this to the problem domains I am most familiar with, in particular biodiversity modeling or, recently, infectious disease modeling. I think I have found an interesting and novel application of CNNs to the problem of modeling species distributions. This post is a quick attempt to outline these thoughts. If they still make sense in a couple days, I will attempt to put a prototype together.</p>
 
-<nav class="navbar navbar-default navbar-static-top">
-<div class="container">
-<div class="navbar-header">
-  <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
-    <span class="sr-only">Toggle navigation</span>
-    <span class="icon-bar"></span>
-    <span class="icon-bar"></span>
-    <span class="icon-bar"></span>
-  </button>
-  <a class="navbar-brand" href="http://localhost:4000/index.html">Scott Farley</a>
-</div>
-<div id="navbar" class="navbar-collapse collapse">
-  <ul class="nav navbar-nav navbar-right">
-    <li><a href="http://localhost:4000/index.html">Home</a></li>
-    <li><a href="http://localhost:4000/cv.html">CV</a></li>
-    <li><a href="http://localhost:4000/index.html#blog">Blog</a></li>
-</div><!--/.nav-collapse -->
-</div>
-</nav>
-
-
-    <div class="page-content">
-      <div class="wrapper">
-        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
-
-  <header class="post-header">
-    <h1 class="post-title" itemprop="name headline">Modeling species distributions using deep convolutional neural networks</h1>
-    <p class="post-meta"><time datetime="2017-08-05T11:22:52-05:00" itemprop="datePublished">Aug 5, 2017</time></p>
-  </header>
-
-  <div class="post-content" itemprop="articleBody">
-    <p>I’ve recently been tooling around with deep learning frameworks TensorFlow and Caffe. I’ve worked some toy examples, and I have been thinking about ways to apply this to the problem domains I am most familiar with, in particular biodiversity modeling or, recently, infectious disease modeling. I think I have found an interesting and novel application of CNNs to the problem of modeling species distributions. This post is a quick attempt to outline these thoughts. If they still make sense in a couple days, I will attempt to put a prototype together.</p>
-
-<p><strong><em>The Problem</em></strong>: Make a prediction of species presence given climatic covariates. It’s been done many times in many ways, and as I note in my <a href="http://localhost:4000/assets/FarleyThesis_FINAL.pdf">thesis</a>, is extremely widely used in both management and the academy. However, there are known shortcomings of existing techniques. One of the drawbacks that comes to mind is that traditional methods for SDM (random forest, logistic regression, etc) take in a <em>n</em> x <em>p</em> design matrix of training data. In particular, these models accept <em>n</em> labeled examples of presence/absence and <em>p</em> climatic covariates found at that location. The model has no information about the climatic conditions in surrounding areas. Therefore, it may fail to capture information about climatic transitions e.g., the species has a strong affinity for being located on a hot-&gt;cold gradient. This is particularly important when fitting the models, as we often do, with outputs from a general circulation model, since the particular gridcell that the training example falls into may not be fully representative of the broader climatic patterns surrounding the site. Finally, it seems that this could be very valuable for predicting the distribution of animals and other mobile species (including pollen distributions), by characterizing spatial patterns in  climatic covariates in the regions surrounding that in which it has been found.</p>
+<p><strong><em>The Problem</em></strong>: Make a prediction of species presence given climatic covariates. It’s been done many times in many ways, and as I note in my <a href="/assets/FarleyThesis_FINAL.pdf">thesis</a>, is extremely widely used in both management and the academy. However, there are known shortcomings of existing techniques. One of the drawbacks that comes to mind is that traditional methods for SDM (random forest, logistic regression, etc) take in a <em>n</em> x <em>p</em> design matrix of training data. In particular, these models accept <em>n</em> labeled examples of presence/absence and <em>p</em> climatic covariates found at that location. The model has no information about the climatic conditions in surrounding areas. Therefore, it may fail to capture information about climatic transitions e.g., the species has a strong affinity for being located on a hot-&gt;cold gradient. This is particularly important when fitting the models, as we often do, with outputs from a general circulation model, since the particular gridcell that the training example falls into may not be fully representative of the broader climatic patterns surrounding the site. Finally, it seems that this could be very valuable for predicting the distribution of animals and other mobile species (including pollen distributions), by characterizing spatial patterns in  climatic covariates in the regions surrounding that in which it has been found.</p>
 
 <p><strong><em>The Idea</em></strong>: Turn the problem from site-by-site classification problem into a computer vision problem where each training example is an ‘image’ of the climatic space surrounding each observation with <em>p</em> channels. In
  this way, you’d be predicting whether or not the ‘image’ contained a species presence or not. The ‘image’ could be of configurable size, but I’m thinking it would be a 0.5 degree square box extending +/- 0.25 degrees from the location of the occurrence. If we’re working with a GCM output with 800 m^2 gridcells like the <a href="https://www.nature.com/articles/sdata201648">Lorenz et al</a>, this box would contain several hundred gricells. If this box is our training data, we (1) get more information to feed to the classifier, and (2) get information about the configuration of how the climate space around a species presence (or absence) is arranged spatially. It’s a lot more data (in terms of training set bytes), and perhaps it would not be helpful (in terms of predictive accuracy), but it seems like it’d be a neat idea to try.</p>
@@ -117,28 +117,55 @@
 <p><em>Side Note: ForestNet</em>: It takes a lot to train a CNN from scratch with random initialization. It seems as though using pre-initialized models often lead to better (and definitely faster) predictions, particularly if the new dataset is rather small. If the technique described above works, it seems possible to build a general <code class="highlighter-rouge">ForestNet</code> that could be used (1) as a land cover prediction and (2) be used to initialize weights for future models. Here’s what I’m thinking:</p>
 
 <p>ForestNet would be trained using the process described above. However, instead of an individual species of interest (e.g., Oak) it would include an ecosystem of interest (in this case, Forest). The positive examples would be sites in which one or more (or <em>n&gt;q</em>, where q is some threshold) forest-type species were present. The negative examples would be those sites where zero (or <em>n&lt;q</em>, where q is some threshold) forst-types were found. The training would proceed as above. The resulting classifier would be general, and could be used to predict the presence or absence of a forest (or other ecosystem type). Once a trained network was available, future species-specific networks could be made by initializing a network with the <code class="highlighter-rouge">ForestNet</code> weights, and then fine-tuning the network to predict the specific species.</p>
+</p>
+	</div>
+</section>
 
-  </div>
+</div>
 
-</article>
-<script type="text/javascript"
-    src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
-</script>
+    
+<!-- Footer -->
+<div class='align-center'>
+	<footer id="footer" class='pt24 align-center'>
+		<div class="inner">
+			<ul class="icons">
+				
+				<li><a href="https://twitter.com/scottsfarley93" class="icon alt fa-twitter" target="_blank"><span class="label">Twitter</span></a></li>
+				
+				
+				
+				
+				<li><a href="https://www.instagram.com/scottsfarley/" class="icon alt fa-instagram" target="_blank"><span class="label">Instagram</span></a></li>
+				
+				
+				
+				
+				
+				<li><a href="http://github.com/scottsfarley93" class="icon alt fa-github" target="_blank"><span class="label">GitHub</span></a></li>
+				
+				
+				
+				<li><a href="https://www.linkedin.com/in/scott-farley-25902581" class="icon alt fa-linkedin" target="_blank"><span class="label">LinkedIn</span></a></li>
+				
+			</ul>
+			<ul class="copyright mb0">
+				<li>&copy; Scott Farley </li>
+			</ul>
+		</div>
+	</footer>
 
-      </div>
-    </div>
+</div>
 
-    <footer  >
-  <ul class='list-inline'>
-      <li class='no-bullet'><span class='glyphicon glyphicon-earphone text-muted'></span><strong class='contact-detail small'>  <a href='tel:626-264-0741'>626.264.0741</a></strong></li>
-      <li class='no-bullet'><span class='glyphicon glyphicon-envelope text-muted'></span><strong class='contact-detail small'>  <a href="mailto:sfarley2@wisc.edu">sfarley@wisc.edu</a></strong></li>
-      <li class='no-bullet'><span class='glyphicon glyphicon-menu-right text-muted'></span><strong class='contact-detail small'><a href='http://twitter.com/scottsfarley93'> @scottsfarley93</a></strong></li>
-      <li class='no-bullet'><span class='glyphicon glyphicon-menu-right text-muted'></span><strong class='contact-detail small'><a href='http://github.com/scottsfarley93'>  GitHub</a></strong></li>
-      <li class='no-bullet'><span class='glyphicon glyphicon-menu-right text-muted'></span><strong class='contact-detail small'><a href='https://www.linkedin.com/in/scott-farley-25902581'>  LinkedIn</a></strong></li>
-</ul>
-</footer>
+<!-- Scripts -->
+	<script src="/assets/js/jquery.min.js"></script>
+	<script src="/assets/js/jquery.scrolly.min.js"></script>
+	<script src="/assets/js/jquery.scrollex.min.js"></script>
+	<script src="/assets/js/skel.min.js"></script>
+	<script src="/assets/js/util.js"></script>
+	<!--[if lte IE 8]><script src="/assets/js/ie/respond.min.js"></script><![endif]-->
+	<script src="/assets/js/main.js"></script>
 
 
-  </body>
+</body>
 
 </html>

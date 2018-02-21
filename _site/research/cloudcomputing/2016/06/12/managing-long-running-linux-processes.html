@@ -1,88 +1,88 @@
 <!DOCTYPE html>
+<!--
+	Forty by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
 <html>
 
-  <head>
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-
-  <title>Managing Long-Running Processes on Linux</title>
-  <meta name="description" content="In my work, I have several times encountered the need to run a script for an extended period of time, or as a daemon (always running as a service).  Whether ...">
-
-  <link rel="stylesheet" href="/css/main.css">
-  <link rel="canonical" href="http://localhost:4000/research/cloudcomputing/2016/06/12/managing-long-running-linux-processes.html">
-  <link rel="alternate" type="application/rss+xml" title="Scott Sherwin Farley" href="http://localhost:4000/feed.xml">
-
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <meta name='viewport' content='width=device-width, initial-scale=1'/>
-    <meta name='keywords' content="maps, cartography"/>
-    <!---Links--->
-    <!-- Latest compiled and minified CSS -->
-		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-
-<!-- Optional theme -->
-		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
-    <link rel="stylesheet" href='http://localhost:4000/css/cv.css'>
-    <link rel="stylesheet" href='http://localhost:4000/css/style.css'>
-    <style>
-    	footer{
-    		text-align:center;
-    	}
-    </style>
-    <script>
-    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-    })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
-
-    ga('create', 'UA-83006302-2', 'auto');
-    ga('send', 'pageview');
-  </script>
-
-  <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha256-/SIrNqv8h6QGKDuNoLGA4iret+kyesCkHGzVUUV0shc=" crossorigin="anonymous"></script>
-<!-- Latest compiled and minified JavaScript -->
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
-
-
+<head>
+	<title>Scott Farley</title>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+	<!--[if lte IE 8]><script src="/assets/js/ie/html5shiv.js"></script><![endif]-->
+	<link href="https://api.mapbox.com/mapbox-assembly/v0.19.0/assembly.min.css" rel="stylesheet">
+	<link href="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/default-skin/default-skin.min.css" rel="stylhesheet">
+	<script src='https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/photoswipe.min.js'></script>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/photoswipe.min.css">
+	<link rel='stylesheet' href="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/photoswipe-ui-default.min.js">
+	<link rel="stylesheet" href="/assets/css/main.css" />
+	<link rel='stylesheet' href="/assets/css/highlight.css" />
+	<!--[if lte IE 9]><link rel="stylesheet" href="/assets/css/ie9.css" /><![endif]-->
+	<!--[if lte IE 8]><link rel="stylesheet" href="/assets/css/ie8.css" /><![endif]-->
+	<script src="https://unpkg.com/masonry-layout@4/dist/masonry.pkgd.min.js"></script>
+	<link rel='stylesheet' href="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.10.0/css/lightbox.min.css"/>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.10.0/js/lightbox-plus-jquery.min.js"></script>
+	<link rel='stylesheet' href="/assets/css/photography.css" />
 </head>
 
 
-  <body>
+<body>
 
+    <!-- Wrapper -->
+<div id="wrapper">
+
+<!-- Header -->
+<!-- <header id="header">
+	<a href="/" class="logo"><strong>Scott Farley</strong> <span></span></a>
+	<nav>
+		<a href="#menu">Menu</a>
+	</nav>
+</header> -->
+
+<!-- Menu -->
+<!-- <nav id="menu">
+	<ul class="links">
+        
+		    
+		
+		    
+		        <li><a href="/"></a></li>
+	    	
+		
+		    
+		
+		    
+		
+		
+		    
+		        <li><a href="/blog.html">Blog</a></li>
+		    
+		
+		    
+		
+		    
+		
+		    
+		        <li><a href="/photography.html">Photgraphy</a></li>
+		    
+		
+	</ul>
+</nav> -->
+ 
     
+    
+<!-- Main -->
+<div id="main" class="alt">
 
-
-<nav class="navbar navbar-default navbar-static-top">
-<div class="container">
-<div class="navbar-header">
-  <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
-    <span class="sr-only">Toggle navigation</span>
-    <span class="icon-bar"></span>
-    <span class="icon-bar"></span>
-    <span class="icon-bar"></span>
-  </button>
-  <a class="navbar-brand" href="http://localhost:4000/index.html">Scott Farley</a>
-</div>
-<div id="navbar" class="navbar-collapse collapse">
-  <ul class="nav navbar-nav navbar-right">
-    <li><a href="http://localhost:4000/index.html">Home</a></li>
-    <li><a href="http://localhost:4000/cv.html">CV</a></li>
-    <li><a href="http://localhost:4000/index.html#blog">Blog</a></li>
-</div><!--/.nav-collapse -->
-</div>
-</nav>
-
-
-    <div class="page-content">
-      <div class="wrapper">
-        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
-
-  <header class="post-header">
-    <h1 class="post-title" itemprop="name headline">Managing Long-Running Processes on Linux</h1>
-    <p class="post-meta"><time datetime="2016-06-12T11:22:52-05:00" itemprop="datePublished">Jun 12, 2016</time></p>
-  </header>
-
-  <div class="post-content" itemprop="articleBody">
-    <p>In my work, I have several times encountered the need to run a script for an extended period of time, or as a daemon (always running as a service).  Whether you’re on your own personal computer or SSHed into a virtual machine in the cloud, managing processes that take a long time can be annoying. If you finish your work day and close your laptop, you’re going to stop your script.  In the cloud (or I guess on a desktop/personal server too) you can take a couple steps to run scripts as services that will not stop when you end your work day.  There are a couple of ways of doing it that I’ve found.  Here are two that matched my needs.</p>
+<!-- One -->
+<section id="one">
+	<div class="inner">
+		<header class="major">
+			<h1>Managing Long-Running Processes on Linux</h1>
+		</header>
+		
+		<p><p>In my work, I have several times encountered the need to run a script for an extended period of time, or as a daemon (always running as a service).  Whether you’re on your own personal computer or SSHed into a virtual machine in the cloud, managing processes that take a long time can be annoying. If you finish your work day and close your laptop, you’re going to stop your script.  In the cloud (or I guess on a desktop/personal server too) you can take a couple steps to run scripts as services that will not stop when you end your work day.  There are a couple of ways of doing it that I’ve found.  Here are two that matched my needs.</p>
 
 <h3 id="forever">Forever</h3>
 
@@ -110,16 +110,16 @@
 
 <p>Create a new program configuration file using <code class="highlighter-rouge">nano [APPLICATION-NAME].conf</code>.  Inside of the file, you will write the details about where the program executable is located, whether it restarts, etc.  Details are confusing but can be found <a href="http://supervisord.org/configuration.html">here</a>.  My configuration file looks like this: (comments are added, remove them)</p>
 
-<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><table style="border-spacing: 0"><tbody><tr><td class="gutter gl" style="text-align: right"><pre class="lineno">1
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><table class="rouge-table"><tbody><tr><td class="gutter gl"><pre class="lineno">1
 2
 3
 4
-5</pre></td><td class="code"><pre><span class="o">[</span>program:masterNode]  <span class="c">## name your process</span>
-<span class="nb">command</span><span class="o">=</span>python -u masterNode.py <span class="c">## this is the command that supervisor will use to start your script</span>
+5
+</pre></td><td class="code"><pre><span class="o">[</span>program:masterNode]  <span class="c">## name your process</span>
+<span class="nb">command</span><span class="o">=</span>python <span class="nt">-u</span> masterNode.py <span class="c">## this is the command that supervisor will use to start your script</span>
 <span class="nv">directory</span><span class="o">=</span>/home/rstudio/thesis-scripts/python  <span class="c">## this is the directory that your script lives in</span>
 <span class="nv">stdout_logfile</span><span class="o">=</span>/home/rstudio/thesis-scripts/logs/masterNode.log <span class="c">## this is where the output of your script will go</span>
-<span class="nv">redirect_stderr</span><span class="o">=</span><span class="nb">true</span> <span class="c">## put errors into your log too</span><span class="w">
-</span></pre></td></tr></tbody></table></code></pre></figure>
+<span class="nv">redirect_stderr</span><span class="o">=</span><span class="nb">true</span> <span class="c">## put errors into your log too</span></pre></td></tr></tbody></table></code></pre></figure>
 
 <p>Now, move the configuration file into the directory used by the supervisor program:</p>
 
@@ -145,28 +145,55 @@ sudo mv [APPLICATION-NAME].conf /etc/supervisor/conf.d
 
 <h3 id="conclusion">Conclusion</h3>
 <p>There are many ways to control your long running processes.  One of the ones I did not mention here is to create the script as its own service.  However, I like the management and flexibility of the tools I discussed here.  Both of these tools would work to do either job too, so I think its really a matter of preference to pick one out.</p>
+</p>
+	</div>
+</section>
 
-  </div>
+</div>
 
-</article>
-<script type="text/javascript"
-    src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
-</script>
+    
+<!-- Footer -->
+<div class='align-center'>
+	<footer id="footer" class='pt24 align-center'>
+		<div class="inner">
+			<ul class="icons">
+				
+				<li><a href="https://twitter.com/scottsfarley93" class="icon alt fa-twitter" target="_blank"><span class="label">Twitter</span></a></li>
+				
+				
+				
+				
+				<li><a href="https://www.instagram.com/scottsfarley/" class="icon alt fa-instagram" target="_blank"><span class="label">Instagram</span></a></li>
+				
+				
+				
+				
+				
+				<li><a href="http://github.com/scottsfarley93" class="icon alt fa-github" target="_blank"><span class="label">GitHub</span></a></li>
+				
+				
+				
+				<li><a href="https://www.linkedin.com/in/scott-farley-25902581" class="icon alt fa-linkedin" target="_blank"><span class="label">LinkedIn</span></a></li>
+				
+			</ul>
+			<ul class="copyright mb0">
+				<li>&copy; Scott Farley </li>
+			</ul>
+		</div>
+	</footer>
 
-      </div>
-    </div>
+</div>
 
-    <footer  >
-  <ul class='list-inline'>
-      <li class='no-bullet'><span class='glyphicon glyphicon-earphone text-muted'></span><strong class='contact-detail small'>  <a href='tel:626-264-0741'>626.264.0741</a></strong></li>
-      <li class='no-bullet'><span class='glyphicon glyphicon-envelope text-muted'></span><strong class='contact-detail small'>  <a href="mailto:sfarley2@wisc.edu">sfarley@wisc.edu</a></strong></li>
-      <li class='no-bullet'><span class='glyphicon glyphicon-menu-right text-muted'></span><strong class='contact-detail small'><a href='http://twitter.com/scottsfarley93'> @scottsfarley93</a></strong></li>
-      <li class='no-bullet'><span class='glyphicon glyphicon-menu-right text-muted'></span><strong class='contact-detail small'><a href='http://github.com/scottsfarley93'>  GitHub</a></strong></li>
-      <li class='no-bullet'><span class='glyphicon glyphicon-menu-right text-muted'></span><strong class='contact-detail small'><a href='https://www.linkedin.com/in/scott-farley-25902581'>  LinkedIn</a></strong></li>
-</ul>
-</footer>
+<!-- Scripts -->
+	<script src="/assets/js/jquery.min.js"></script>
+	<script src="/assets/js/jquery.scrolly.min.js"></script>
+	<script src="/assets/js/jquery.scrollex.min.js"></script>
+	<script src="/assets/js/skel.min.js"></script>
+	<script src="/assets/js/util.js"></script>
+	<!--[if lte IE 8]><script src="/assets/js/ie/respond.min.js"></script><![endif]-->
+	<script src="/assets/js/main.js"></script>
 
 
-  </body>
+</body>
 
 </html>

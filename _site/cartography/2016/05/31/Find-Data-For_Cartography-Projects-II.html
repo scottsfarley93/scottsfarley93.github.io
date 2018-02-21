@@ -1,88 +1,88 @@
 <!DOCTYPE html>
+<!--
+	Forty by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
 <html>
 
-  <head>
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-
-  <title>On Finding Data for Cartography Projects, Part II: Spatial Data Services and APIs</title>
-  <meta name="description" content="Using APIs and Data ServicesThis is the second installment in my series about finding data from new and different sources for use in your cartography or GIS ...">
-
-  <link rel="stylesheet" href="/css/main.css">
-  <link rel="canonical" href="http://localhost:4000/cartography/2016/05/31/Find-Data-For_Cartography-Projects-II.html">
-  <link rel="alternate" type="application/rss+xml" title="Scott Sherwin Farley" href="http://localhost:4000/feed.xml">
-
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <meta name='viewport' content='width=device-width, initial-scale=1'/>
-    <meta name='keywords' content="maps, cartography"/>
-    <!---Links--->
-    <!-- Latest compiled and minified CSS -->
-		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-
-<!-- Optional theme -->
-		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
-    <link rel="stylesheet" href='http://localhost:4000/css/cv.css'>
-    <link rel="stylesheet" href='http://localhost:4000/css/style.css'>
-    <style>
-    	footer{
-    		text-align:center;
-    	}
-    </style>
-    <script>
-    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-    })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
-
-    ga('create', 'UA-83006302-2', 'auto');
-    ga('send', 'pageview');
-  </script>
-
-  <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha256-/SIrNqv8h6QGKDuNoLGA4iret+kyesCkHGzVUUV0shc=" crossorigin="anonymous"></script>
-<!-- Latest compiled and minified JavaScript -->
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
-
-
+<head>
+	<title>Scott Farley</title>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+	<!--[if lte IE 8]><script src="/assets/js/ie/html5shiv.js"></script><![endif]-->
+	<link href="https://api.mapbox.com/mapbox-assembly/v0.19.0/assembly.min.css" rel="stylesheet">
+	<link href="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/default-skin/default-skin.min.css" rel="stylhesheet">
+	<script src='https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/photoswipe.min.js'></script>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/photoswipe.min.css">
+	<link rel='stylesheet' href="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/photoswipe-ui-default.min.js">
+	<link rel="stylesheet" href="/assets/css/main.css" />
+	<link rel='stylesheet' href="/assets/css/highlight.css" />
+	<!--[if lte IE 9]><link rel="stylesheet" href="/assets/css/ie9.css" /><![endif]-->
+	<!--[if lte IE 8]><link rel="stylesheet" href="/assets/css/ie8.css" /><![endif]-->
+	<script src="https://unpkg.com/masonry-layout@4/dist/masonry.pkgd.min.js"></script>
+	<link rel='stylesheet' href="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.10.0/css/lightbox.min.css"/>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.10.0/js/lightbox-plus-jquery.min.js"></script>
+	<link rel='stylesheet' href="/assets/css/photography.css" />
 </head>
 
 
-  <body>
+<body>
 
+    <!-- Wrapper -->
+<div id="wrapper">
+
+<!-- Header -->
+<!-- <header id="header">
+	<a href="/" class="logo"><strong>Scott Farley</strong> <span></span></a>
+	<nav>
+		<a href="#menu">Menu</a>
+	</nav>
+</header> -->
+
+<!-- Menu -->
+<!-- <nav id="menu">
+	<ul class="links">
+        
+		    
+		
+		    
+		        <li><a href="/"></a></li>
+	    	
+		
+		    
+		
+		    
+		
+		
+		    
+		        <li><a href="/blog.html">Blog</a></li>
+		    
+		
+		    
+		
+		    
+		
+		    
+		        <li><a href="/photography.html">Photgraphy</a></li>
+		    
+		
+	</ul>
+</nav> -->
+ 
     
+    
+<!-- Main -->
+<div id="main" class="alt">
 
-
-<nav class="navbar navbar-default navbar-static-top">
-<div class="container">
-<div class="navbar-header">
-  <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
-    <span class="sr-only">Toggle navigation</span>
-    <span class="icon-bar"></span>
-    <span class="icon-bar"></span>
-    <span class="icon-bar"></span>
-  </button>
-  <a class="navbar-brand" href="http://localhost:4000/index.html">Scott Farley</a>
-</div>
-<div id="navbar" class="navbar-collapse collapse">
-  <ul class="nav navbar-nav navbar-right">
-    <li><a href="http://localhost:4000/index.html">Home</a></li>
-    <li><a href="http://localhost:4000/cv.html">CV</a></li>
-    <li><a href="http://localhost:4000/index.html#blog">Blog</a></li>
-</div><!--/.nav-collapse -->
-</div>
-</nav>
-
-
-    <div class="page-content">
-      <div class="wrapper">
-        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
-
-  <header class="post-header">
-    <h1 class="post-title" itemprop="name headline">On Finding Data for Cartography Projects, Part II: Spatial Data Services and APIs</h1>
-    <p class="post-meta"><time datetime="2016-05-31T11:22:52-05:00" itemprop="datePublished">May 31, 2016</time></p>
-  </header>
-
-  <div class="post-content" itemprop="articleBody">
-    <h3>Using APIs and Data Services</h3>
+<!-- One -->
+<section id="one">
+	<div class="inner">
+		<header class="major">
+			<h1>On Finding Data for Cartography Projects, Part II: Spatial Data Services and APIs</h1>
+		</header>
+		
+		<p><h3>Using APIs and Data Services</h3>
 <p>This is the second installment in my series about finding data from new and different sources for use in your cartography or GIS projects.  Last time I discussed looking through existing source code to find hidden datasets that might be useful. Today, I will walk through using an API service to tap into an organization’s database.  As a simple google search will reveal, there are other resources, blogs, and tutorials out there that talk about how to use an API as a data source, but I will focus particularly on converting data from an API into a useful spatial data format that can be used in mapping and analysis.  Tons of APIs have spatial data (usually latitude and longitude) attached to their responses, its just a matter of finding the data service and massaging it into the right format.</p>
 <h4>What is an API?</h4>
 <p>An API, which stands for Application Programming Interface, is a set of protocols and methods that define how two computers should talk to each other.  An API is a documented set of building blocks (of code) that define how an existing application works.  A programmer can put these blocks together to extend the existing program, or create a new app that uses portions of the existing program.  Consider <a href="http://twitter.com">Twitter</a>.  Twitter is super popular, and a lot of people use it for various things – documenting every facet of their daily lives, reporting news, <a href="http://chrisscheele.com/">observing disasters and severe weather</a>, etc.  To build the platform, Twitter needed to make a whole bunch of computers talk to each other. When a user writes a tweet, it is sent to twitter’s central database, where it is stored, and then pushed back out to other clients.  Multiply this by Twitter’s &gt;310 million users, both reading and writing tweets, and you have a lot of clients that need to communicate with minimal friction.</p>
@@ -116,7 +116,7 @@
 
 <p>Here is an example of asking Neotoma for all of the sites above 4,000 meters.  The most important thing to remember is that this an asynchronous AJAX call, so it will take second to respond, and your code has to be able to handle this in its organization.  First we will build the query string, next we will send it to Neotoma using jQuery’s $.ajax function, and finally, we will deal will the response. Another important facet of using jQuery and javascript’s ajax technique is that you don’t have to build the response yourself, you can just pass in a <code>data</code> parameter in the ajax call, and the string will be built automatically. You can still see the built query string by <code>console.log</code>-ing the <code>this.url</code> on <code>beforeSend</code>.</p>
 
-<figure class="highlight"><pre><code class="language-javascript" data-lang="javascript"><table style="border-spacing: 0"><tbody><tr><td class="gutter gl" style="text-align: right"><pre class="lineno">1
+<figure class="highlight"><pre><code class="language-javascript" data-lang="javascript"><table class="rouge-table"><tbody><tr><td class="gutter gl"><pre class="lineno">1
 2
 3
 4
@@ -152,17 +152,18 @@
 34
 35
 36
-37</pre></td><td class="code"><pre><span class="kd">function</span> <span class="nx">getNeotomaData</span><span class="p">(</span><span class="nx">minAlt</span><span class="p">){</span>
+37
+</pre></td><td class="code"><pre><span class="kd">function</span> <span class="nx">getNeotomaData</span><span class="p">(</span><span class="nx">minAlt</span><span class="p">){</span>
   <span class="nx">endpoint</span> <span class="o">=</span> <span class="s1">'http://api.neotomadb.org/v1/data/sites'</span> <span class="c1">//this is the root and resource</span>
   <span class="nx">$</span><span class="p">.</span><span class="nx">ajax</span><span class="p">(</span><span class="nx">endpoint</span><span class="p">,</span> <span class="p">{</span> <span class="c1">//make an ajax call with the query string url</span>
     <span class="na">dataType</span><span class="p">:</span> <span class="s2">"jsonp"</span><span class="p">,</span> <span class="c1">//its json, but coming from a remote server, so jsonp</span>
     <span class="na">beforeSend</span><span class="p">:</span> <span class="kd">function</span><span class="p">(){</span> <span class="c1">//optional, but helpful for debugging</span>
       <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">url</span><span class="p">)</span> <span class="c1">//to see exactly where the call is going to</span>
     <span class="p">},</span>
-    <span class="nx">data</span><span class="err">:</span><span class="p">{</span>
-      <span class="nl">altmin</span><span class="p">:</span> <span class="nx">minAlt</span> <span class="c1">//pass in the key-value parameters</span>
+    <span class="na">data</span><span class="p">:{</span>
+      <span class="na">altmin</span><span class="p">:</span> <span class="nx">minAlt</span> <span class="c1">//pass in the key-value parameters</span>
     <span class="p">},</span>
-    <span class="nx">success</span><span class="err">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">response</span><span class="p">){</span>
+    <span class="na">success</span><span class="p">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">response</span><span class="p">){</span>
       <span class="c1">//called when the call succeeds</span>
       <span class="k">if</span> <span class="p">(</span><span class="nx">response</span><span class="p">[</span><span class="s1">'success'</span><span class="p">]){</span><span class="c1">//check whether the server said okay</span>
         <span class="nx">data</span> <span class="o">=</span> <span class="nx">response</span><span class="p">[</span><span class="s1">'data'</span><span class="p">]</span> <span class="c1">//just take the data from the response</span>
@@ -173,7 +174,7 @@
         <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">response</span><span class="p">[</span><span class="s1">'message'</span><span class="p">])</span> <span class="c1">//the server will tell you what's wrong</span>
       <span class="p">}</span>
     <span class="p">},</span>
-    <span class="nx">error</span><span class="err">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">xhr</span><span class="p">,</span> <span class="nx">status</span><span class="p">,</span> <span class="nx">error</span><span class="p">){</span>
+    <span class="na">error</span><span class="p">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">xhr</span><span class="p">,</span> <span class="nx">status</span><span class="p">,</span> <span class="nx">error</span><span class="p">){</span>
       <span class="c1">//there was an AJAX error (communcation problem)</span>
       <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">"AJAX error."</span><span class="p">)</span>
       <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">error</span><span class="p">)</span>
@@ -188,8 +189,7 @@
   <span class="c1">//do analysis?</span>
   <span class="c1">//the world is your oyster</span>
   <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">dataArray</span><span class="p">)</span> <span class="c1">//or just print the message</span>
-<span class="p">}</span><span class="w">
-</span></pre></td></tr></tbody></table></code></pre></figure>
+<span class="p">}</span></pre></td></tr></tbody></table></code></pre></figure>
 
 <p>If you have a page with jQuery included on it and call <code>getNeotomaData</code>, you should see the response get logged into the console.</p>
 
@@ -200,7 +200,7 @@
 
 <p>There are some web-based tools to convert json to csv.  However, since JSON can be hierarchical and a csv is flat, it can be difficult for these tools to work correctly.  If you have some level of competency using python, I recommend custom-rolling your conversions each time you need to call a new resource, to make sure you get the fields that you need in your CSV.  This example uses the <code>csv</code> module for writing the file and the <code>requests</code> module for making the api call.</p>
 
-<figure class="highlight"><pre><code class="language-python" data-lang="python"><table style="border-spacing: 0"><tbody><tr><td class="gutter gl" style="text-align: right"><pre class="lineno">1
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><table class="rouge-table"><tbody><tr><td class="gutter gl"><pre class="lineno">1
 2
 3
 4
@@ -240,7 +240,8 @@
 38
 39
 40
-41</pre></td><td class="code"><pre><span class="kn">import</span> <span class="nn">csv</span>
+41
+</pre></td><td class="code"><pre><span class="kn">import</span> <span class="nn">csv</span>
 <span class="kn">import</span> <span class="nn">requests</span>
 
 <span class="k">def</span> <span class="nf">saveDataFromNeotoma</span><span class="p">(</span><span class="n">minAlt</span><span class="p">,</span> <span class="n">outfile</span><span class="p">):</span>
@@ -280,34 +281,60 @@
     <span class="c"># finish up</span>
     <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
-<span class="n">saveDataFromNeotoma</span><span class="p">(</span><span class="mi">4000</span><span class="p">,</span> <span class="s">"/path/to/your/intended/file.csv"</span><span class="p">)</span><span class="w">
-</span></pre></td></tr></tbody></table></code></pre></figure>
+<span class="n">saveDataFromNeotoma</span><span class="p">(</span><span class="mi">4000</span><span class="p">,</span> <span class="s">"/path/to/your/intended/file.csv"</span><span class="p">)</span></pre></td></tr></tbody></table></code></pre></figure>
 
 <p>In this way, you can create a file just like it had been made available for public downloading, but (1) you’ve done it on a resource that was not available as a file download, and (2) you were able to exactly configure the response how you want it, so you don’t have to mess around in excel filtering and sorting.</p>
 
 <p>Hopefully this post was helpful in getting you started on using APIs and data services, and that you can maybe use these techniques in your own work at some point.  Spatial data APIs are everywhere – happy hunting.</p>
+</p>
+	</div>
+</section>
 
-  </div>
+</div>
 
-</article>
-<script type="text/javascript"
-    src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
-</script>
+    
+<!-- Footer -->
+<div class='align-center'>
+	<footer id="footer" class='pt24 align-center'>
+		<div class="inner">
+			<ul class="icons">
+				
+				<li><a href="https://twitter.com/scottsfarley93" class="icon alt fa-twitter" target="_blank"><span class="label">Twitter</span></a></li>
+				
+				
+				
+				
+				<li><a href="https://www.instagram.com/scottsfarley/" class="icon alt fa-instagram" target="_blank"><span class="label">Instagram</span></a></li>
+				
+				
+				
+				
+				
+				<li><a href="http://github.com/scottsfarley93" class="icon alt fa-github" target="_blank"><span class="label">GitHub</span></a></li>
+				
+				
+				
+				<li><a href="https://www.linkedin.com/in/scott-farley-25902581" class="icon alt fa-linkedin" target="_blank"><span class="label">LinkedIn</span></a></li>
+				
+			</ul>
+			<ul class="copyright mb0">
+				<li>&copy; Scott Farley </li>
+			</ul>
+		</div>
+	</footer>
 
-      </div>
-    </div>
+</div>
 
-    <footer  >
-  <ul class='list-inline'>
-      <li class='no-bullet'><span class='glyphicon glyphicon-earphone text-muted'></span><strong class='contact-detail small'>  <a href='tel:626-264-0741'>626.264.0741</a></strong></li>
-      <li class='no-bullet'><span class='glyphicon glyphicon-envelope text-muted'></span><strong class='contact-detail small'>  <a href="mailto:sfarley2@wisc.edu">sfarley@wisc.edu</a></strong></li>
-      <li class='no-bullet'><span class='glyphicon glyphicon-menu-right text-muted'></span><strong class='contact-detail small'><a href='http://twitter.com/scottsfarley93'> @scottsfarley93</a></strong></li>
-      <li class='no-bullet'><span class='glyphicon glyphicon-menu-right text-muted'></span><strong class='contact-detail small'><a href='http://github.com/scottsfarley93'>  GitHub</a></strong></li>
-      <li class='no-bullet'><span class='glyphicon glyphicon-menu-right text-muted'></span><strong class='contact-detail small'><a href='https://www.linkedin.com/in/scott-farley-25902581'>  LinkedIn</a></strong></li>
-</ul>
-</footer>
+<!-- Scripts -->
+	<script src="/assets/js/jquery.min.js"></script>
+	<script src="/assets/js/jquery.scrolly.min.js"></script>
+	<script src="/assets/js/jquery.scrollex.min.js"></script>
+	<script src="/assets/js/skel.min.js"></script>
+	<script src="/assets/js/util.js"></script>
+	<!--[if lte IE 8]><script src="/assets/js/ie/respond.min.js"></script><![endif]-->
+	<script src="/assets/js/main.js"></script>
 
 
-  </body>
+</body>
 
 </html>

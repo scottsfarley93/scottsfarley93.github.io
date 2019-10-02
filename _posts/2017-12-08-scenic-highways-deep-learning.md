@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "Scenery-based routing: A deep learning approach"
+title:  "Idea -- Scenery-based routing: A deep learning approach"
 date:   2017-12-05 11:22:52 -0500
 categories: machine-learning
 ---
